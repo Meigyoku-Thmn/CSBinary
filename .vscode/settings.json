@@ -1,0 +1,10 @@
+{
+  "files.exclude": {
+    ".nyc_output": true,
+    ".vs": true,
+    "node_modules": true,
+    ".gitattributes": true,
+  },
+  "editor.tabSize": 2,
+  "editor.detectIndentation": false,
+}

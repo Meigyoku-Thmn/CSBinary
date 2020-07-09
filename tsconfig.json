@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "module": "CommonJS",
+    "noImplicitAny": false,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "outDir": "build",
+    "sourceMap": true,
+    "target": "ES2017",
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+  },
+  "exclude": [
+    "node_modules/*",
+    "build/*",
+    "coverage/*",
+    "test/*",
+    "test.js",
+    "test.ts",
+  ]
+}

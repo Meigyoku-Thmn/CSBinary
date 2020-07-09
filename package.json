@@ -1,0 +1,26 @@
+{
+  "name": "csbinary",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "tsc && mocha",
+    "build": "tsc"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/fs-ext": "^2.0.0",
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^14.0.14",
+    "lodash": "^4.17.19",
+    "mocha": "^8.0.1",
+    "mock-fs": "github:Meigyoku-Thmn/mock-fs#master",
+    "mock-require": "^3.0.3",
+    "nyc": "^15.1.0",
+    "typescript": "^3.9.6"
+  },
+  "dependencies": {
+    "fs-ext": "^2.0.0"
+  }
+}
