@@ -1,18 +1,16 @@
 // Please keep this order
-const assert = require('assert');
-const { randomFillSync } = require('crypto');
-const { isEqual } = require('lodash');
-const { StringDecoder } = require('string_decoder');
-const mockrequire = require('mock-require');
-const mockfs = require('mock-fs');
-const fs = require('fs');
-const FileDescriptor = require('mock-fs/lib/descriptor');
+import assert from 'assert';
+import { randomFillSync } from 'crypto';
+import { isEqual } from 'lodash';
+import { StringDecoder } from 'string_decoder';
+import mockrequire from 'mock-require';
+import mockfs from 'mock-fs';
+import fs from 'fs';
 
 mockrequire('fs-ext', {
   constants: { SEEK_SET: 0, SEEK_CUR: 1 },
-  seekSync: function (fd, offset, whence) {
-    /** @type {FileDescriptor} */
-    const fdo = mockfs.getDescriptorById(fd);
+  seekSync: function (fd: number, offset: number, whence: number) {
+    const fdo = mockfs['getDescriptorById'](fd);
     if (whence == 0) // SEEK_SET
       fdo.setPosition(offset);
     else if (whence == 1) // SEEK_CUR
@@ -23,20 +21,20 @@ mockrequire('fs-ext', {
   }
 });
 
-const { constants, seekSync } = require('fs-ext');
+import { constants, seekSync } from 'fs-ext';
 const { SEEK_SET } = constants;
-const { BinaryReader } = require('../build/binary-reader');
+import { BinaryReader } from '../binary-reader';
 
-function openEmtpyFile(flags) {
-  mockfs({ empty: '', });
+function openEmtpyFile(flags?: string) {
+  mockfs({ empty: '' });
   return fs.openSync('empty', flags);
 }
 
-function getRandom(min, max) {
+function getRandom(min: number, max: number) {
   return Math.random() * (max - min) + min;
 }
 
-function canRead(fd) {
+function canRead(fd: number) {
   try {
     fs.readSync(fd, Buffer.alloc(1));
     return true;
@@ -155,7 +153,7 @@ describe('BinaryReader Tests', () => {
 
   it('BinaryReader | Read7BitEncodedInt | Allows Overlong Encodings', () => {
     mockfs({ 'f': Buffer.from([0x9F, 0x00 /* overlong */]) });
-    const fd = fs.openSync('f');
+    const fd = fs.openSync('f', 'r');
     const reader = new BinaryReader(fd);
 
     const actual = reader.read7BitEncodedInt();
@@ -167,21 +165,21 @@ describe('BinaryReader Tests', () => {
     //                      |0x10|| 0x80 || 0x80 || 0x80 || 0x80|
 
     mockfs({ 'f': Buffer.from([0x80, 0x80, 0x80, 0x80, 0x10]) });
-    let fd = fs.openSync('f');
+    let fd = fs.openSync('f', 'r');
     let reader = new BinaryReader(fd);
     assert.throws(() => reader.read7BitEncodedInt(), TypeError);
 
     // 5 bytes, all with the "there's more data after this" flag set
 
     mockfs({ 'f': Buffer.from([0x80, 0x80, 0x80, 0x80, 0x80]) });
-    fd = fs.openSync('f');
+    fd = fs.openSync('f', 'r');
     reader = new BinaryReader(fd);
     assert.throws(() => reader.read7BitEncodedInt(), TypeError);
   });
 
   it('BinaryReader | Read7BitEncodedInt64 | Allows Overlong Encodings', () => {
     mockfs({ 'f': Buffer.from([0x9F, 0x00 /* overlong */]), });
-    const fd = fs.openSync('f');
+    const fd = fs.openSync('f', 'r');
     const reader = new BinaryReader(fd);
 
     const actual = reader.read7BitEncodedInt64();
@@ -194,30 +192,26 @@ describe('BinaryReader Tests', () => {
     //                       `-- 0x02
 
     mockfs({ 'f': Buffer.from([0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x02]) });
-    let fd = fs.openSync('f');
+    let fd = fs.openSync('f', 'r');
     let reader = new BinaryReader(fd);
     assert.throws(() => reader.read7BitEncodedInt64(), TypeError);
 
     // 10 bytes, all with the "there's more data after this" flag set
 
     mockfs({ 'f': Buffer.from([0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80]) });
-    fd = fs.openSync('f');
+    fd = fs.openSync('f', 'r');
     reader = new BinaryReader(fd);
     assert.throws(() => reader.read7BitEncodedInt64(), TypeError);
   });
 
-  /**
- * @param {BinaryReader} binaryReader 
- */
-  function validateDisposedExceptions(binaryReader) {
+  function validateDisposedExceptions(binaryReader: BinaryReader) {
     let byteBuffer = Buffer.alloc(10);
-    /** @type {string[]} */
-    let charBuffer = new Array(10);
+    let charBuffer: string[] = new Array(10);
 
     assert.throws(() => binaryReader.peekChar(), ReferenceError);
     assert.throws(() => binaryReader.readCharCode(), ReferenceError);
-    assert.throws(() => binaryReader.readSpanEx(byteBuffer, 0, 1), ReferenceError);
-    assert.throws(() => binaryReader.readCharsEx(charBuffer, 0, 1), ReferenceError);
+    assert.throws(() => binaryReader.readIntoBufferEx(byteBuffer, 0, 1), ReferenceError);
+    assert.throws(() => binaryReader.readIntoCharsEx(charBuffer, 0, 1), ReferenceError);
     assert.throws(() => binaryReader.readBoolean(), ReferenceError);
     assert.throws(() => binaryReader.readByte(), ReferenceError);
     assert.throws(() => binaryReader.readBytes(1), ReferenceError);
@@ -244,9 +238,9 @@ describe('BinaryReader Tests', () => {
     };
 
     mockfs({ 'f': randomFillSync(Buffer.alloc(100), 0, 100) });
-    fd = fs.openSync('f');
+    let fd = fs.openSync('f', 'r');
     let reader = new BinaryReader(fd);
-    assert.throws(() => reader.readCharsEx(new Array(10), 0, 10), TypeError);
+    assert.throws(() => reader.readIntoCharsEx(new Array(10), 0, 10), TypeError);
     reader.dispose();
 
     StringDecoder.prototype.write = oldWrite;
@@ -261,8 +255,7 @@ describe('BinaryReader Tests', () => {
     ];
     for (let [sourceSize, index, count, destinationSize, expectedReadLength] of testSuite) {
       let fd = openEmtpyFile('r+');
-      /** @type {string[]} */
-      let source = new Array(sourceSize);
+      let source: string[] = new Array(sourceSize);
       for (let i = 0; i < sourceSize; i++) {
         source[i] = String.fromCharCode(getRandom(0, 127));
       }
@@ -270,9 +263,8 @@ describe('BinaryReader Tests', () => {
       seekSync(fd, 0, SEEK_SET);
 
       let reader = new BinaryReader(fd, 'ascii');
-      /** @type {string[]} */
-      let destination = new Array(destinationSize).fill(null);
-      let readCount = reader.readCharsEx(destination, index, count);
+      let destination: string[] = new Array(destinationSize).fill(null);
+      let readCount = reader.readIntoCharsEx(destination, index, count);
       assert.equal(readCount, expectedReadLength);
       assert.ok(isEqual(source.slice(0, readCount), destination.slice(index, index + readCount)));
 
@@ -291,28 +283,28 @@ describe('BinaryReader Tests', () => {
     ];
     for (let [source, readLength, expected] of testSuite) {
       let fd = openEmtpyFile('r+');
-      fs.writeSync(fd, Buffer.from(source.join(''), 'ascii'));
+      fs.writeSync(fd, Buffer.from((source as string[]).join(''), 'ascii'));
       seekSync(fd, 0, SEEK_SET);
 
       let reader = new BinaryReader(fd);
-      let destination = reader.readChars(readLength);
+      let destination = reader.readChars(readLength as number);
       assert.ok(isEqual(expected, destination));
       reader.dispose();
     }
   })
   it.skip('Read Chars | Over Reads', () => {
-    let testSuite = ['utf16le', 'utf8'];
+    let testSuite: BufferEncoding[] = ['utf16le', 'utf8'];
     for (let encoding of testSuite) {
       // ChunkingStream returns less than requested (simulated because there is no "Stream" in NodeJS)
-      let oldReadSync = fs.readSync();
-      fs.readSync = function (fd, buffer, offset, length, position) {
+      let oldReadSync = fs.readSync;
+      fs.readSync = function (fd: number, buffer: Buffer, offset: number, length: number, position: number) {
         if (offset == null || length == null) {
           offset = 0;
           length = buffer.length;
         }
         if (length > 10) length -= 3;
-        return oldReadSync.bind(fs)(fd, buffer, offset, length, position);
-      };
+        return oldReadSync.bind(fs)(fd, buffer, offset, length, position) as number;
+      } as typeof fs.readSync;
 
       let data1 = "hello world \ud83d\ude03!".split(''); // 14 code points, 15 chars in UTF-16, 17 bytes in UTF-8
       let data2 = 0xABCDEF01;
@@ -342,10 +334,10 @@ describe('BinaryReader Tests', () => {
     for (let [sourceSize, destinationSize, expectedReadLength] of testSuite) {
       let source = randomFillSync(Buffer.alloc(sourceSize), 0, sourceSize);
       mockfs({ 'f': source });
-      fd = fs.openSync('f');
+      let fd = fs.openSync('f', 'r');
       let reader = new BinaryReader(fd);
       let destination = Buffer.alloc(destinationSize);
-      let readCount = reader.readSpan(destination);
+      let readCount = reader.readIntoBuffer(destination);
       assert.ok(isEqual(expectedReadLength, readCount));
       assert.ok(isEqual(source.subarray(0, expectedReadLength), destination.subarray(0, expectedReadLength)));
       assert.ok(destination.subarray(expectedReadLength).every(e => e == 0));
@@ -356,7 +348,7 @@ describe('BinaryReader Tests', () => {
     let fd = openEmtpyFile();
     let binaryReader = new BinaryReader(fd);
     binaryReader.dispose();
-    assert.throws(() => binaryReader.readSpan(Buffer.alloc(0)), ReferenceError);
+    assert.throws(() => binaryReader.readIntoBuffer(Buffer.alloc(0)), ReferenceError);
     binaryReader.dispose();
   });
 
@@ -372,7 +364,7 @@ describe('BinaryReader Tests', () => {
     br = new BinaryReader(fd, 'utf8', false);
     br.dispose();
     assert.ok(!canRead(fd), "ERROR: After closing a BinaryReader with leaveOpen bool not set, canRead(fd) returns true!");
-    
+
     // Test default
     fd = openEmtpyFile();
     br = new BinaryReader(fd);

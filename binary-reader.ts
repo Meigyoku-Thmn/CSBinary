@@ -22,11 +22,7 @@ export class BinaryReader {
 
   private _canSeek: boolean;
 
-  constructor(
-    input: number,
-    encoding: BufferEncoding = 'utf8',
-    leaveOpen: boolean = false,
-  ) {
+  constructor(input: number, encoding: BufferEncoding = 'utf8', leaveOpen = false) {
     if (typeof input != 'number')
       throw new TypeError('input must be a file descriptor');
 
@@ -48,7 +44,7 @@ export class BinaryReader {
     return this._stream;
   }
 
-  dispose(disposing: boolean = true): void {
+  dispose(disposing = true): void {
     if (!this._disposed) {
       if (disposing && !this._leaveOpen) {
         fs.closeSync(this._stream);
@@ -250,7 +246,7 @@ export class BinaryReader {
     return sb;
   }
 
-  readCharsEx(buffer: char[], index: number, count: number): number {
+  readIntoCharsEx(buffer: char[], index: number, count: number): number {
     if (buffer == null) {
       throw new TypeError('buffer is null.')
     }
@@ -271,6 +267,14 @@ export class BinaryReader {
     }
     this.throwIfDisposed();
     return this.internalReadChars(subarray(buffer, index, index + count));
+  }
+
+  readIntoChars(buffer: SubArray<char>): number {
+    if (buffer == null) {
+      throw new TypeError('buffer is null.')
+    }
+    this.throwIfDisposed();
+    return this.internalReadChars(buffer);
   }
 
   private internalReadChars(buffer: SubArray<char>): number {
@@ -350,7 +354,7 @@ export class BinaryReader {
     return chars;
   }
 
-  readSpanEx(buffer: Buffer, index: number, count: number): number {
+  readIntoBufferEx(buffer: Buffer, index: number, count: number): number {
     if (buffer == null) {
       throw new TypeError('buffer is null or undefined.');
     }
@@ -374,7 +378,7 @@ export class BinaryReader {
     return fs.readSync(this._stream, buffer, index, count, null);
   }
 
-  readSpan(buffer: Buffer): number {
+  readIntoBuffer(buffer: Buffer): number {
     if (buffer == null) {
       throw new TypeError("buffer is null");
     }
