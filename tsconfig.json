@@ -4,11 +4,13 @@
     "noImplicitAny": false,
     "removeComments": true,
     "preserveConstEnums": true,
-    "outDir": "build",
+    "outDir": "build/src",
     "sourceMap": true,
     "target": "ES2017",
     "moduleResolution": "Node",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "declaration": true,
+    "declarationDir": "build/types"
   },
   "exclude": [
     "node_modules/*",
