@@ -51,7 +51,7 @@ describe('BinaryReader Tests', () => {
     mockfs.restore();
   });
 
-  it('BinaryReader | Dispose Tests', () => {
+  it('Dispose Tests', () => {
     // Disposing multiple times should not throw an exception
     let fd = openEmtpyFile();
     let binaryReader = new BinaryReader(fd);
@@ -61,7 +61,7 @@ describe('BinaryReader Tests', () => {
     binaryReader.dispose();
   });
 
-  it('BinaryReader | Close Tests', () => {
+  it('Close Tests', () => {
     let fd = openEmtpyFile();
     let binaryReader = new BinaryReader(fd);
     binaryReader.close();
@@ -70,7 +70,7 @@ describe('BinaryReader Tests', () => {
     binaryReader.dispose();
   });
 
-  it('BinaryReader | Dispose Tests | Negative', () => {
+  it('Dispose Tests | Negative', () => {
     let fd = openEmtpyFile();
     let binaryReader = new BinaryReader(fd);
     binaryReader.dispose();
@@ -78,7 +78,7 @@ describe('BinaryReader Tests', () => {
     binaryReader.dispose();
   });
 
-  it('BinaryReader | Close Tests | Negative', () => {
+  it('Close Tests | Negative', () => {
     let fd = openEmtpyFile();
     let binaryReader = new BinaryReader(fd);
     binaryReader.close();
@@ -86,7 +86,7 @@ describe('BinaryReader Tests', () => {
     binaryReader.dispose();
   });
 
-  it.skip('BinaryReader | Eof Reached Early Tests | Throws Exception', () => {
+  it.skip('Eof Reached Early Tests | Throws Exception', () => {
     // test integer primitives
 
     runTest(writer => writer.write(byte.MinValue), reader => reader.readByte());
@@ -148,10 +148,10 @@ describe('BinaryReader Tests', () => {
   });
 
   /*
-  * Other tests for Read7BitEncodedInt[64] are in BinaryWriter.WriteTests.cs, not here.
+  * Other tests for Read7BitEncodedInt[64] are in BinaryWriter's tests.
   */
 
-  it('BinaryReader | Read7BitEncodedInt | Allows Overlong Encodings', () => {
+  it('Read7BitEncodedInt | Allows Overlong Encodings', () => {
     mockfs({ 'f': Buffer.from([0x9F, 0x00 /* overlong */]) });
     const fd = fs.openSync('f', 'r');
     const reader = new BinaryReader(fd);
@@ -160,7 +160,7 @@ describe('BinaryReader Tests', () => {
     assert.equal(actual, 0x1F);
   });
 
-  it('BinaryReader | Read7BitEncodedInt | Bad Format | Throws', () => {
+  it('Read7BitEncodedInt | Bad Format | Throws', () => {
     // Serialized form of 0b1_00000000_00000000_00000000_00000000
     //                      |0x10|| 0x80 || 0x80 || 0x80 || 0x80|
 
@@ -177,7 +177,7 @@ describe('BinaryReader Tests', () => {
     assert.throws(() => reader.read7BitEncodedInt(), TypeError);
   });
 
-  it('BinaryReader | Read7BitEncodedInt64 | Allows Overlong Encodings', () => {
+  it('Read7BitEncodedInt64 | Allows Overlong Encodings', () => {
     mockfs({ 'f': Buffer.from([0x9F, 0x00 /* overlong */]), });
     const fd = fs.openSync('f', 'r');
     const reader = new BinaryReader(fd);
@@ -186,7 +186,7 @@ describe('BinaryReader Tests', () => {
     assert.equal(actual, 0x1F);
   });
 
-  it('BinaryReader | Read7BitEncodedInt64 | Bad Format | Throws', () => {
+  it('Read7BitEncodedInt64 | Bad Format | Throws', () => {
     // Serialized form of 0b1_00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000
     //                      | || 0x80| | 0x80|| 0x80 || 0x80 || 0x80 || 0x80 || 0x80 || 0x80 || 0x80|
     //                       `-- 0x02

@@ -1,2 +1,2 @@
-export { BinaryReader } from './binary-reader';
-export { SubArray, subarray } from './utils/array';
+export { BinaryReader } from './src/binary-reader';
+export { SubArray, subarray } from './src/utils/array';

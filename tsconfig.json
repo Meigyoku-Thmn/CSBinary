@@ -2,20 +2,20 @@
   "compilerOptions": {
     "module": "CommonJS",
     "noImplicitAny": false,
-    "removeComments": true,
+    "removeComments": false,
     "preserveConstEnums": true,
-    "outDir": "build/src",
+    "outDir": "build",
     "sourceMap": true,
     "target": "ES2017",
     "moduleResolution": "Node",
     "esModuleInterop": true,
     "declaration": true,
-    "declarationDir": "build/types"
+    "declarationDir": "types"
   },
   "exclude": [
     "node_modules/*",
     "build/*",
-    "coverage/*",
+    "types/*",
     "test/*",
     "test.js",
     "test.ts"
