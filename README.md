@@ -1,7 +1,7 @@
 # CSBinary
 I ported BinaryReader and BinaryWriter from Dotnet Core to NodeJS because reading and writing binary files non-linearly in NodeJS is very tedious.
 
-Non-linear data processing (that means you can jump/"seek" all across a file to read its' data) is not a popular thing in NodeJS worlds (people usually do streaming instead), but when you have to, then this library will come in handy. Beside, you want to write code in a scripting language for simplicity and convenience.
+Non-linear data processing (that means you can jump/"seek" back and forth at will all across a file to read its' data) is not a popular thing in NodeJS worlds (people usually do streaming instead), but when you have to, then this library will come in handy. Beside, you want to write code in a scripting language for simplicity and convenience.
 
 You don't have to write code like this anymore:
 ```js
