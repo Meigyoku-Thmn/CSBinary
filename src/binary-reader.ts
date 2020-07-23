@@ -2,17 +2,23 @@ import fs from 'fs';
 import { seekSync, constants } from 'fs-ext'
 const { SEEK_CUR, SEEK_SET } = constants;
 import { StringDecoder } from 'string_decoder';
-import { readByte, tell } from './utils/file'
-import { subarray, SubArray } from './utils/array';
+import { readByte, tell, canSeek } from './utils/file'
+import { SubArray } from './utils/array';
+import { raise } from './utils/error';
+import { CSCode } from './constants/error';
 
 type char = string;
 
+const BIG_7Fh = BigInt(0x7F);
+const BIG_0 = BigInt(0);
 const MaxCharBytesSize = 128;
+const BufferSize = 16;
+/**
+ * Reads primitive data types as binary values in a specific encoding.
+ */
 export class BinaryReader {
-  private readonly _stream: number;
-  private readonly _buffer: Buffer;
+  private readonly _fd: number;
   private readonly _decoder: StringDecoder;
-  private _charBytes: Buffer;
 
   // Performance optimization for Read() w/ Unicode. Speeds us up by ~40%
   private readonly _2BytesPerChar: boolean;
@@ -28,56 +34,51 @@ export class BinaryReader {
    * @param leaveOpen `true` to leave the file open after the BinaryReader object is disposed; otherwise, `false`. Default to `false`.
    */
   constructor(input: number, encoding: BufferEncoding = 'utf8', leaveOpen = false) {
-    if (typeof input != 'number')
-      throw new TypeError('input must be a file descriptor');
+    if (!Number.isSafeInteger(input)) throw TypeError('"input" must be a safe integer.');
+    if (typeof encoding != 'string') throw TypeError('"encoding" must be a string.');
+    if (typeof leaveOpen != 'boolean') throw TypeError('"leaveOpen" must be a boolean.');
 
-    this._stream = input;
+    this._canSeek = canSeek(input);
+    if (!this._canSeek)
+      raise(ReferenceError('Input file is not readable.'), CSCode.FileNotReadable);
+
+    this._fd = input;
     this._decoder = new StringDecoder(encoding);
     if (this._decoder['lastNeed'] == null)
-      throw new ReferenceError('"StringDecoder" from "string_decoder" module doesn\'t have "lastNeed" field.');
-    this._buffer = Buffer.alloc(16);
-    // _charBuffer and _charBytes will be left null.
+      throw ReferenceError('"StringDecoder" from "string_decoder" module doesn\'t have "lastNeed" field.');
+
     // For Encodings that always use 2 bytes per char (or more),
     // special case them here to make Read() & Peek() faster.
-    this._2BytesPerChar = encoding == 'utf16le';
+    this._2BytesPerChar = encoding == 'utf16le' || encoding == 'ucs2' || encoding == 'ucs-2';
     this._leaveOpen = leaveOpen;
 
-    this._canSeek = tell(this._stream) >= 0;
   }
 
   /**
    * Get the underlying file descriptor of the BinaryReader.
    */
-  get baseStream() {
-    return this._stream;
-  }
-
-  /**
-   * Releases the unmanaged resources used by the BinaryReader class and optionally releases the managed resources.
-   * @param disposing `true` to release both managed and unmanaged resources; `false` to release only unmanaged resources. Default to `true`.
-   */
-  dispose(disposing = true): void {
-    if (!this._disposed) {
-      if (disposing && !this._leaveOpen) {
-        fs.closeSync(this._stream);
-      }
-      this._disposed = true;
-    }
+  get baseFd(): number {
+    return this._fd;
   }
 
   /**
    * Closes the current reader and the underlying file.
    */
   close(): void {
-    this.dispose(true);
+    if (!this._disposed) {
+      if (!this._leaveOpen) {
+        fs.closeSync(this._fd);
+      }
+      this._disposed = true;
+    }
   }
 
   private throwIfDisposed(): void {
     if (this._disposed) {
-      throw new ReferenceError('This BinaryReader instance is disposed.');
+      raise(ReferenceError('This BinaryReader instance is closed.'), CSCode.FileIsClosed);
     }
   }
-  
+
   /**
    * Returns the next available character and does not advance the byte or character position.
    * @returns The next available character, or -1 if no more characters are available or the file does not support seeking.
@@ -89,9 +90,9 @@ export class BinaryReader {
       return -1;
     }
 
-    var origPos = tell(this._stream);
+    var origPos = tell(this._fd);
     let ch = this.readCharCode();
-    seekSync(this._stream, origPos, SEEK_SET);
+    seekSync(this._fd, origPos, SEEK_SET);
     return ch;
   }
 
@@ -106,10 +107,10 @@ export class BinaryReader {
     let posSav = 0;
 
     if (this._canSeek) {
-      posSav = tell(this._stream);
+      posSav = tell(this._fd);
     }
 
-    this._charBytes ? 0 : (this._charBytes = Buffer.alloc(MaxCharBytesSize));
+    let _charBytes = Buffer.allocUnsafe(MaxCharBytesSize);
 
     // there isn't any decoder in JS world that can reuse output buffer
     let singleChar = '';
@@ -121,14 +122,14 @@ export class BinaryReader {
       // Assume 1 byte can be 1 char unless _2BytesPerChar is true.
       numBytes = this._2BytesPerChar ? 2 : 1;
 
-      let r = readByte(this._stream);
-      this._charBytes.writeUInt8(r, 0);
+      let r = readByte(this._fd);
+      _charBytes.writeUInt8(r);
       if (r == -1) {
         numBytes = 0;
       }
       if (numBytes == 2) {
-        r = readByte(this._stream);
-        this._charBytes.writeUInt8(r, 1);
+        r = readByte(this._fd);
+        _charBytes.writeUInt8(r, 1);
         if (r == -1) {
           numBytes = 1;
         }
@@ -139,15 +140,15 @@ export class BinaryReader {
       }
 
       try {
-        singleChar = this._decoder.write(this._charBytes.subarray(0, numBytes));
+        singleChar = this._decoder.write(_charBytes.subarray(0, numBytes));
         if (singleChar.length > 1)
-          throw new Error("BinaryReader hit a surrogate char in the read method.");
+          throw Error("BinaryReader hit a surrogate char in the read method.");
       }
       catch (err) {
         // Handle surrogate char
 
         if (this._canSeek) {
-          seekSync(this._stream, posSav - tell(this._stream), SEEK_CUR);
+          seekSync(this._fd, posSav - tell(this._fd), SEEK_CUR);
         }
         // else - we can't do much here
 
@@ -168,9 +169,9 @@ export class BinaryReader {
   private internalReadByte(): number {
     this.throwIfDisposed();
 
-    let b = readByte(this._stream);
+    let b = readByte(this._fd);
     if (b == -1) {
-      throw new RangeError('Read beyond end-of-file.');
+      raise(RangeError('Read beyond end-of-file.'), CSCode.ReadBeyondEndOfFile);
     }
 
     return b;
@@ -181,7 +182,9 @@ export class BinaryReader {
    * @returns A signed byte read from the current file.
    */
   readSByte(): number {
-    return this.internalReadByte() - 128; // "cast" byte to sbyte
+    let rs = this.internalReadByte();
+    if (rs > 127) rs -= 256;
+    return rs;
   }
 
   /**
@@ -199,7 +202,7 @@ export class BinaryReader {
   readChar(): char {
     let value = this.readCharCode();
     if (value == -1) {
-      throw new RangeError('Read beyond end-of-file.');
+      raise(RangeError('Read beyond end-of-file.'), CSCode.ReadBeyondEndOfFile);
     }
     return String.fromCharCode(value);
   }
@@ -256,7 +259,7 @@ export class BinaryReader {
    * @returns A 4-byte floating point value read from the current file.
    */
   readSingle(): number {
-    return this.internalRead(8).readFloatLE();
+    return this.internalRead(4).readFloatLE();
   }
 
   /**
@@ -269,7 +272,7 @@ export class BinaryReader {
 
   /** Not supported */
   readDecimal(): number {
-    throw new TypeError('Decimal type number is not supported.');
+    throw TypeError('Decimal type number is not supported.');
   }
 
   /**
@@ -287,25 +290,25 @@ export class BinaryReader {
     // Length of the string in bytes, not chars
     stringLength = this.read7BitEncodedInt();
     if (stringLength < 0) {
-      throw new RangeError('Invalid string\'s length: ' + stringLength);
+      raise(RangeError(`Invalid string\'s length: ${stringLength}.`), CSCode.InvalidEncodedStringLength);
     }
 
     if (stringLength == 0) {
       return '';
     }
 
-    this._charBytes ? 0 : (this._charBytes = Buffer.alloc(MaxCharBytesSize));
+    let _charBytes = Buffer.allocUnsafe(MaxCharBytesSize);
 
     let sb = '';
     do {
       readLength = ((stringLength - currPos) > MaxCharBytesSize) ? MaxCharBytesSize : (stringLength - currPos);
 
-      n = fs.readSync(this._stream, this._charBytes, 0, readLength, null);
+      n = fs.readSync(this._fd, _charBytes, 0, readLength, null);
       if (n == 0) {
-        throw new RangeError('Read beyond end-of-file.');
+        raise(RangeError('Read beyond end-of-file.'), CSCode.ReadBeyondEndOfFile);
       }
 
-      let strRead = this._decoder.write(this._charBytes.subarray(0, n))
+      let strRead = this._decoder.write(_charBytes.subarray(0, n))
 
       if (currPos == 0 && n == stringLength) {
         return strRead;
@@ -326,26 +329,17 @@ export class BinaryReader {
    * @returns The total number of characters read into the buffer. This might be less than the number of characters requested if that many characters are not currently available, or it might be zero if the end of the file is reached.
    */
   readIntoCharsEx(buffer: char[], index: number, count: number): number {
-    if (buffer == null) {
-      throw new TypeError('buffer is null.')
-    }
-    if (index == null) {
-      throw new TypeError('index is null.');
-    }
-    if (count == null) {
-      throw new TypeError('count is null');
-    }
-    if (index < 0) {
-      throw new RangeError('index need to be a non-negative number.');
-    }
-    if (count < 0) {
-      throw new RangeError('count need to be a non-negative number.');
-    }
-    if (buffer.length - index < count) {
-      throw new RangeError('This will read into out of buffer.');
-    }
+    if (!Array.isArray(buffer)) throw TypeError('"buffer" must be a character array.');
+    if (!Number.isSafeInteger(index)) throw TypeError('"index" must be a safe integer.');
+    if (!Number.isSafeInteger(count)) throw TypeError('"count" must be a safe integer.');
+    if (index < 0)
+      throw RangeError('"index" need to be a non-negative number.');
+    if (count < 0)
+      throw RangeError('"count" need to be a non-negative number.');
+    if (buffer.length - index < count)
+      throw RangeError('This will read into out of buffer.');
     this.throwIfDisposed();
-    return this.internalReadChars(subarray(buffer, index, index + count));
+    return this.internalReadChars(SubArray.from(buffer, index, index + count));
   }
 
   /**
@@ -353,12 +347,10 @@ export class BinaryReader {
    * @param buffer A view of characters. When this method returns, the contents of this region are replaced by the characters read from the current source.
    * @returns The total number of characters read into the buffer. This might be less than the number of characters requested if that many characters are not currently available, or it might be zero if the end of the file is reached.
    */
-  readIntoChars(buffer: SubArray<char>): number {
-    if (buffer == null) {
-      throw new TypeError('buffer is null.')
-    }
+  readIntoChars(buffer: char[]): number {
+    if (!Array.isArray(buffer)) throw TypeError('"buffer" must be a character array.');
     this.throwIfDisposed();
-    return this.internalReadChars(buffer);
+    return this.internalReadChars(SubArray.from(buffer));
   }
 
   private internalReadChars(buffer: SubArray<char>): number {
@@ -371,7 +363,7 @@ export class BinaryReader {
       // is for our encoding. Otherwise for UnicodeEncoding we'd have to
       // do ~1+log(n) reads to read n characters.
       if (this._2BytesPerChar) {
-        numBytes <<= 1;
+        numBytes = numBytes << 1 >>> 0;
       }
 
       // We do not want to read even a single byte more than necessary.
@@ -391,13 +383,13 @@ export class BinaryReader {
         }
       }
 
-      this._charBytes ? 0 : (this._charBytes = Buffer.alloc(MaxCharBytesSize));
+      let _charBytes = Buffer.allocUnsafe(MaxCharBytesSize);
 
       if (numBytes > MaxCharBytesSize) {
         numBytes = MaxCharBytesSize;
       }
-      numBytes = fs.readSync(this._stream, this._charBytes, 0, numBytes, null);
-      let byteBuffer = this._charBytes.subarray(0, numBytes);
+      numBytes = fs.readSync(this._fd, _charBytes, 0, numBytes, null);
+      let byteBuffer = _charBytes.subarray(0, numBytes);
 
       if (byteBuffer.length == 0) {
         break;
@@ -406,12 +398,12 @@ export class BinaryReader {
       let strRead = this._decoder.write(byteBuffer);
       for (let i = 0; i < strRead.length; i++)
         buffer.set(i, strRead[i]);
-      buffer = buffer.slice(strRead.length);
+      buffer = buffer.sub(strRead.length);
 
       totalCharsRead += strRead.length;
     }
 
-    // we may have read fewer than the number of characters requested if end of stream reached
+    // we may have read fewer than the number of characters requested if end of file reached
     // or if the encoding makes the char count too big for the buffer (e.g. fallback sequence)
     return totalCharsRead;
   }
@@ -422,12 +414,9 @@ export class BinaryReader {
    * @returns A character array containing data read from the underlying file. This might be less than the number of characters requested if the end of the file is reached.
    */
   readChars(count: number): char[] {
-    if (count == null) {
-      throw new TypeError('count is null.');
-    }
-    if (count < 0) {
-      throw new RangeError('count must be a non-negative value.');
-    }
+    if (!Number.isSafeInteger(count)) throw TypeError('"count" must be a safe integer.');
+    if (count < 0)
+      throw RangeError('"count" must be a non-negative value.');
     this.throwIfDisposed();
 
     if (count == 0) {
@@ -435,7 +424,7 @@ export class BinaryReader {
     }
 
     let chars = new Array<char>(count);
-    let n = this.internalReadChars(subarray(chars));
+    let n = this.internalReadChars(SubArray.from(chars));
     if (n != count) {
       chars = chars.slice(0, n);
     }
@@ -451,27 +440,21 @@ export class BinaryReader {
    * @returns The number of bytes read into buffer. This might be less than the number of bytes requested if that many bytes are not available, or it might be zero if the end of the file is reached.
    */
   readIntoBufferEx(buffer: Buffer, index: number, count: number): number {
-    if (buffer == null) {
-      throw new TypeError('buffer is null or undefined.');
-    }
-    if (index == null) {
-      throw new TypeError('index is null');
-    }
-    if (count == null) {
-      throw new TypeError('count is null');
-    }
+    if (!Buffer.isBuffer(buffer)) throw TypeError('"buffer" must be a Buffer.');
+    if (!Number.isSafeInteger(index)) throw TypeError('"index" must be a safe integer.');
+    if (!Number.isSafeInteger(count)) throw TypeError('"count" must be a safe integer.');
     if (index < 0) {
-      throw new RangeError('index must be a non-negative number.');
+      throw RangeError('"index" must be a non-negative number.');
     }
     if (count < 0) {
-      throw new RangeError('count must be a non-negative number.');
+      throw RangeError('"count" must be a non-negative number.');
     }
     if (buffer.length - index < count) {
-      throw new RangeError('This will read into out of buffer.');
+      throw RangeError('This will read into out of buffer.');
     }
     this.throwIfDisposed();
 
-    return fs.readSync(this._stream, buffer, index, count, null);
+    return fs.readSync(this._fd, buffer, index, count, null);
   }
 
   /**
@@ -480,11 +463,9 @@ export class BinaryReader {
    * @returns The total number of bytes read into the buffer. This can be less than the number of bytes allocated in the buffer if that many bytes are not currently available, or zero (0) if the end of the file has been reached.
    */
   readIntoBuffer(buffer: Buffer): number {
-    if (buffer == null) {
-      throw new TypeError("buffer is null");
-    }
+    if (!Buffer.isBuffer(buffer)) throw TypeError('"buffer" must be a Buffer.');
     this.throwIfDisposed();
-    return fs.readSync(this._stream, buffer);
+    return fs.readSync(this._fd, buffer);
   }
 
   /**
@@ -493,22 +474,20 @@ export class BinaryReader {
    * @returns A buffer containing data read from the underlying file. This might be less than the number of bytes requested if the end of the file is reached.
    */
   readBytes(count: number): Buffer {
-    if (count == null) {
-      throw new TypeError('count is null');
-    }
+    if (!Number.isSafeInteger(count)) throw TypeError('"count" must be a safe integer.');
     if (count < 0) {
-      throw new RangeError('count must be a non-negative number.');
+      throw RangeError('"count" must be a non-negative number.');
     }
     this.throwIfDisposed();
 
     if (count == 0) {
-      return Buffer.alloc(0);
+      return Buffer.allocUnsafe(0);
     }
 
-    let result = Buffer.alloc(count);
+    let result = Buffer.allocUnsafe(count);
     let numRead = 0;
     do {
-      let n = fs.readSync(this._stream, result, numRead, count, null);
+      let n = fs.readSync(this._fd, result, numRead, count, null);
       if (n == 0) {
         break;
       }
@@ -519,9 +498,7 @@ export class BinaryReader {
 
     if (numRead != result.length) {
       // Trim array. This should happen on EOF & possibly net streams.
-      let copy = Buffer.alloc(numRead);
-      result.copy(copy, 0, 0, numRead);
-      result = copy;
+      result = result.subarray(0, numRead);
     }
 
     return result;
@@ -530,16 +507,17 @@ export class BinaryReader {
   private internalRead(numBytes: number): Buffer {
     this.throwIfDisposed();
 
+    let buffer = Buffer.allocUnsafe(BufferSize);
     let bytesRead = 0;
     do {
-      let n = fs.readSync(this._stream, this._buffer, bytesRead, numBytes - bytesRead, null);
+      let n = fs.readSync(this._fd, buffer, bytesRead, numBytes - bytesRead, null);
       if (n == 0) {
-        throw new RangeError('Read beyond end-of-file.');
+        raise(RangeError('Read beyond end-of-file.'), CSCode.ReadBeyondEndOfFile);
       }
       bytesRead += n;
     } while (bytesRead < numBytes);
 
-    return this._buffer;
+    return buffer;
   }
 
   /**
@@ -564,9 +542,9 @@ export class BinaryReader {
 
     const MaxBytesWithoutOverflow = 4;
     for (let shift = 0; shift < MaxBytesWithoutOverflow * 7; shift += 7) { // TODO: check 
-      // ReadByte handles end of stream cases for us.
+      // ReadByte handles end of file cases for us.
       byteReadJustNow = this.readByte();
-      result |= (byteReadJustNow & 0x7F) << shift;
+      result |= (byteReadJustNow & 0x7F) << shift >>> 0;
 
       if (byteReadJustNow <= 0x7F) {
         return result; // early exit
@@ -579,10 +557,10 @@ export class BinaryReader {
 
     byteReadJustNow = this.readByte();
     if (byteReadJustNow > 0b1111) {
-      throw new TypeError('SR.Format_Bad7BitInt');
+      raise(TypeError('Bad 7 bit encoded number in file.'), CSCode.BadEncodedIntFormat);
     }
 
-    result |= byteReadJustNow << (MaxBytesWithoutOverflow * 7);
+    result |= byteReadJustNow << (MaxBytesWithoutOverflow * 7) >>> 0;
     return result;
   }
 
@@ -591,7 +569,7 @@ export class BinaryReader {
    * @returns A 64-bit integer in compressed format.
    */
   read7BitEncodedInt64(): bigint {
-    let result = BigInt(0);
+    let result = BIG_0;
     let byteReadJustNow: number;
 
     // Read the integer 7 bits at a time. The high bit
@@ -604,9 +582,9 @@ export class BinaryReader {
 
     const MaxBytesWithoutOverflow = 9;
     for (let shift = 0; shift < MaxBytesWithoutOverflow * 7; shift += 7) {
-      // ReadByte handles end of stream cases for us.
+      // ReadByte handles end of file cases for us.
       byteReadJustNow = this.readByte();
-      result |= (BigInt(byteReadJustNow) & BigInt(0x7F)) << BigInt(shift);
+      result |= (BigInt(byteReadJustNow) & BIG_7Fh) << BigInt(shift);
 
       if (byteReadJustNow <= 0x7F) {
         return result; // early exit
@@ -619,7 +597,7 @@ export class BinaryReader {
 
     byteReadJustNow = this.readByte();
     if (byteReadJustNow > 0b1) {
-      throw new TypeError('SR.Format_Bad7BitInt');
+      raise(TypeError('Bad 7 bit encoded number in file.'), CSCode.BadEncodedIntFormat);
     }
 
     result |= BigInt(byteReadJustNow) << BigInt(MaxBytesWithoutOverflow * 7);

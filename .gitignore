@@ -4,3 +4,5 @@ test.js
 test.ts
 .nyc_output
 types
+dist
+coverage

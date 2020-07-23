@@ -4,7 +4,7 @@
     "noImplicitAny": false,
     "removeComments": false,
     "preserveConstEnums": true,
-    "outDir": "build",
+    "outDir": "dist",
     "sourceMap": true,
     "target": "ES2017",
     "moduleResolution": "Node",
@@ -15,6 +15,7 @@
   "exclude": [
     "node_modules/*",
     "build/*",
+    "dist/*",
     "types/*",
     "test/*",
     "test.js",
