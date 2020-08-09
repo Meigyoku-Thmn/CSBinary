@@ -21,7 +21,6 @@
     "@types/mocha": "^7.0.2",
     "@types/mock-require": "^2.0.0",
     "@types/node": "^14.0.14",
-    "fs-monkey": "^1.0.1",
     "lodash": "^4.17.19",
     "memfs": "^3.2.0",
     "mocha": "^8.0.1",
@@ -31,8 +30,7 @@
     "rimraf": "^3.0.2",
     "ts-mocha": "^7.0.0",
     "ts-node": "^8.10.2",
-    "typescript": "^3.9.6",
-    "unionfs": "^4.4.0"
+    "typescript": "^3.9.6"
   },
   "dependencies": {
     "bindings": "^1.5.0",
