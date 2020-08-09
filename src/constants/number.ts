@@ -21,3 +21,11 @@ export const LONG_MAX = BigInt('9223372036854775807');
 
 export const ULONG_MIN = BigInt(0);
 export const ULONG_MAX = BigInt('18446744073709551615');
+
+export const SINGLE_MIN = -3.4028234663852886E+38;
+export const SINGLE_MAX = 3.4028234663852886E+38;
+export const SINGLE_EPSILON = 1.401298464324817E-45;
+
+export const DOUBLE_MIN = -Number.MAX_VALUE;
+export const DOUBLE_MAX = Number.MAX_VALUE;
+export const DOUBLE_EPSILON = Number.MIN_VALUE;

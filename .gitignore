@@ -1,7 +1,7 @@
 node_modules
 build
 test.js
-test.ts
+test*.ts
 .nyc_output
 types
 dist

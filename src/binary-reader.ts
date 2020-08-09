@@ -1,11 +1,11 @@
 import fs from 'fs';
-import { seekSync, constants } from 'fs-ext'
-const { SEEK_CUR, SEEK_SET } = constants;
-import { StringDecoder } from 'string_decoder';
+import { seekSync } from 'fs-ext'
 import { readByte, tell, canSeek } from './utils/file'
 import { SubArray } from './utils/array';
 import { raise } from './utils/error';
 import { CSCode } from './constants/error';
+import { IEncoding, Encoding, IDecoder } from './encoding';
+import { SEEK_SET, SEEK_CUR } from './constants/mode';
 
 type char = string;
 
@@ -18,22 +18,22 @@ const BufferSize = 16;
  */
 export class BinaryReader {
   private readonly _fd: number;
-  private readonly _decoder: StringDecoder;
+  private readonly _decoder: IDecoder;
 
   // Performance optimization for Read() w/ Unicode. Speeds us up by ~40%
-  private readonly _2BytesPerChar: boolean;
-  private readonly _leaveOpen: boolean;
-  private _disposed: boolean;
+  private readonly _2BytesPerChar: boolean = false;
+  private readonly _leaveOpen: boolean = false;
+  private _disposed = false;
 
-  private _canSeek: boolean;
+  private _canSeek = false;
 
   /**
    * Initializes a new instance of the BinaryReader class based on the specified file descriptor and character encoding, and optionally leaves the file open.
    * @param input The input file descriptor.
-   * @param encoding The character encoding to use. Default to `'utf8'`
+   * @param encoding The character encoding to use, or an object implementing the IEncoding interface. Default to `'utf8'`
    * @param leaveOpen `true` to leave the file open after the BinaryReader object is disposed; otherwise, `false`. Default to `false`.
    */
-  constructor(input: number, encoding: BufferEncoding = 'utf8', leaveOpen = false) {
+  constructor(input: number, encoding: BufferEncoding | string | IEncoding = 'utf8', leaveOpen = false) {
     if (!Number.isSafeInteger(input)) throw TypeError('"input" must be a safe integer.');
     if (typeof encoding != 'string') throw TypeError('"encoding" must be a string.');
     if (typeof leaveOpen != 'boolean') throw TypeError('"leaveOpen" must be a boolean.');
@@ -43,9 +43,10 @@ export class BinaryReader {
       raise(ReferenceError('Input file is not readable.'), CSCode.FileNotReadable);
 
     this._fd = input;
-    this._decoder = new StringDecoder(encoding);
-    if (this._decoder['lastNeed'] == null)
-      throw ReferenceError('"StringDecoder" from "string_decoder" module doesn\'t have "lastNeed" field.');
+    if (typeof encoding == 'string')
+      this._decoder = new Encoding(encoding).getDecoder();
+    else if (typeof encoding == 'object')
+      this._decoder = (encoding as IEncoding).getDecoder();
 
     // For Encodings that always use 2 bytes per char (or more),
     // special case them here to make Read() & Peek() faster.
@@ -123,13 +124,13 @@ export class BinaryReader {
       numBytes = this._2BytesPerChar ? 2 : 1;
 
       let r = readByte(this._fd);
-      _charBytes.writeUInt8(r);
+      _charBytes.writeUInt8(r < 0 ? r + 256 : r);
       if (r == -1) {
         numBytes = 0;
       }
       if (numBytes == 2) {
         r = readByte(this._fd);
-        _charBytes.writeUInt8(r, 1);
+        _charBytes.writeUInt8(r < 0 ? r + 256 : r, 1);
         if (r == -1) {
           numBytes = 1;
         }
@@ -142,12 +143,12 @@ export class BinaryReader {
       try {
         singleChar = this._decoder.write(_charBytes.subarray(0, numBytes));
         if (singleChar.length > 1)
-          throw Error("BinaryReader hit a surrogate char in the read method.");
+          raise(Error("BinaryReader hit a surrogate char in the read method."), CSCode.SurrogateCharHit);
       }
       catch (err) {
         // Handle surrogate char
 
-        if (this._canSeek) {
+        if (err.code == CSCode.SurrogateCharHit && this._canSeek) {
           seekSync(this._fd, posSav - tell(this._fd), SEEK_CUR);
         }
         // else - we can't do much here
@@ -183,8 +184,7 @@ export class BinaryReader {
    */
   readSByte(): number {
     let rs = this.internalReadByte();
-    if (rs > 127) rs -= 256;
-    return rs;
+    return rs > 127 ? rs - 256 : rs;
   }
 
   /**
@@ -373,7 +373,7 @@ export class BinaryReader {
       // a custom replacement sequence may violate this assumption.
       if (numBytes > 1) {
         // Check whether the decoder has any pending state.
-        if (this._decoder['lastNeed'] != 0) {
+        if (this._decoder.hasState) {
           numBytes--;
 
           // The worst case is charsRemaining = 2 and UTF32Decoder holding onto 3 pending bytes. We need to read just
@@ -465,7 +465,7 @@ export class BinaryReader {
   readIntoBuffer(buffer: Buffer): number {
     if (!Buffer.isBuffer(buffer)) throw TypeError('"buffer" must be a Buffer.');
     this.throwIfDisposed();
-    return fs.readSync(this._fd, buffer);
+    return fs.readSync(this._fd, buffer, 0, buffer.length, null);
   }
 
   /**

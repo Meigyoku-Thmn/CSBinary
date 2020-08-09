@@ -7,5 +7,7 @@ export const CSCode = enumize(
   "ReadBeyondEndOfFile",
   "InvalidEncodedStringLength",
   "BadEncodedIntFormat",
+  "SurrogateCharHit",
+  "InvalidCharacterEncoding",
 );
 export type CSCode = keyof typeof CSCode;

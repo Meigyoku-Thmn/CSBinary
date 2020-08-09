@@ -10,7 +10,7 @@ const isWin32 = process.platform == 'win32';
 
 export function readByte(fd: number): number {
   let oneByteArray = Buffer.allocUnsafe(1);
-  let r = fs.readSync(fd, oneByteArray);
+  let r = fs.readSync(fd, oneByteArray, 0, oneByteArray.length, null);
   if (r == 0)
     return -1;
   return oneByteArray[0];
@@ -27,7 +27,14 @@ export function tell(fd: number): number {
 }
 
 export function canSeek(fd: number): boolean {
-  return tell(fd) >= 0;
+  try {
+    tell(fd);
+    return true;
+  } catch (err) {
+    if (err.code == 'EBADF')
+      throw err;
+    return false;
+  }
 }
 
 export function canWrite(fd: number): boolean {

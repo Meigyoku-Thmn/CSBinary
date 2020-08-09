@@ -5,11 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "ts-mocha -p tsconfig.json test/**/*.spec.ts",
+    "test:one": "ts-mocha -p tsconfig.json test/binary-reader.spec.ts --timeout 99999999",
     "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test",
     "config": "node-gyp configure",
     "build": "node-gyp build && tsc",
     "rebuild": "node-gyp rebuild && tsc -b --clean && rimraf types && tsc",
-    "clean": "node-gyp clean && rimraf dist && rimraf types"
+    "clean": "node-gyp clean && rimraf dist && rimraf types && rimraf coverage"
   },
   "author": "",
   "license": "ISC",
@@ -18,21 +19,25 @@
     "@types/fs-ext": "^2.0.0",
     "@types/lodash": "^4.14.157",
     "@types/mocha": "^7.0.2",
-    "@types/mock-fs": "^4.10.0",
     "@types/mock-require": "^2.0.0",
     "@types/node": "^14.0.14",
+    "fs-monkey": "^1.0.1",
     "lodash": "^4.17.19",
+    "memfs": "^3.2.0",
     "mocha": "^8.0.1",
-    "mock-fs": "github:Meigyoku-Thmn/mock-fs#master",
     "mock-require": "^3.0.3",
     "nyc": "^15.1.0",
+    "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "ts-mocha": "^7.0.0",
-    "typescript": "^3.9.6"
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.6",
+    "unionfs": "^4.4.0"
   },
   "dependencies": {
     "bindings": "^1.5.0",
     "fs-ext": "github:Meigyoku-Thmn/node-fs-ext#master",
+    "iconv-lite": "github:Meigyoku-Thmn/iconv-lite#master",
     "node-addon-api": "*"
   },
   "gypfile": true

@@ -15,7 +15,8 @@
       "runtimeArgs": [
         "-p",
         "tsconfig.json",
-        "test/**/*.spec.ts"
+        "test/**/*.spec.ts",
+        "--timeout 99999999"
       ],
       "port": 9229
     }

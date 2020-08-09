@@ -10,7 +10,9 @@
     "moduleResolution": "Node",
     "esModuleInterop": true,
     "declaration": true,
-    "declarationDir": "types"
+    "declarationDir": "types",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true
   },
   "exclude": [
     "node_modules/*",
@@ -18,7 +20,6 @@
     "dist/*",
     "types/*",
     "test/*",
-    "test.js",
-    "test.ts"
+    "test*"
   ]
 }

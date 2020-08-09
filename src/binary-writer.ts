@@ -1,15 +1,19 @@
 import fs from 'fs';
 import { seekSync } from 'fs-ext'
-import { writeByte, openNullDevice, canWrite, flushAsync, closeAsync } from './utils/file'
+import { writeByte, openNullDevice, canWrite, flushAsync } from './utils/file'
 import { isSurrogate } from './utils/string';
 import { raise } from './utils/error';
 import { CSCode } from './constants/error';
+import { INT_MIN, INT_MAX } from './constants/number';
+import { IEncoding, Encoding } from './encoding';
+import { CStr, RawStr } from './constants/mode';
 
 type char = string;
 
 const MIN_LONG = BigInt('-9223372036854775808');
 const LONG_WRAP = BigInt('18446744073709551616');
 const MAX_LONG = BigInt("9223372036854775807");
+const INT_WRAP = 4294967296;
 const BIG_SEVEN = BigInt(7);
 const BIG_7Fh = BigInt(0x7F);
 const BIG_0 = BigInt(0);
@@ -23,8 +27,9 @@ export class BinaryWriter {
   }
 
   protected _fd: number;
-  private readonly _encoding: BufferEncoding;
-  private readonly _leaveOpen: boolean;
+  private readonly _encoding: IEncoding;
+  private readonly _leaveOpen: boolean = false;
+  private _disposed: boolean = false;
 
   /**
    * Initializes a new instance of the BinaryWriter class based on the specified file and character encoding, and optionally leaves the file open.
@@ -32,15 +37,17 @@ export class BinaryWriter {
    * @param encoding The character encoding to use.
    * @param leaveOpen `true` to leave the file open after the BinaryWriter object is disposed; otherwise, `false`.
    */
-  constructor(output: number, encoding: BufferEncoding = 'utf8', leaveOpen = false) {
+  constructor(output: number, encoding: BufferEncoding | string | IEncoding = 'utf8', leaveOpen = false) {
     if (!Number.isSafeInteger(output)) throw TypeError('"output" must be a safe integer.');
     if (typeof encoding != 'string') throw TypeError('"encoding" must be a string.');
     if (typeof leaveOpen != 'boolean') throw TypeError('"leaveOpen" must be a boolean.');
-    Buffer.from('', encoding); // validate encoding
     if (!canWrite(output)) raise(ReferenceError('Output file is not writable.'), CSCode.FileNotWritable);
 
     this._fd = output;
-    this._encoding = encoding;
+    if (typeof encoding == 'string')
+      this._encoding = new Encoding(encoding);
+    else if (typeof encoding == 'object')
+      this._encoding = encoding as IEncoding;
     this._leaveOpen = leaveOpen;
   }
 
@@ -48,24 +55,36 @@ export class BinaryWriter {
    * Closes this writer and releases any system resources associated with the writer. Following a call to Close, any operations on the writer may raise exceptions.
    */
   close(): void {
-    if (this._leaveOpen)
-      fs.fdatasyncSync(this._fd);
-    else
-      fs.closeSync(this._fd);
+    if (!this._disposed) {
+      if (this._leaveOpen)
+        fs.fdatasyncSync(this._fd);
+      else
+        fs.closeSync(this._fd);
+      this._disposed = true;
+    }
+  }
+
+  private throwIfDisposed(): void {
+    if (this._disposed) {
+      raise(ReferenceError('This BinaryWriter instance is closed.'), CSCode.FileIsClosed);
+    }
   }
 
   /**
    * The async version of the close method.
    */
   async closeAsync(): Promise<void> {
-    if (this.constructor == BinaryWriter) {
-      if (this._leaveOpen)
-        await flushAsync(this._fd);
-      else
-        await closeAsync(this._fd);
-    } else {
-      // Since this is a derived BinaryWriter, delegate to whatever logic the derived implementation already has in close.
-      this.close();
+    if (!this._disposed) {
+      if (this.constructor == BinaryWriter) {
+        if (this._leaveOpen)
+          await flushAsync(this._fd);
+        else
+          fs.closeSync(this._fd);
+      } else {
+        // Since this is a derived BinaryWriter, delegate to whatever logic the derived implementation already has in close.
+        this.close();
+      }
+      this._disposed = true;
     }
   }
 
@@ -81,6 +100,7 @@ export class BinaryWriter {
    * Clears all buffers for this writer and causes any buffered data to be written to the underlying device.
    */
   flush(): void {
+    this.throwIfDisposed();
     fs.fdatasyncSync(this._fd);
   }
 
@@ -91,6 +111,7 @@ export class BinaryWriter {
    * @returns The position with the current file.
    */
   seek(offset: number, origin: number): number {
+    this.throwIfDisposed();
     return seekSync(this._fd, offset, origin);
   }
 
@@ -100,6 +121,7 @@ export class BinaryWriter {
    */
   writeBoolean(value: boolean): void {
     if (typeof value != 'boolean') throw TypeError('"value" must be a boolean.');
+    this.throwIfDisposed();
     let buffer = Buffer.allocUnsafe(1).fill(value ? 1 : 0);
     fs.writeSync(this._fd, buffer, 0, 1);
   }
@@ -110,6 +132,7 @@ export class BinaryWriter {
    */
   writeByte(value: number): void {
     if (!Number.isSafeInteger(value)) throw TypeError('"value" must be a safe integer.');
+    this.throwIfDisposed();
     writeByte(this._fd, value);
   }
 
@@ -120,6 +143,7 @@ export class BinaryWriter {
   writeSByte(value: number): void {
     if (!Number.isSafeInteger(value)) throw TypeError('"value" must be a safe integer.');
     if (value < -128 || value > 127) throw RangeError('"value" must be in range [-128:127].');
+    this.throwIfDisposed();
     writeByte(this._fd, value < 0 ? value + 256 : value);
   }
 
@@ -128,8 +152,9 @@ export class BinaryWriter {
    * @param buffer A byte array containing the data to write.
    */
   writeBuffer(buffer: Buffer): void {
-    if (Buffer.isBuffer(buffer)) throw TypeError('"buffer" must be a Buffer.');
-    fs.writeSync(this._fd, buffer);
+    if (!Buffer.isBuffer(buffer)) throw TypeError('"buffer" must be a Buffer.');
+    this.throwIfDisposed();
+    fs.writeSync(this._fd, buffer, 0, buffer.length);
   }
 
   /**
@@ -139,9 +164,10 @@ export class BinaryWriter {
    * @param count The number of bytes to read from `buffer` and to write to the file.
    */
   writeBufferEx(buffer: Buffer, index: number, count: number): void {
-    if (Buffer.isBuffer(buffer)) throw TypeError('"buffer" must be a Buffer.');
+    if (!Buffer.isBuffer(buffer)) throw TypeError('"buffer" must be a Buffer.');
     if (!Number.isSafeInteger(index)) throw TypeError('"index" must be a safe integer.');
     if (!Number.isSafeInteger(count)) throw TypeError('"count" must be a safe integer.');
+    this.throwIfDisposed();
     fs.writeSync(this._fd, buffer, index, count);
   }
 
@@ -153,7 +179,9 @@ export class BinaryWriter {
     if (typeof ch != 'string' || ch.length > 1) throw TypeError('"ch" must be a single character string.');
     if (isSurrogate(ch))
       throw RangeError('Surrogates are not allowed as single character string.');
-    fs.writeSync(this._fd, ch, null, this._encoding);
+    this.throwIfDisposed();
+    const bytes = this._encoding.encode(ch);
+    fs.writeSync(this._fd, bytes, 0, bytes.length);
   }
 
   /**
@@ -162,11 +190,12 @@ export class BinaryWriter {
    */
   writeChars(chars: char[]): void {
     if (!Array.isArray(chars)) throw TypeError('"chars" must be a single character array.');
-    const _chars = chars.join('');
+    const _chars = chars.join(''); // TODO: I don't know any better way
     if (chars.length != _chars.length)
       throw RangeError('Please use an actual single character array.');
-
-    fs.writeSync(this._fd, _chars, null, this._encoding);
+    this.throwIfDisposed();
+    const bytes = this._encoding.encode(_chars);
+    fs.writeSync(this._fd, bytes, 0, bytes.length);
   }
 
   /**
@@ -179,6 +208,7 @@ export class BinaryWriter {
     if (!Array.isArray(chars)) throw TypeError('"chars" must be a single character array.');
     if (!Number.isSafeInteger(index)) throw TypeError('"index" must be a safe integer.');
     if (!Number.isSafeInteger(count)) throw TypeError('"count" must be a safe integer.');
+    this.throwIfDisposed();
     let _chars = '';
     let end = index + count;
     if (end > chars.length)
@@ -186,10 +216,10 @@ export class BinaryWriter {
     for (let i = index; i < end; i++) {
       if (chars[i].length > 1)
         throw RangeError('Please use an actual single character array.');
-      _chars += chars[i];
+      _chars += chars[i];  // TODO: I don't know any better way
     }
-
-    fs.writeSync(this._fd, _chars, null, this._encoding);
+    const bytes = this._encoding.encode(_chars);
+    fs.writeSync(this._fd, bytes, 0, bytes.length);
   }
 
   /**
@@ -198,9 +228,10 @@ export class BinaryWriter {
    */
   writeDouble(value: number): void {
     if (typeof value != 'number') throw TypeError('"value" must be a number.');
+    this.throwIfDisposed();
     let buffer = Buffer.allocUnsafe(8);
     buffer.writeDoubleLE(value);
-    fs.writeSync(this._fd, buffer, 0);
+    fs.writeSync(this._fd, buffer, 0, buffer.length);
   }
 
   /** Not supported */
@@ -214,9 +245,10 @@ export class BinaryWriter {
    */
   writeInt16(value: number): void {
     if (!Number.isSafeInteger(value)) throw TypeError('"value" must be a safe integer.');
+    this.throwIfDisposed();
     let buffer = Buffer.allocUnsafe(2);
     buffer.writeInt16LE(value);
-    fs.writeSync(this._fd, buffer);
+    fs.writeSync(this._fd, buffer, 0, buffer.length);
   }
 
   /**
@@ -225,9 +257,10 @@ export class BinaryWriter {
    */
   writeUInt16(value: number): void {
     if (!Number.isSafeInteger(value)) throw TypeError('"value" must be a safe integer.');
+    this.throwIfDisposed();
     let buffer = Buffer.allocUnsafe(2);
     buffer.writeUInt16LE(value);
-    fs.writeSync(this._fd, buffer);
+    fs.writeSync(this._fd, buffer, 0, buffer.length);
   }
 
   /**
@@ -236,9 +269,10 @@ export class BinaryWriter {
    */
   writeInt32(value: number): void {
     if (!Number.isSafeInteger(value)) throw TypeError('"value" must be a safe integer.');
+    this.throwIfDisposed();
     let buffer = Buffer.allocUnsafe(4);
     buffer.writeInt32LE(value);
-    fs.writeSync(this._fd, buffer);
+    fs.writeSync(this._fd, buffer, 0, buffer.length);
   }
 
   /**
@@ -247,9 +281,10 @@ export class BinaryWriter {
    */
   writeUInt32(value: number): void {
     if (!Number.isSafeInteger(value)) throw TypeError('"value" must be a safe integer.');
+    this.throwIfDisposed();
     let buffer = Buffer.allocUnsafe(4);
     buffer.writeUInt32LE(value);
-    fs.writeSync(this._fd, buffer);
+    fs.writeSync(this._fd, buffer, 0, buffer.length);
   }
 
   /**
@@ -258,9 +293,10 @@ export class BinaryWriter {
    */
   writeInt64(value: bigint): void {
     if (typeof value != 'bigint') throw TypeError('"value" must be a bigint.');
+    this.throwIfDisposed();
     let buffer = Buffer.allocUnsafe(8);
     buffer.writeBigInt64LE(value);
-    fs.writeSync(this._fd, buffer);
+    fs.writeSync(this._fd, buffer, 0, buffer.length);
   }
 
   /**
@@ -269,9 +305,10 @@ export class BinaryWriter {
    */
   writeUInt64(value: bigint): void {
     if (typeof value != 'bigint') throw TypeError('"value" must be a bigint.');
+    this.throwIfDisposed();
     let buffer = Buffer.allocUnsafe(8);
     buffer.writeBigUInt64LE(value);
-    fs.writeSync(this._fd, buffer);
+    fs.writeSync(this._fd, buffer, 0, buffer.length);
   }
 
   /**
@@ -280,21 +317,30 @@ export class BinaryWriter {
    */
   writeSingle(value: number): void {
     if (typeof value != 'number') throw TypeError('"value" must be a number.');
+    this.throwIfDisposed();
     let buffer = Buffer.allocUnsafe(4);
     buffer.writeFloatLE(value);
-    fs.writeSync(this._fd, buffer);
+    fs.writeSync(this._fd, buffer, 0, buffer.length);
   }
 
   /**
    * Writes a length-prefixed string to this file in the current encoding of the BinaryWriter, and advances the current position of the file in accordance with the encoding used and the specific characters being written to the file.
    * @param value The value to write.
    */
-  writeString(value: string): void {
+  writeString(value: string, mode?: number): void {
     if (typeof value != 'string') throw TypeError('"value" must be a string.');
+    this.throwIfDisposed();
 
-    let totalBytes = Buffer.byteLength(value, this._encoding);
-    this.write7BitEncodedInt(totalBytes);
-    fs.writeSync(this._fd, value, null, this._encoding);
+    if (mode != CStr && mode != RawStr) {
+      let totalBytes = this._encoding.byteLength(value);
+      this.write7BitEncodedInt(totalBytes);
+    }
+    const bytes = this._encoding.encode(value);
+    fs.writeSync(this._fd, bytes, 0, bytes.length);
+    if (mode == CStr) {
+      const nullBytes = this._encoding.encode('\0');
+      fs.writeSync(this._fd, nullBytes, 0, nullBytes.length);
+    }
   }
 
   /**
@@ -303,9 +349,10 @@ export class BinaryWriter {
    */
   write7BitEncodedInt(value: number): void {
     if (!Number.isSafeInteger(value)) throw TypeError('"value" must be a safe integer.');
-    if (value < -2147483648 || value > 2147483647) throw RangeError('"value" must be in range [-2147483648:2147483647].')
+    if (value < INT_MIN || value > INT_MAX) throw RangeError(`"value" must be in range [${INT_MIN}:${INT_MAX}}].`)
+    this.throwIfDisposed();
 
-    let uValue = value < 0 ? value + 4294967296 : value;
+    let uValue = value < 0 ? value + INT_WRAP : value;
 
     // Write out an int 7 bits at a time. The high bit of the byte,
     // when on, tells reader to continue reading more bytes.
@@ -325,6 +372,7 @@ export class BinaryWriter {
   write7BitEncodedInt64(value: bigint): void {
     if (typeof value != 'bigint') throw TypeError('"value" must be a bigint.');
     if (value < MIN_LONG || value > MAX_LONG) throw RangeError(`"value" must be in range [${MIN_LONG}:${MAX_LONG}].`);
+    this.throwIfDisposed();
 
     let uValue = value < BIG_0 ? value + LONG_WRAP : value;
 
