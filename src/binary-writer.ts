@@ -208,6 +208,14 @@ export class BinaryWriter {
     if (!Array.isArray(chars)) throw TypeError('"chars" must be a single character array.');
     if (!Number.isSafeInteger(index)) throw TypeError('"index" must be a safe integer.');
     if (!Number.isSafeInteger(count)) throw TypeError('"count" must be a safe integer.');
+    if (index < 0)
+      throw RangeError('"index" must be a non-negative number.');
+    if (index > chars.length)
+      throw RangeError('"index" must not be greater than chars\'s length.');
+    if (count < 0)
+      throw RangeError('"count" must be a non-negative number.');
+    if (index + count > chars.length)
+      throw RangeError('"index + count" must not be greater than chars\' length.');
     this.throwIfDisposed();
     let _chars = '';
     let end = index + count;

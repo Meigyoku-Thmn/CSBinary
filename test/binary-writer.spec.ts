@@ -55,7 +55,7 @@ describe('BinaryReader Tests', () => {
   it('Encoding Ctor And Write Tests', () => {
     let testSuite = [
       ['utf8', "This is UTF8\u00FF"],
-      // ['utf16be', "This is BigEndianUnicode\u00FF"],
+      ['utf16be', "This is BigEndianUnicode\u00FF"],
       ['utf16le', "This is Unicode\u00FF"],
     ];
     for (let [encoding, testString] of testSuite) {

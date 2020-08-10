@@ -22,7 +22,7 @@
     "@types/mock-require": "^2.0.0",
     "@types/node": "^14.0.14",
     "lodash": "^4.17.19",
-    "memfs": "^3.2.0",
+    "memfs": "github:Meigyoku-Thmn/memfs#dev",
     "mocha": "^8.0.1",
     "mock-require": "^3.0.3",
     "nyc": "^15.1.0",

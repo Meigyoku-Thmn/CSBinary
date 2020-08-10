@@ -105,6 +105,9 @@ describe('BinaryReader | Write Byte Char Tests', () => {
   /// </summary>
   it.skip('Write Char 2', () => {
     let stream = openEmtpyFile();
+    // string name = iso-2022-jp, codepage = 50220 (original test used a code page number).
+    // taken from https://docs.microsoft.com/en-us/windows/desktop/Intl/code-page-identifiers
+
     let codepageName = 'iso-2022-jp' as BufferEncoding;
     let writer = new BinaryWriter(stream, codepageName, true);
 
@@ -237,7 +240,7 @@ describe('BinaryReader | Write Byte Char Tests', () => {
     dr2.close();
   });
 
-  it.skip('Write Buffer | Negative', () => {
+  it('Write Buffer | Negative', () => {
     let iArrInvalidValues = [-1, -2, -100, -1000, -10000, -100000, -1000000, -10000000, -100000000, -1000000000, INT_MIN, SHORT_MIN];
     let iArrLargeValues = [INT_MAX, INT_MAX - 1, Math.floor(INT_MAX / 2), Math.floor(INT_MAX / 10), Math.floor(INT_MAX / 100)];
     let bArr = Buffer.alloc(0);
@@ -357,7 +360,7 @@ describe('BinaryReader | Write Byte Char Tests', () => {
     dr2.close();
   });
 
-  it.skip('Write Char Array | Negative', () => {
+  it('Write Char Array | Negative', () => {
     let iArrInvalidValues = [-1, -2, -100, -1000, -10000, -100000, -1000000, -10000000, -100000000, -1000000000, INT_MIN, SHORT_MIN];
     let iArrLargeValues = [INT_MAX, INT_MAX - 1, Math.floor(INT_MAX / 2), Math.floor(INT_MAX / 10), Math.floor(INT_MAX / 100)];
     let chArr = new Array<string>(1000);
@@ -380,9 +383,9 @@ describe('BinaryReader | Write Byte Char Tests', () => {
 
     for (let iLoop = 0; iLoop < iArrInvalidValues.length; iLoop++) {
       // [] ArgumentOutOfRange for negative offset
-      assert.throws(() => dw2.writeCharsEx(chArr, iArrInvalidValues[iLoop], 0), ReferenceError);
+      assert.throws(() => dw2.writeCharsEx(chArr, iArrInvalidValues[iLoop], 0), RangeError);
       // [] negative count.
-      assert.throws(() => dw2.writeCharsEx(chArr, 0, iArrInvalidValues[iLoop]), ReferenceError);
+      assert.throws(() => dw2.writeCharsEx(chArr, 0, iArrInvalidValues[iLoop]), RangeError);
     }
     dw2.close();
 
@@ -390,9 +393,9 @@ describe('BinaryReader | Write Byte Char Tests', () => {
     dw2 = new BinaryWriter(mstr);
     for (let iLoop = 0; iLoop < iArrLargeValues.length; iLoop++) {
       // [] Offset out of range
-      assert.throws(() => dw2.writeCharsEx(chArr, iArrLargeValues[iLoop], 0), ReferenceError);
+      assert.throws(() => dw2.writeCharsEx(chArr, iArrLargeValues[iLoop], 0), RangeError);
       // [] Invalid count value
-      assert.throws(() => dw2.writeCharsEx(chArr, 0, iArrLargeValues[iLoop]), ReferenceError);
+      assert.throws(() => dw2.writeCharsEx(chArr, 0, iArrLargeValues[iLoop]), RangeError);
     }
     dw2.close();
   });
