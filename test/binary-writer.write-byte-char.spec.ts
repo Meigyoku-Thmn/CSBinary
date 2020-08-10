@@ -101,19 +101,19 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
 
   /// <summary>
   /// Cases Tested:
-  /// Writing bytes casted to chars and using a different encoding; iso-2022-jp.
+  /// Writing bytes casted to chars and using a different encoding; Windows932.
   /// </summary>
-  it.skip('Write Char 2', () => {
+  it('Write Char 2', () => {
     let stream = openEmtpyFile();
-    // string name = iso-2022-jp, codepage = 50220 (original test used a code page number).
-    // taken from https://docs.microsoft.com/en-us/windows/desktop/Intl/code-page-identifiers
+    // string name = Windows932, codepage = 932
+    // reference: https://docs.microsoft.com/en-us/windows/desktop/Intl/code-page-identifiers
 
-    let codepageName = 'iso-2022-jp' as BufferEncoding;
+    let codepageName = 'Windows932' as BufferEncoding;
     let writer = new BinaryWriter(stream, codepageName, true);
 
     let bytes = Buffer.from([0x01, 0x02, 0x03, 0x04, 0x05]);
 
-    writer.writeChar(String.fromCharCode(0x30ca));
+    writer.writeChar(String.fromCharCode(0x30ca)); // The katakana character 'na'
     writer.writeBuffer(bytes);
     writer.flush();
     writer.writeChar('\0');
@@ -124,8 +124,7 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
     assert.equal(japanese.charCodeAt(0), 0x30ca);
     let readBytes = reader.readBytes(5);
     for (let i = 0; i < 5; i++) {
-      //We pretty much don't expect this to work
-      assert.notEqual(bytes[i], readBytes[i]);
+      assert.equal(bytes[i], readBytes[i]);
     }
 
     writer.close();
