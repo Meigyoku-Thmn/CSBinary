@@ -4,20 +4,14 @@ import { writeByte, openNullDevice, canWrite, flushAsync } from './utils/file'
 import { isSurrogate } from './utils/string';
 import { raise } from './utils/error';
 import { CSCode } from './constants/error';
-import { INT_MIN, INT_MAX } from './constants/number';
+import {
+  INT_MIN, INT_MAX, LONG_MIN, LONG_MAX, MASK_8_BIT, LONG_WRAP, BIG_0, BIG_7Fh, BIG_SEVEN, INT_WRAP
+} from './constants/number';
 import { IEncoding, Encoding } from './encoding';
 import { CStr, RawStr } from './constants/mode';
 
 type char = string;
 
-const MIN_LONG = BigInt('-9223372036854775808');
-const LONG_WRAP = BigInt('18446744073709551616');
-const MAX_LONG = BigInt("9223372036854775807");
-const INT_WRAP = 4294967296;
-const BIG_SEVEN = BigInt(7);
-const BIG_7Fh = BigInt(0x7F);
-const BIG_0 = BigInt(0);
-const MASK_8_BIT = 0xFF;
 /**
  * Writes primitive types in binary to a file and supports writing strings in a specific encoding.
  */
@@ -379,7 +373,7 @@ export class BinaryWriter {
    */
   write7BitEncodedInt64(value: bigint): void {
     if (typeof value != 'bigint') throw TypeError('"value" must be a bigint.');
-    if (value < MIN_LONG || value > MAX_LONG) throw RangeError(`"value" must be in range [${MIN_LONG}:${MAX_LONG}].`);
+    if (value < LONG_MIN || value > LONG_MAX) throw RangeError(`"value" must be in range [${LONG_MIN}:${LONG_MAX}].`);
     this.throwIfDisposed();
 
     let uValue = value < BIG_0 ? value + LONG_WRAP : value;

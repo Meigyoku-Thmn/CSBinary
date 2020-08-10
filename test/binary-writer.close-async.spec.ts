@@ -9,7 +9,7 @@ const { SEEK_CUR } = constants;
 let BinaryWriter = _BinaryWriter;
 let seekSync = _seekSync;
 
-describe('BinaryReader | Close Asyncs Tests', () => {
+describe('BinaryWriter | Close Asyncs Tests', () => {
   before(() => {
     prepareMock();
     ({ BinaryWriter, seekSync } = reloadCriticalModules());

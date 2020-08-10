@@ -29,3 +29,10 @@ export const SINGLE_EPSILON = 1.401298464324817E-45;
 export const DOUBLE_MIN = -Number.MAX_VALUE;
 export const DOUBLE_MAX = Number.MAX_VALUE;
 export const DOUBLE_EPSILON = Number.MIN_VALUE;
+
+export const LONG_WRAP = BigInt('18446744073709551616');
+export const INT_WRAP = 4294967296;
+export const BIG_SEVEN = BigInt(7);
+export const BIG_7Fh = BigInt(0x7F);
+export const BIG_0 = BigInt(0);
+export const MASK_8_BIT = 0xFF;

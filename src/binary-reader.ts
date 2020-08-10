@@ -6,11 +6,10 @@ import { raise } from './utils/error';
 import { CSCode } from './constants/error';
 import { IEncoding, Encoding, IDecoder } from './encoding';
 import { SEEK_SET, SEEK_CUR } from './constants/mode';
+import { BIG_0, BIG_7Fh, LONG_MAX, LONG_WRAP } from './constants/number';
 
 type char = string;
 
-const BIG_7Fh = BigInt(0x7F);
-const BIG_0 = BigInt(0);
 const MaxCharBytesSize = 128;
 const BufferSize = 16;
 /**
@@ -540,6 +539,8 @@ export class BinaryReader {
     // This means that we can read the first 4 bytes without
     // worrying about integer overflow.
 
+    // bitwise OR operation's result is always signed, so there is no need to manually cast to signed number
+
     const MaxBytesWithoutOverflow = 4;
     for (let shift = 0; shift < MaxBytesWithoutOverflow * 7; shift += 7) { // TODO: check 
       // ReadByte handles end of file cases for us.
@@ -601,6 +602,6 @@ export class BinaryReader {
     }
 
     result |= BigInt(byteReadJustNow) << BigInt(MaxBytesWithoutOverflow * 7);
-    return result;
+    return result > LONG_MAX ? result - LONG_WRAP : result;
   }
 }

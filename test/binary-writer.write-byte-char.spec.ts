@@ -14,7 +14,7 @@ let BinaryReader = _BinaryReader;
 let seekSync = _seekSync;
 let fs = _fs;
 
-describe('BinaryReader | Write Byte Char Tests', () => {
+describe('BinaryWriter | Write Byte Char Tests', () => {
   before(() => {
     prepareMock();
     ({ BinaryReader, BinaryWriter, seekSync, fs } = reloadCriticalModules());

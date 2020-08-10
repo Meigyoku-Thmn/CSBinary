@@ -14,7 +14,7 @@ let BinaryWriter = _BinaryWriter;
 let seekSync = _seekSync;
 let fs = _fs;
 
-describe('BinaryReader Tests', () => {
+describe('BinaryWriter Tests', () => {
   before(() => {
     prepareMock();
     ({ BinaryReader, BinaryWriter, seekSync, fs } = reloadCriticalModules());
@@ -239,6 +239,7 @@ describe('BinaryReader Tests', () => {
   it.skip('Flush Tests', () => {
     // [] Check that flush updates the underlying stream
     let memstr2 = openEmtpyFile();
+    // they are missing a buffered stream here
     let bw2 = new BinaryWriter(memstr2);
     let str = "HelloWorld";
     let expectedLength = str.length + 1; // 1 for 7-bit encoded length
@@ -248,11 +249,11 @@ describe('BinaryReader Tests', () => {
     assert.equal(fs.fstatSync(memstr2).size, expectedLength);
     bw2.close();
 
-    // [] Flushing a closed writer may throw an exception depending on the underlying stream
+    // [] Flushing a closed writer may throw an exception
     memstr2 = openEmtpyFile();
     bw2 = new BinaryWriter(memstr2);
     bw2.close();
-    // bw2.flush(); // weird test from Microsoft?
+    assert.throws(() => bw2.flush(), { code: CSCode.FileIsClosed });
   });
 
   it('Close Tests', () => {

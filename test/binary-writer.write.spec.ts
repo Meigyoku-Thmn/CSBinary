@@ -12,7 +12,7 @@ let BinaryReader = _BinaryReader;
 let BinaryWriter = _BinaryWriter;
 let seekSync = _seekSync;
 
-describe('BinaryReader | Write Tests', () => {
+describe('BinaryWriter | Write Tests', () => {
   before(() => {
     prepareMock();
     ({ BinaryReader, BinaryWriter, seekSync } = reloadCriticalModules());
@@ -101,7 +101,7 @@ describe('BinaryReader | Write Tests', () => {
     writeTest(i64Arr, (bw, s) => bw.writeInt64(s), br => br.readInt64());
   });
 
-  it.skip('Write 7 Bit Encoded Int64', () => {
+  it('Write 7 Bit Encoded Int64', () => {
     let i64Arr = [
       LONG_MIN, LONG_MAX, 0, -10000, 10000, -50, 50,
       0, -1, -101,
