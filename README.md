@@ -48,7 +48,7 @@ Mapping table of BinaryReader's methods from .NET to NodeJS:
 | BinaryReader(Stream input, Encoding encoding, bool leaveOpen) | constructor(input: number, encoding: BufferEncoding \| string \| IEncoding = 'utf8', leaveOpen = false)               |
 | Stream BaseStream { get; }                                    | get baseFd(): number |
 | void Close()                                                  | close(): void |
-|                                                               | seek(offset: number, origin: number): number |
+|                                                               | seek(offset: number, origin: SeekOrigin): number |
 | int PeekChar()                                                | peekChar(): number
 | int Read()                                                    | readCharCode(): number
 | byte ReadByte()                                               | readByte(): number
@@ -83,7 +83,7 @@ Mapping table of BinaryWriter's method from .NET to NodeJS:
 | void Close()                                                   | close(): void
 |                                                                | async closeAsync(): Promise\<void\>
 | void Flush()                                                   | flush(): void
-| long Seek(int offset, SeekOrigin origin)                       | seek(offset: number, origin: number): number
+| long Seek(int offset, SeekOrigin origin)                       | seek(offset: number, origin: SeekOrigin): number
 | void Write(bool value)                                         | writeBoolean(value: boolean): void
 | void Write(byte value)                                         | writeByte(value: number): void
 | void Write(sbyte value)                                        | writeSByte(value: number): void
