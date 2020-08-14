@@ -4,13 +4,13 @@ export class SubArray<T> {
     if (!Number.isSafeInteger(start)) throw TypeError('"number" must be a safe integer.');
     if (!Number.isSafeInteger(end)) throw TypeError('"end" must be a safe integer.');
     if (start < 0)
-      throw Error('"start" must be a non-negative number.');
+      throw RangeError('"start" must be a non-negative number.');
     if (start > arr.length)
-      throw Error('"start" goes out-of-bound.');
+      throw RangeError('"start" goes out-of-bound.');
     if (start > end)
-      throw Error('"start" must not be bigger than end.');
+      throw RangeError('"start" must not be bigger than end.');
     if (end > arr.length)
-      throw Error('"end" goes out-of-bound.');
+      throw RangeError('"end" goes out-of-bound.');
 
     return new SubArray(arr, start, end);
   }

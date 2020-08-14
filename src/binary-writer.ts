@@ -8,7 +8,7 @@ import {
   INT_MIN, INT_MAX, LONG_MIN, LONG_MAX, MASK_8_BIT, LONG_WRAP, BIG_0, BIG_7Fh, BIG_SEVEN, INT_WRAP
 } from './constants/number';
 import { IEncoding, Encoding } from './encoding';
-import { CStr, RawStr } from './constants/mode';
+import { StringMode } from './constants/mode';
 
 type char = string;
 
@@ -28,12 +28,12 @@ export class BinaryWriter {
   /**
    * Initializes a new instance of the BinaryWriter class based on the specified file and character encoding, and optionally leaves the file open.
    * @param output The output file.
-   * @param encoding The character encoding to use.
+   * @param encoding The character encoding to use, or an object implementing the IEncoding interface. Default to `'utf8'`
    * @param leaveOpen `true` to leave the file open after the BinaryWriter object is disposed; otherwise, `false`.
    */
   constructor(output: number, encoding: BufferEncoding | string | IEncoding = 'utf8', leaveOpen = false) {
-    if (!Number.isSafeInteger(output)) throw TypeError('"output" must be a safe integer.');
-    if (typeof encoding != 'string') throw TypeError('"encoding" must be a string.');
+    if (!Number.isSafeInteger(output)) throw TypeError('"output" must be a valid file descriptor.');
+    if (typeof encoding != 'string') throw TypeError('"encoding" must be a string or an instance that implements IEncoding.');
     if (typeof leaveOpen != 'boolean') throw TypeError('"leaveOpen" must be a boolean.');
     if (!canWrite(output)) raise(ReferenceError('Output file is not writable.'), CSCode.FileNotWritable);
 
@@ -101,7 +101,7 @@ export class BinaryWriter {
   /**
    * Sets the position within the current file.
    * @param offset A byte offset relative to `origin`.
-   * @param origin A field indicating the reference point from which the new position is to be obtained. Expected SEEK_SET, SEEK_CUR and SEEK_END value exposed from C header file.
+   * @param origin A field indicating the reference point from which the new position is to be obtained. Expected SEEK_SET, SEEK_CUR and SEEK_END that CSBinary exports.
    * @returns The position with the current file.
    */
   seek(offset: number, origin: number): number {
@@ -328,18 +328,19 @@ export class BinaryWriter {
   /**
    * Writes a length-prefixed string to this file in the current encoding of the BinaryWriter, and advances the current position of the file in accordance with the encoding used and the specific characters being written to the file.
    * @param value The value to write.
+   * @param mode CStr to write C-String, RawStr to write the string as-is without null-terminated or prefixed-length
    */
-  writeString(value: string, mode?: number): void {
+  writeString(value: string, mode?: StringMode): void {
     if (typeof value != 'string') throw TypeError('"value" must be a string.');
     this.throwIfDisposed();
 
-    if (mode != CStr && mode != RawStr) {
+    if (mode != StringMode.CStr && mode != StringMode.RawStr) {
       let totalBytes = this._encoding.byteLength(value);
       this.write7BitEncodedInt(totalBytes);
     }
     const bytes = this._encoding.encode(value);
     fs.writeSync(this._fd, bytes, 0, bytes.length);
-    if (mode == CStr) {
+    if (mode == StringMode.CStr) {
       const nullBytes = this._encoding.encode('\0');
       fs.writeSync(this._fd, nullBytes, 0, nullBytes.length);
     }

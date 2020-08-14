@@ -19,7 +19,6 @@
     "build/*",
     "dist/*",
     "types/*",
-    "test/*",
-    "test*"
+    "test/*"
   ]
 }

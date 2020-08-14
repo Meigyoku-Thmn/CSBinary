@@ -10,7 +10,8 @@
     "config": "node-gyp configure",
     "build": "node-gyp build && tsc",
     "rebuild": "node-gyp rebuild && tsc -b --clean && rimraf types && tsc",
-    "clean": "node-gyp clean && rimraf dist && rimraf types && rimraf coverage"
+    "clean": "node-gyp clean && rimraf dist && rimraf types && rimraf coverage",
+    "postinstall": "echo Hello world"
   },
   "author": "",
   "license": "ISC",
@@ -23,10 +24,9 @@
     "@types/node": "^14.0.14",
     "lodash": "^4.17.19",
     "memfs": "github:Meigyoku-Thmn/memfs#dev",
-    "mocha": "^8.0.1",
+    "mocha": "^8.1.1",
     "mock-require": "^3.0.3",
     "nyc": "^15.1.0",
-    "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "ts-mocha": "^7.0.0",
     "ts-node": "^8.10.2",

@@ -34,7 +34,7 @@ export class BinaryReader {
    */
   constructor(input: number, encoding: BufferEncoding | string | IEncoding = 'utf8', leaveOpen = false) {
     if (!Number.isSafeInteger(input)) throw TypeError('"input" must be a safe integer.');
-    if (typeof encoding != 'string') throw TypeError('"encoding" must be a string.');
+    if (typeof encoding != 'string') throw TypeError('"encoding" must be a string or an instance that implements IEncoding.');
     if (typeof leaveOpen != 'boolean') throw TypeError('"leaveOpen" must be a boolean.');
 
     this._canSeek = canSeek(input);
@@ -77,6 +77,17 @@ export class BinaryReader {
     if (this._disposed) {
       raise(ReferenceError('This BinaryReader instance is closed.'), CSCode.FileIsClosed);
     }
+  }
+
+  /**
+   * Sets the position within the current file.
+   * @param offset A byte offset relative to `origin`.
+   * @param origin A field indicating the reference point from which the new position is to be obtained. Expected SEEK_SET, SEEK_CUR and SEEK_END that CSBinary exports.
+   * @returns The position with the current file.
+   */
+  seek(offset: number, origin: number): number {
+    this.throwIfDisposed();
+    return seekSync(this._fd, offset, origin);
   }
 
   /**

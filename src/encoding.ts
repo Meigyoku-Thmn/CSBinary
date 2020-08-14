@@ -4,9 +4,9 @@ import { CSCode } from './constants/error';
 
 export interface IEncoding {
   getDecoder(): IDecoder;
-  getEncoder(): IEncoder;
+  getEncoder?(): IEncoder; // Unused for now
   byteLength(str: string): number;
-  decode(buf: Buffer): string;
+  decode?(buf: Buffer): string; // Unused for now
   encode(str: string): Buffer;
 }
 

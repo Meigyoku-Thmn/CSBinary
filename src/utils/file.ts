@@ -1,7 +1,8 @@
 import fs from 'fs';
 import { seekSync, constants, fcntlSync } from 'fs-ext'
-const { SEEK_CUR, O_ACCMODE, O_WRONLY, O_RDWR } = constants as any;
+const { O_ACCMODE, O_WRONLY, O_RDWR } = constants as any;
 import { getFdAccessMask, AccessMask } from '../addon';
+import { SEEK_CUR } from '../constants/mode';
 
 const poxisPlatforms = new Set<typeof process.platform>([
   'aix', 'android', 'cygwin', 'darwin', 'freebsd', 'linux', 'netbsd', 'openbsd', 'sunos']);
