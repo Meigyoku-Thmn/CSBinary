@@ -1,4 +1,4 @@
-#include <napi.h>
+#include <nan.h>
 #ifdef _WIN32
 #include <uv.h>
 #include <Windows.h>
@@ -28,31 +28,27 @@ typedef struct _FILE_ACCESS_INFORMATION {
 
 decltype(&NtQueryInformationFile) QueryInformationFile = NULL;
 
-Napi::Value GetFdAccessMask(const Napi::CallbackInfo& info) {
-   Napi::Env env = info.Env();
-
+NAN_METHOD(GetFdAccessMask) {
    if (QueryInformationFile == NULL) {
-      Napi::TypeError::New(env,
-         "This module has failed to import the NtQueryInformationFile function, there is nothing it can do.")
-         .ThrowAsJavaScriptException();
-      return env.Null();
+      return Nan::ThrowError(
+         Nan::TypeError("This module has failed to import the NtQueryInformationFile function, there is nothing I can do."));
    }
 
    if (info.Length() < 1) {
-      Napi::TypeError::New(env, "Expected one argument of number type.").ThrowAsJavaScriptException();
-      return env.Null();
+      return Nan::ThrowError(
+         Nan::TypeError("Expected one argument of number type."));
    }
 
-   if (!info[0].IsNumber()) {
-      Napi::TypeError::New(env, "Must provider a number as file descriptor.").ThrowAsJavaScriptException();
-      return env.Null();
+   if (!info[0]->IsNumber()) {
+      return Nan::ThrowError(
+         Nan::TypeError("Must provider a number as file descriptor."));
    }
 
-   int fd = info[0].As<Napi::Number>().Int32Value();
+   int fd = info[0].As<v8::Int32>()->Value();
    HANDLE fh = (HANDLE)uv_get_osfhandle(fd);
    if (fh == INVALID_HANDLE_VALUE) {
-      Napi::Error::New(env, "Bad file descriptor.").ThrowAsJavaScriptException();
-      return env.Null();
+      return Nan::ThrowError(
+         Nan::Error("Bad file descriptor."));
    }
 
    IO_STATUS_BLOCK statusBlock;
@@ -62,11 +58,10 @@ Napi::Value GetFdAccessMask(const Napi::CallbackInfo& info) {
       fh, &statusBlock, &accessInfo, sizeof(FILE_ACCESS_INFORMATION), (FILE_INFORMATION_CLASS)8);
 
    if (status == S_OK) {
-      return Napi::Number::New(env, accessInfo.AccessFlags);
+      info.GetReturnValue().Set((UINT32)accessInfo.AccessFlags);
    } else {
-      Napi::Error::New(env, "NtQueryInformationFile returned an error code: 0x" + toString(status, hex))
-         .ThrowAsJavaScriptException();
-      return env.Null();
+      return Nan::ThrowError(
+         Nan::Error(("NtQueryInformationFile returned an error code: 0x" + toString(status, hex)).c_str()));
    }
 }
 
@@ -77,12 +72,11 @@ FARPROC fnBind(const char* dllName, const char* procName) {
 }
 #endif
 
-Napi::Object Init(Napi::Env env, Napi::Object exports) {
+NAN_MODULE_INIT(Init) {
 #ifdef _WIN32
    QueryInformationFile = (decltype(&NtQueryInformationFile))fnBind("ntdll.dll", "NtQueryInformationFile");
-   exports.Set(Napi::String::New(env, "getFdAccessMask"), Napi::Function::New(env, GetFdAccessMask));
+   Nan::Export(target, "getFdAccessMask", GetFdAccessMask);
 #endif
-   return exports;
 }
 
-NODE_API_MODULE(addon, Init)
+NODE_MODULE(addon, Init)
