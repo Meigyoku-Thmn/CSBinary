@@ -30,7 +30,6 @@
     "@types/lodash": "^4.14.157",
     "@types/mocha": "^7.0.2",
     "@types/mock-require": "^2.0.0",
-    "@types/node": "^14.0.14",
     "lodash": "^4.17.19",
     "memfs": "github:Meigyoku-Thmn/memfs#dev",
     "mocha": "^8.1.1",
@@ -42,6 +41,7 @@
     "typescript": "^3.9.6"
   },
   "dependencies": {
+    "@types/node": "^14.0.14",
     "bindings": "^1.5.0",
     "fs-ext": "github:Meigyoku-Thmn/node-fs-ext#master",
     "iconv-lite": "github:Meigyoku-Thmn/iconv-lite#master",
