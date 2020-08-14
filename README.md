@@ -33,7 +33,7 @@ reader.close();
 # Install
 There is no package on npm yet.
 ```bash
-npm i --save github:Meigyoku-Thmn/CSBinary#v1.0.0
+npm i --save github:Meigyoku-Thmn/CSBinary#v1.1.0
 ```
 
 # Usage
