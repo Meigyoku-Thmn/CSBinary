@@ -2,7 +2,7 @@ import fs from 'fs';
 import { seekSync, constants, fcntlSync } from 'fs-ext'
 const { O_ACCMODE, O_WRONLY, O_RDWR } = constants as any;
 import { getFdAccessMask, AccessMask } from '../addon';
-import { SEEK_CUR } from '../constants/mode';
+import { SeekOrigin } from '../constants/mode';
 
 const poxisPlatforms = new Set<typeof process.platform>([
   'aix', 'android', 'cygwin', 'darwin', 'freebsd', 'linux', 'netbsd', 'openbsd', 'sunos']);
@@ -24,7 +24,7 @@ export function writeByte(fd: number, value: number): void {
 }
 
 export function tell(fd: number): number {
-  return seekSync(fd, 0, SEEK_CUR);
+  return seekSync(fd, 0, SeekOrigin.Current);
 }
 
 export function canSeek(fd: number): boolean {

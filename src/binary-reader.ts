@@ -5,7 +5,7 @@ import { SubArray } from './utils/array';
 import { raise } from './utils/error';
 import { CSCode } from './constants/error';
 import { IEncoding, Encoding, IDecoder } from './encoding';
-import { SEEK_SET, SEEK_CUR } from './constants/mode';
+import { SeekOrigin } from './constants/mode';
 import { BIG_0, BIG_7Fh, LONG_MAX, LONG_WRAP } from './constants/number';
 
 type char = string;
@@ -82,10 +82,10 @@ export class BinaryReader {
   /**
    * Sets the position within the current file.
    * @param offset A byte offset relative to `origin`.
-   * @param origin A field indicating the reference point from which the new position is to be obtained. Expected SEEK_SET, SEEK_CUR and SEEK_END that CSBinary exports.
+   * @param origin A field indicating the reference point from which the new position is to be obtained.
    * @returns The position with the current file.
    */
-  seek(offset: number, origin: number): number {
+  seek(offset: number, origin: SeekOrigin): number {
     this.throwIfDisposed();
     return seekSync(this._fd, offset, origin);
   }
@@ -103,7 +103,7 @@ export class BinaryReader {
 
     var origPos = tell(this._fd);
     let ch = this.readCharCode();
-    seekSync(this._fd, origPos, SEEK_SET);
+    seekSync(this._fd, origPos, SeekOrigin.Begin);
     return ch;
   }
 
@@ -159,7 +159,7 @@ export class BinaryReader {
         // Handle surrogate char
 
         if (err.code == CSCode.SurrogateCharHit && this._canSeek) {
-          seekSync(this._fd, posSav - tell(this._fd), SEEK_CUR);
+          seekSync(this._fd, posSav - tell(this._fd), SeekOrigin.Current);
         }
         // else - we can't do much here
 

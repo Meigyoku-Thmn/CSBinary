@@ -8,7 +8,7 @@ import {
   INT_MIN, INT_MAX, LONG_MIN, LONG_MAX, MASK_8_BIT, LONG_WRAP, BIG_0, BIG_7Fh, BIG_SEVEN, INT_WRAP
 } from './constants/number';
 import { IEncoding, Encoding } from './encoding';
-import { StringMode } from './constants/mode';
+import { StringMode, SeekOrigin } from './constants/mode';
 
 type char = string;
 
@@ -101,10 +101,10 @@ export class BinaryWriter {
   /**
    * Sets the position within the current file.
    * @param offset A byte offset relative to `origin`.
-   * @param origin A field indicating the reference point from which the new position is to be obtained. Expected SEEK_SET, SEEK_CUR and SEEK_END that CSBinary exports.
+   * @param origin A field indicating the reference point from which the new position is to be obtained.
    * @returns The position with the current file.
    */
-  seek(offset: number, origin: number): number {
+  seek(offset: number, origin: SeekOrigin): number {
     this.throwIfDisposed();
     return seekSync(this._fd, offset, origin);
   }

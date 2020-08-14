@@ -1,6 +1,6 @@
 import assert from 'assert';
 import { prepareMock, tearDownMock, reloadCriticalModules, flushCriticalModules } from './mock-prepare';
-import { openEmtpyFile, getMockFileContent, openLastEmptyFile } from './utils';
+import { openEmtpyFile } from './utils';
 import { constants, seekSync as _seekSync } from 'fs-ext';
 import { BinaryReader as _BinaryReader } from '../src/binary-reader';
 import { BinaryWriter as _BinaryWriter } from '../src/binary-writer';
