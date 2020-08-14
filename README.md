@@ -108,7 +108,7 @@ Mapping table of BinaryWriter's method from .NET to NodeJS:
 You can provide your own encoding by implementing the IEncoding interface, then pass your encoding instance to BinaryReader and BinaryWriter's constructor. You don't have to implement everything in the IEncoding interface.
 
 # Limitations
-Dispose Pattern and Decimal are not supported.<br>
-File Buffering is not supported (please don't confuse this with Buffer class in NodeJS, they are different things).
-There is no memory optimization for writing overly long string in BinaryWriter, so to avoid massive memory allocation you should not write such string.
-writeChars and writeCharsEx will concat the array before writing, this may be slow on your system, I'm still not sure about that.
+* Dispose Pattern and Decimal are not supported.<br>
+* File Buffering is not supported (please don't confuse this with Buffer class in NodeJS, they are different things).
+* There is no memory optimization for writing overly long string in BinaryWriter, so to avoid massive memory allocation you should not write such string.
+* writeChars and writeCharsEx will concat the array before writing, this may be slow on your system, I'm still not sure about that.
