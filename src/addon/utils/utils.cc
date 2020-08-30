@@ -1,5 +1,8 @@
 #include "utils.h"
 #include <cstdio>
+#ifndef _WIN32
+#include <unistd.h>
+#endif
 #include <fcntl.h>
 #include <uv.h>
 #include "../exception-handler/exception-handler.h"
@@ -148,7 +151,37 @@ IOState GetFileState(HANDLE fHandle) {
 }
 #else
 IOFlag GetFileState(int fd) {
-
+   int flags = fcntl(fd, F_GETFL);
+   if (flags == -1)
+      THROW_ERRNO;
+   int accessMode = flags & O_ACCMODE;
+   auto isRead = accessMode == O_RDONLY || accessMode == O_RDWR;
+   auto isWrite = accessMode == O_WRONLY || accessMode == O_RDWR;
+   auto isAppend = (flags & O_APPEND) != 0;
+   rs.canRead = isRead;
+   rs.canWrite = isWrite;
+   rs.canAppend = isAppend;
+   rs.canSeek = fseek(fd, 0, SEEK_CUR) == 0;
+   if (isRead == false && isWrite == true && isAppend == true) {
+      rs.posixFlag = O_WRONLY | O_APPEND | O_BINARY;
+      rs.stdioFlag = "ab";
+   } else if (isRead == true && isWrite == true && isAppend == true) {
+      rs.posixFlag = O_RDWR | O_APPEND | O_BINARY;
+      rs.stdioFlag = "a+b";
+   } else if (isRead == true && isWrite == false && isAppend == false) {
+      rs.posixFlag = O_RDONLY | O_BINARY;
+      rs.stdioFlag = "rb";
+   } else if (isRead == true && isWrite == true && isAppend == false) {
+      rs.posixFlag = O_RDWR | O_BINARY;
+      rs.stdioFlag = "r+b";
+   } else if (isRead == false && isWrite == true && isAppend == false) {
+      rs.posixFlag = O_WRONLY | O_BINARY;
+      rs.stdioFlag = "wb";
+   } else {
+      // This should not happen
+      throw NodeException(NodeError::Generic, "There is no suitable file flag that can be inferred from your file descriptor.");
+   }
+   return rs;
 }
 #endif
 
