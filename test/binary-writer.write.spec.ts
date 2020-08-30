@@ -1,35 +1,32 @@
 import assert from 'assert';
-import { SHORT_MAX, INT_MIN, INT_MAX, SINGLE_MIN, SINGLE_MAX, SINGLE_EPSILON, DOUBLE_EPSILON, DOUBLE_MIN, DOUBLE_MAX, SHORT_MIN, LONG_MIN, LONG_MAX, USHORT_MIN, USHORT_MAX, UINT_MIN, UINT_MAX, ULONG_MIN, ULONG_MAX } from '../src/constants/number';
+import {
+  SHORT_MAX, INT_MIN, INT_MAX, SINGLE_MIN, SINGLE_MAX, SINGLE_EPSILON, DOUBLE_EPSILON,
+  DOUBLE_MIN, DOUBLE_MAX, SHORT_MIN, LONG_MIN, LONG_MAX, USHORT_MIN, USHORT_MAX, UINT_MIN, UINT_MAX, ULONG_MIN, ULONG_MAX
+} from '../src/constants/number';
 import { CSCode } from '../src/constants/error';
-import { prepareMock, tearDownMock, reloadCriticalModules, flushCriticalModules } from './mock-prepare';
-import { openEmtpyFile } from './utils';
-import { constants, seekSync as _seekSync } from 'fs-ext';
-import { BinaryReader as _BinaryReader } from '../src/binary-reader';
-import { BinaryWriter as _BinaryWriter } from '../src/binary-writer';
-import { vol } from 'memfs';
-const { SEEK_SET } = constants;
-let BinaryReader = _BinaryReader;
-let BinaryWriter = _BinaryWriter;
-let seekSync = _seekSync;
+import { BinaryReader } from '../src/binary-reader';
+import { BinaryWriter } from '../src/binary-writer';
+import { SeekOrigin } from '../src/constants/mode';
+import { openTruncated, installHookToFile, removeHookFromFile } from './utils';
+import { IFile } from '../src/addon/file';
 
 describe('BinaryWriter | Write Tests', () => {
+  let fileArr: IFile[] = [];
   before(() => {
-    prepareMock();
-    ({ BinaryReader, BinaryWriter, seekSync } = reloadCriticalModules());
-  });
-  after(() => {
-    tearDownMock();
-    flushCriticalModules();
+    installHookToFile(fileArr) as any;
   });
   afterEach(() => {
-    vol.reset();
+    fileArr = fileArr.reduce((acc, e) => (e.close(), acc), []);
+  });
+  after(() => {
+    removeHookFromFile();
   });
 
   it('Write Boolean', async () => {
     // [] Write a series of booleans to a stream
-    let mstr = openEmtpyFile();
-    let dw2 = new BinaryWriter(mstr, 'utf8', true);
-    let dr2 = new BinaryReader(mstr);
+    let file = openTruncated();
+    let dw2 = new BinaryWriter(file, 'utf8', true);
+    let dr2 = new BinaryReader(file);
 
     dw2.writeBoolean(false);
     dw2.writeBoolean(false);
@@ -40,7 +37,7 @@ describe('BinaryWriter | Write Tests', () => {
     dw2.writeInt32(0);
 
     dw2.flush();
-    seekSync(mstr, 0, SEEK_SET);
+    file.seek(0, SeekOrigin.Begin);
 
     assert.ok(!dr2.readBoolean());
     assert.ok(!dr2.readBoolean());
@@ -146,23 +143,23 @@ describe('BinaryWriter | Write Tests', () => {
   });
 
   it('Write String | Null', () => {
-    let memStream = openEmtpyFile();
-    let dw2 = new BinaryWriter(memStream);
+    let file = openTruncated();
+    let dw2 = new BinaryWriter(file);
     assert.throws(() => dw2.writeString(null), TypeError);
     dw2.close();
   });
 
-  function writeTest<T>(testElements: T[], write: (w: _BinaryWriter, s: T) => void, read: (r: _BinaryReader) => T) {
-    let memStream = openEmtpyFile();
-    let writer = new BinaryWriter(memStream, 'utf8', true);
-    let reader = new BinaryReader(memStream);
+  function writeTest<T>(testElements: T[], write: (w: BinaryWriter, s: T) => void, read: (r: BinaryReader) => T) {
+    let file = openTruncated();
+    let writer = new BinaryWriter(file, 'utf8', true);
+    let reader = new BinaryReader(file);
 
     for (let i = 0; i < testElements.length; i++) {
       write(writer, testElements[i]);
     }
 
     writer.flush();
-    seekSync(memStream, 0, SEEK_SET);
+    file.seek(0, SeekOrigin.Begin);
 
     for (let i = 0; i < testElements.length; i++) {
       assert.strictEqual(read(reader).toString(), testElements[i].toString());

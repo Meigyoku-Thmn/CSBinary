@@ -1,30 +1,22 @@
 import assert from 'assert';
-import { prepareMock, tearDownMock, reloadCriticalModules, flushCriticalModules } from './mock-prepare';
-import { openEmtpyFile } from './utils';
-import { constants, seekSync as _seekSync } from 'fs-ext';
-import { BinaryReader as _BinaryReader } from '../src/binary-reader';
-import { BinaryWriter as _BinaryWriter } from '../src/binary-writer';
+import { BinaryReader } from '../src/binary-reader';
+import { BinaryWriter } from '../src/binary-writer';
 import { CSCode } from '../src/constants/error';
 import { BYTE_MIN, BYTE_MAX, SBYTE_MIN, SBYTE_MAX, INT_MIN, SHORT_MIN, INT_MAX } from '../src/constants/number';
-import { vol } from 'memfs';
-import _fs from 'fs';
-const { SEEK_SET, SEEK_CUR } = constants;
-let BinaryWriter = _BinaryWriter;
-let BinaryReader = _BinaryReader;
-let seekSync = _seekSync;
-let fs = _fs;
+import { IFile } from '../src/addon/file';
+import { installHookToFile, removeHookFromFile, openTruncated } from './utils';
+import { SeekOrigin } from '../src/constants/mode';
 
 describe('BinaryWriter | Write Byte Char Tests', () => {
+  let fileArr: IFile[] = [];
   before(() => {
-    prepareMock();
-    ({ BinaryReader, BinaryWriter, seekSync, fs } = reloadCriticalModules());
-  });
-  after(() => {
-    tearDownMock();
-    flushCriticalModules();
+    installHookToFile(fileArr) as any;
   });
   afterEach(() => {
-    vol.reset();
+    fileArr = fileArr.reduce((acc, e) => (e.close(), acc), []);
+  });
+  after(() => {
+    removeHookFromFile();
   });
 
   /// <summary>
@@ -34,7 +26,7 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
   /// 3) Casting an int to char and writing it, works.
   /// </summary>
   it('Write Char', () => {
-    let mstr = openEmtpyFile();
+    let mstr = openTruncated();
     let dw2 = new BinaryWriter(mstr, 'utf8', true);
     let dr2 = new BinaryReader(mstr);
 
@@ -47,7 +39,7 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
       dw2.writeChar(chArr[ii]);
 
     dw2.flush();
-    seekSync(mstr, 0, SEEK_SET);
+    mstr.seek(0, SeekOrigin.Begin);
     for (ii = 0; ii < chArr.length; ii++) {
       let c = dr2.readChar();
       assert.equal(c, chArr[ii]);
@@ -62,7 +54,7 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
 
     //A high-surrogate is a Unicode code point in the range U+D800 through U+DBFF and a low-surrogate is a Unicode code point in the range U+DC00 through U+DFFF
     let ch: string;
-    let mem = openEmtpyFile();
+    let mem = openTruncated();
     let writer = new BinaryWriter(mem, 'utf16le');
 
     //between 1 <= x < 255
@@ -71,8 +63,7 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
       ch = String.fromCharCode(randomNumbers[i]);
       writer.writeChar(ch);
     }
-
-    seekSync(mem, 0, SEEK_SET);
+    mem.seek(0, SeekOrigin.Begin);
     writer.close();
   });
 
@@ -82,7 +73,7 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
 
     //A high-surrogate is a Unicode code point in the range U+D800 through U+DBFF and a low-surrogate is a Unicode code point in the range U+DC00 through U+DFFF
     let ch: string;
-    let mem = openEmtpyFile();
+    let mem = openTruncated();
     let writer = new BinaryWriter(mem, 'utf16le');
     // between 55296 <= x < 56319
     let randomNumbers = [55296, 56318, 55305, 56019, 55888, 55900, 56251];
@@ -104,7 +95,7 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
   /// Writing bytes casted to chars and using a different encoding; Windows932.
   /// </summary>
   it('Write Char 2', () => {
-    let stream = openEmtpyFile();
+    let stream = openTruncated();
     // string name = Windows932, codepage = 932
     // reference: https://docs.microsoft.com/en-us/windows/desktop/Intl/code-page-identifiers
 
@@ -118,7 +109,7 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
     writer.flush();
     writer.writeChar('\0');
 
-    seekSync(stream, 0, SEEK_SET);
+    stream.seek(0, SeekOrigin.Begin);
     let reader = new BinaryReader(stream, codepageName);
     let japanese = reader.readChar();
     assert.equal(japanese.charCodeAt(0), 0x30ca);
@@ -139,14 +130,14 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
     let byteArr = [BYTE_MIN, BYTE_MAX, 100, 1, 10, Math.floor(BYTE_MAX / 2), BYTE_MAX - 100]
 
     // [] read/Write with Memorystream
-    let mstr = openEmtpyFile();
+    let mstr = openTruncated();
     let dw2 = new BinaryWriter(mstr, 'utf8', true);
 
     for (ii = 0; ii < byteArr.length; ii++)
       dw2.writeByte(byteArr[ii]);
 
     dw2.flush();
-    seekSync(mstr, 0, SEEK_SET);
+    mstr.seek(0, SeekOrigin.Begin);
     let dr2 = new BinaryReader(mstr);
 
     for (ii = 0; ii < byteArr.length; ii++)
@@ -171,14 +162,14 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
     ];
 
     // [] read/Write with Memorystream
-    let mstr = openEmtpyFile();
+    let mstr = openTruncated();
     let dw2 = new BinaryWriter(mstr, 'utf8', true);
 
     for (ii = 0; ii < sbArr.length; ii++)
       dw2.writeSByte(sbArr[ii]);
 
     dw2.flush();
-    seekSync(mstr, 0, SEEK_SET);
+    mstr.seek(0, SeekOrigin.Begin);
     let dr2 = new BinaryReader(mstr)
 
     for (ii = 0; ii < sbArr.length; ii++)
@@ -199,7 +190,7 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
       10, 20, 30, -10, -20, -30, SBYTE_MAX - 100
     ];
 
-    let mstr = openEmtpyFile();
+    let mstr = openTruncated();
     let dw2 = new BinaryWriter(mstr, 'utf8', true);
 
     for (ii = 0; ii < sbArr.length; ii++)
@@ -220,12 +211,12 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
     let byteArr = Buffer.from([BYTE_MIN, BYTE_MAX, 1, 5, 10, 100, 200]);
 
     // [] read/Write with Memorystream
-    let mstr = openEmtpyFile();
+    let mstr = openTruncated();
     let dw2 = new BinaryWriter(mstr, 'utf8', true);
 
     dw2.writeBuffer(byteArr);
     dw2.flush();
-    seekSync(mstr, 0, SEEK_SET);
+    mstr.seek(0, SeekOrigin.Begin);
 
     let dr2 = new BinaryReader(mstr);
 
@@ -244,20 +235,20 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
     let iArrLargeValues = [INT_MAX, INT_MAX - 1, Math.floor(INT_MAX / 2), Math.floor(INT_MAX / 10), Math.floor(INT_MAX / 100)];
     let bArr = Buffer.alloc(0);
     // [] ArgumentNullException for null argument
-    let mstr = openEmtpyFile();
+    let mstr = openTruncated();
     let dw2 = new BinaryWriter(mstr);
 
     assert.throws(() => dw2.writeBuffer(null), TypeError);
     dw2.close();
 
     // [] ArgumentNullException for null argument
-    mstr = openEmtpyFile()
+    mstr = openTruncated()
     dw2 = new BinaryWriter(mstr);
     assert.throws(() => dw2.writeBufferEx(null, 0, 0), TypeError);
 
     dw2.close();
 
-    mstr = openEmtpyFile();
+    mstr = openTruncated();
     dw2 = new BinaryWriter(mstr);
     for (let iLoop = 0; iLoop < iArrInvalidValues.length; iLoop++) {
       // [] ArgumentOutOfRange for negative offset
@@ -267,7 +258,7 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
     }
     dw2.close();
 
-    mstr = openEmtpyFile();
+    mstr = openTruncated();
     dw2 = new BinaryWriter(mstr);
     for (let iLoop = 0; iLoop < iArrLargeValues.length; iLoop++) {
       // [] Offset out of range
@@ -284,9 +275,9 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
   /// 2) Tests exceptional scenarios.
   /// </summary>
   it('Write Buffer 2', () => {
-    let dw2: _BinaryWriter;
-    let dr2: _BinaryReader;
-    let mstr: number;
+    let dw2: BinaryWriter;
+    let dr2: BinaryReader;
+    let mstr: IFile;
     let bArr = Buffer.alloc(0);
     let ii = 0;
     let bReadArr = Buffer.alloc(0);
@@ -300,12 +291,12 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
       bArr[ii] = ii % 255;
 
     // []read/ Write character values 0-1000 with  Memorystream
-    mstr = openEmtpyFile();
+    mstr = openTruncated();
     dw2 = new BinaryWriter(mstr, 'utf8', true);
 
     dw2.writeBufferEx(bArr, 0, bArr.length);
     dw2.flush();
-    seekSync(mstr, 0, SEEK_SET);
+    mstr.seek(0, SeekOrigin.Begin);
 
     dr2 = new BinaryReader(mstr);
     bReadArr = Buffer.alloc(bArr.length);
@@ -340,12 +331,12 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
       chArr[ii] = String.fromCharCode(ii);
 
     // [] read/Write with Memorystream
-    let mstr = openEmtpyFile();
+    let mstr = openTruncated();
     let dw2 = new BinaryWriter(mstr, 'utf8', true);
 
     dw2.writeChars(chArr);
     dw2.flush();
-    seekSync(mstr, 0, SEEK_SET);
+    mstr.seek(0, SeekOrigin.Begin);
 
     let dr2 = new BinaryReader(mstr);
 
@@ -365,19 +356,19 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
     let chArr = new Array<string>(1000);
 
     // [] ArgumentNullException for null argument
-    let mstr = openEmtpyFile();
+    let mstr = openTruncated();
     let dw2 = new BinaryWriter(mstr);
     assert.throws(() => dw2.writeChars(null), TypeError);
     dw2.close();
 
     // [] ArgumentNullException for null argument
-    mstr = openEmtpyFile();
+    mstr = openTruncated();
     dw2 = new BinaryWriter(mstr);
     assert.throws(() => dw2.writeChars(null), TypeError);
 
     dw2.close();
 
-    mstr = openEmtpyFile();
+    mstr = openTruncated();
     dw2 = new BinaryWriter(mstr);
 
     for (let iLoop = 0; iLoop < iArrInvalidValues.length; iLoop++) {
@@ -388,7 +379,7 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
     }
     dw2.close();
 
-    mstr = openEmtpyFile();
+    mstr = openTruncated();
     dw2 = new BinaryWriter(mstr);
     for (let iLoop = 0; iLoop < iArrLargeValues.length; iLoop++) {
       // [] Offset out of range
@@ -420,7 +411,7 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
   /// then it returns 0xfffd, which is why BinaryReader.ReadChar needs to do an explicit check. (It always throws when it encounters a surrogate)
   /// </summary>
   it('Write Char Array 2', () => {
-    let mem = openEmtpyFile();
+    let mem = openTruncated();
     let writer = new BinaryWriter(mem, 'utf16le', true);
 
     // between 55296 <= x < 56319
@@ -433,7 +424,7 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
     ].map(e => String.fromCharCode(e));
 
     writer.writeChars(randomChars);
-    seekSync(mem, 0, SEEK_SET);
+    mem.seek(0, SeekOrigin.Begin);
     let reader = new BinaryReader(mem, 'utf16le');
 
     for (let i = 0; i < 50; i++) {
@@ -476,12 +467,12 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
 
     // []read/ Write character values 0-1000 with  Memorystream
 
-    let mstr = openEmtpyFile();
+    let mstr = openTruncated();
     let dw2 = new BinaryWriter(mstr, 'utf8', true);
 
     dw2.writeCharsEx(chArr, 0, chArr.length);
     dw2.flush();
-    seekSync(mstr, 0, SEEK_SET);
+    mstr.seek(0, SeekOrigin.Begin);
 
     let dr2 = new BinaryReader(mstr);
     let chReadArr = new Array<string>(chArr.length);
@@ -499,32 +490,32 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
     let bytes = Buffer.from([4, 2, 7, 0xFF]);
     let chars = ['a', '7', String.fromCharCode(65535)];
 
-    let memoryStream = openEmtpyFile();
+    let memoryStream = openTruncated();
     let binaryWriter = new BinaryWriter(memoryStream, 'utf16le');
     binaryWriter.writeBuffer(bytes);
     binaryWriter.writeChars(chars);
 
-    let baseStream = binaryWriter.baseFd;
-    seekSync(baseStream, 2, SEEK_SET);
+    let baseStream = binaryWriter.file;
+    baseStream.seek(2, SeekOrigin.Begin);
 
     let b = Buffer.alloc(1);
-    fs.readSync(baseStream, b, 0, b.length, null);
+    baseStream.read(b);
     assert.equal(b.readUInt8(), 7);
-    fs.readSync(baseStream, b, 0, b.length, null);
+    baseStream.read(b);
     assert.equal(b.readUInt8(), 0xFF);
 
     let testChar: string;
     b = Buffer.alloc(2);
 
-    fs.readSync(baseStream, b, 0, b.length, null);
+    baseStream.read(b);
     testChar = b.toString('utf16le');
     assert.equal(testChar, 'a');
 
-    fs.readSync(baseStream, b, 0, b.length, null);
+    baseStream.read(b);
     testChar = b.toString('utf16le');
     assert.equal(testChar, '7');
 
-    fs.readSync(baseStream, b, 0, b.length, null);
+    baseStream.read(b);
     testChar = b.toString('utf16le');
     assert.equal(testChar, String.fromCharCode(65535));
   });

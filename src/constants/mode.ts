@@ -1,4 +1,4 @@
-import { constants } from 'fs-ext'
+import { constants } from "../addon";
 const { SEEK_CUR, SEEK_SET, SEEK_END } = constants;
 
 export enum SeekOrigin {

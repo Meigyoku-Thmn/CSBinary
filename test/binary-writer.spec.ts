@@ -1,42 +1,37 @@
 import assert from 'assert';
 import { SHORT_MAX, INT_MIN, INT_MAX } from '../src/constants/number';
 import { CSCode } from '../src/constants/error';
-import { prepareMock, tearDownMock, reloadCriticalModules, flushCriticalModules } from './mock-prepare';
-import { openEmtpyFile, getMockFileContent } from './utils';
-import { constants, seekSync as _seekSync } from 'fs-ext';
-import { BinaryReader as _BinaryReader } from '../src/binary-reader';
-import { BinaryWriter as _BinaryWriter } from '../src/binary-writer';
-import { vol } from 'memfs';
-import _fs from 'fs';
-const { SEEK_SET, SEEK_CUR, SEEK_END } = constants;
-let BinaryReader = _BinaryReader;
-let BinaryWriter = _BinaryWriter;
-let seekSync = _seekSync;
-let fs = _fs;
+import { openTruncated, installHookToFile, removeHookFromFile, openTruncatedToRead, getFileContent } from './utils';
+import { BinaryReader } from '../src/binary-reader';
+import { BinaryWriter } from '../src/binary-writer';
+import fs from 'fs';
+import { SeekOrigin } from '../src/constants/mode';
+import { IFile } from '../src/addon/file';
 
 describe('BinaryWriter Tests', () => {
+  let fileArr: IFile[] = [];
   before(() => {
-    prepareMock();
-    ({ BinaryReader, BinaryWriter, seekSync, fs } = reloadCriticalModules());
-  });
-  after(() => {
-    tearDownMock();
-    flushCriticalModules();
+    installHookToFile(fileArr) as any;
   });
   afterEach(() => {
-    vol.reset();
+    fileArr = fileArr.reduce((acc, e) => (e.close(), acc), []);
+  });
+  after(() => {
+    removeHookFromFile();
   });
 
   it('Ctor And Write Tests', () => {
     // [] Smoke test to ensure that we can write with the constructed writer
-    let mstr = openEmtpyFile();
-    let dw2 = new BinaryWriter(mstr);
-    let dr2 = new BinaryReader(mstr);
+    let file = openTruncated();
+    let dw2 = new BinaryWriter(file, 'utf8', true);
+    let dr2 = new BinaryReader(file);
     dw2.writeBoolean(true);
     dw2.flush();
-    seekSync(mstr, 0, SEEK_SET);
+    file.seek(0, SeekOrigin.Begin);
 
     assert.ok(dr2.readBoolean());
+    dw2.close();
+    dr2.close();
   });
 
   it('Ctor And Write Tests | Negative', () => {
@@ -44,12 +39,12 @@ describe('BinaryWriter Tests', () => {
     assert.throws(() => new BinaryWriter(null), TypeError);
 
     // [] Can't construct a BinaryWriter on a readonly file
-    assert.throws(() => new BinaryWriter(openEmtpyFile('r')), { code: CSCode.FileNotWritable });
+    assert.throws(() => new BinaryWriter(openTruncatedToRead()), { code: CSCode.FileNotWritable });
 
     // [] Can't construct a BinaryWriter with a closed file
-    let memStream = openEmtpyFile();
-    fs.closeSync(memStream);
-    assert.throws(() => new BinaryWriter(memStream), { code: 'EBADF' });
+    let file = openTruncated();
+    file.close();
+    assert.throws(() => new BinaryWriter(file), { code: CSCode.FileNotWritable });
   });
 
   it('Encoding Ctor And Write Tests', () => {
@@ -59,15 +54,16 @@ describe('BinaryWriter Tests', () => {
       ['utf16le', "This is Unicode\u00FF"],
     ];
     for (let [encoding, testString] of testSuite) {
-      let memStream = openEmtpyFile();
-      let writer = new BinaryWriter(memStream, encoding as BufferEncoding);
-      let reader = new BinaryReader(memStream, encoding as BufferEncoding);
+      let file = openTruncated();
+      let writer = new BinaryWriter(file, encoding as BufferEncoding);
+      let reader = new BinaryReader(file, encoding as BufferEncoding);
 
       writer.writeString(testString);
       writer.flush();
-      seekSync(memStream, 0, SEEK_SET);
+      file.seek(0, SeekOrigin.Begin);
 
       assert.equal(reader.readString(), testString);
+      writer.close();
     }
   });
 
@@ -75,7 +71,7 @@ describe('BinaryWriter Tests', () => {
     // [] Check for ArgumentNullException on null stream
     assert.throws(() => new BinaryWriter(null, 'utf-8'), TypeError);
     // [] Check for ArgumentNullException on null encoding
-    assert.throws(() => new BinaryWriter(openEmtpyFile(), null), TypeError);
+    assert.throws(() => new BinaryWriter(openTruncated(), null), TypeError);
   });
 
   it('Seek Tests', () => {
@@ -84,33 +80,35 @@ describe('BinaryWriter Tests', () => {
       INT_MAX, INT_MAX - 1, Math.floor(INT_MAX / 2), Math.floor(INT_MAX / 10), Math.floor(INT_MAX / 100)
     ];
 
-    let dw2: _BinaryWriter;
-    let mstr: number;
+    let dw2: BinaryWriter;
+    let mstr: IFile;
     let bArr: Buffer;
     let sb = '';
     let lReturn = 0;
 
-    mstr = openEmtpyFile();
+    mstr = openTruncated();
     dw2 = new BinaryWriter(mstr);
     dw2.writeChars("Hello, this is my string".split(''));
     for (let iLoop = 0; iLoop < iArrLargeValues.length; iLoop++) {
-      lReturn = dw2.seek(iArrLargeValues[iLoop], SEEK_SET);
+      dw2.file.seek(iArrLargeValues[iLoop], SeekOrigin.Begin);
+      lReturn = dw2.file.tell();
 
       assert.equal(lReturn, iArrLargeValues[iLoop]);
     }
     dw2.close();
 
     // [] Seek from start of stream
-    mstr = openEmtpyFile();
+    mstr = openTruncated();
     dw2 = new BinaryWriter(mstr);
     dw2.writeChars("0123456789".split(''));
-    lReturn = dw2.seek(0, SEEK_SET);
+    dw2.file.seek(0, SeekOrigin.Begin);
+    lReturn = dw2.file.tell();
 
     assert.equal(lReturn, 0);
 
     dw2.writeChars("lki".split(''));
     dw2.flush();
-    bArr = getMockFileContent(mstr);
+    bArr = getFileContent(mstr);
     sb = bArr.reduce((acc, e) => acc + String.fromCharCode(e), '');
 
     assert.equal(sb, "lki3456789");
@@ -118,17 +116,18 @@ describe('BinaryWriter Tests', () => {
     dw2.close();
 
     // [] Seek into stream from start
-    mstr = openEmtpyFile();
+    mstr = openTruncated();
     dw2 = new BinaryWriter(mstr);
 
     dw2.writeChars("0123456789".split(''));
-    lReturn = dw2.seek(3, SEEK_SET);
+    dw2.file.seek(3, SeekOrigin.Begin);
+    lReturn = dw2.file.tell();
 
     assert.equal(lReturn, 3);
 
     dw2.writeChars("lk".split(''));
     dw2.flush();
-    bArr = getMockFileContent(mstr);
+    bArr = getFileContent(mstr);
     sb = bArr.reduce((acc, e) => acc + String.fromCharCode(e), '');
 
     assert.equal(sb, "012lk56789");
@@ -136,16 +135,17 @@ describe('BinaryWriter Tests', () => {
     dw2.close();
 
     // [] Seek from end of stream
-    mstr = openEmtpyFile();
+    mstr = openTruncated();
     dw2 = new BinaryWriter(mstr);
     dw2.writeChars("0123456789".split(''));
-    lReturn = dw2.seek(-3, SEEK_END);
+    dw2.file.seek(-3, SeekOrigin.End);
+    lReturn = dw2.file.tell();
 
     assert.equal(lReturn, 7);
 
     dw2.writeChars("ll".split(''));
     dw2.flush();
-    bArr = getMockFileContent(mstr);
+    bArr = getFileContent(mstr);
     sb = bArr.reduce((acc, e) => acc + String.fromCharCode(e), '');
 
     assert.equal(sb, "0123456ll9");
@@ -153,17 +153,18 @@ describe('BinaryWriter Tests', () => {
     dw2.close();
 
     // [] Seeking from current position
-    mstr = openEmtpyFile();
+    mstr = openTruncated();
     dw2 = new BinaryWriter(mstr);
     dw2.writeChars("0123456789".split(''));
-    seekSync(mstr, 2, SEEK_SET);
-    lReturn = dw2.seek(2, SEEK_CUR);
+    dw2.file.seek(2, SeekOrigin.Begin);
+    dw2.file.seek(2, SeekOrigin.Current);
+    lReturn = dw2.file.tell();
 
     assert.equal(lReturn, 4);
 
     dw2.writeChars("ll".split(''));
     dw2.flush();
-    bArr = getMockFileContent(mstr);
+    bArr = getFileContent(mstr);
     sb = bArr.reduce((acc, e) => acc + String.fromCharCode(e), '');
 
     assert.equal(sb, "0123ll6789");
@@ -171,35 +172,38 @@ describe('BinaryWriter Tests', () => {
     dw2.close();
 
     // [] Seeking past the end from middle
-    mstr = openEmtpyFile();
+    mstr = openTruncated();
     dw2 = new BinaryWriter(mstr);
     dw2.writeChars("0123456789".split(''));
-    lReturn = dw2.seek(4, SEEK_END);  //This won't throw any exception now.
+    dw2.file.seek(4, SeekOrigin.End);  //This won't throw any exception now.
+    lReturn = dw2.file.tell();
 
-    assert.equal(seekSync(mstr, 0, SEEK_CUR), 14);
+    assert.equal(lReturn, 14);
 
     dw2.close();
 
     // [] Seek past the end from beginning
-    mstr = openEmtpyFile();
+    mstr = openTruncated();
     dw2 = new BinaryWriter(mstr);
     dw2.writeChars("0123456789".split(''));
-    lReturn = dw2.seek(11, SEEK_SET); //This won't throw any exception now.
+    dw2.file.seek(11, SeekOrigin.Begin); //This won't throw any exception now.
+    lReturn = dw2.file.tell();
 
-    assert.equal(seekSync(mstr, 0, SEEK_CUR), 11);
+    assert.equal(lReturn, 11);
 
     dw2.close();
 
     // [] Seek to the end
-    mstr = openEmtpyFile();
+    mstr = openTruncated();
     dw2 = new BinaryWriter(mstr);
     dw2.writeChars('0123456789'.split(''));
-    lReturn = dw2.seek(10, SEEK_SET);
+    dw2.file.seek(10, SeekOrigin.Begin);
+    lReturn = dw2.file.tell();
 
     assert.equal(lReturn, 10);
 
     dw2.writeChars("ll".split(''));
-    bArr = getMockFileContent(mstr);
+    bArr = getFileContent(mstr);
     sb = bArr.reduce((acc, e) => acc + String.fromCharCode(e), '');
 
     assert.equal(sb, "0123456789ll");
@@ -211,46 +215,45 @@ describe('BinaryWriter Tests', () => {
     let testSuite = [-1, -2, -10000, INT_MIN];
     for (let invalidValue of testSuite) {
       // [] IOException if offset is negative
-      let memStream = openEmtpyFile();
+      let memStream = openTruncated();
       let writer = new BinaryWriter(memStream);
       writer.writeChars('Hello, this is my string'.split(''));
-      assert.throws(() => writer.seek(invalidValue, SEEK_SET), { code: "EINVAL" })
+      assert.throws(() => writer.file.seek(invalidValue, SeekOrigin.Begin), { code: "EINVAL" })
       writer.close();
     }
   });
 
   it('Seek Tests | Invalid SeekOrigin', () => {
     // [] ArgumentException for invalid seekOrigin
-    let memStream = openEmtpyFile();
+    let memStream = openTruncated();
     let writer = new BinaryWriter(memStream);
     writer.writeChars("0123456789".split(''));
-    assert.throws(() => writer.seek(3, null), RangeError);
+    assert.throws(() => writer.file.seek(3, null), TypeError);
     writer.close();
   });
 
   it('BaseStream Tests', () => {
     // [] Get the base stream for MemoryStream
-    let ms2 = openEmtpyFile();
+    let ms2 = openTruncated();
     let sr2 = new BinaryWriter(ms2);
-    assert.strictEqual(sr2.baseFd, ms2);
+    assert.strictEqual(sr2.file, ms2);
     sr2.close();
   });
 
-  it.skip('Flush Tests', () => {
+  it('Flush Tests', () => {
     // [] Check that flush updates the underlying stream
-    let memstr2 = openEmtpyFile();
-    // they are missing a buffered stream here
+    let memstr2 = openTruncated();
     let bw2 = new BinaryWriter(memstr2);
     let str = "HelloWorld";
     let expectedLength = str.length + 1; // 1 for 7-bit encoded length
     bw2.writeString(str);
-    assert.equal(fs.fstatSync(memstr2).size, expectedLength); // weird test from Microsoft?
+    assert.equal(fs.fstatSync(memstr2.fd).size, 0);
     bw2.flush();
-    assert.equal(fs.fstatSync(memstr2).size, expectedLength);
+    assert.equal(fs.fstatSync(memstr2.fd).size, expectedLength);
     bw2.close();
 
     // [] Flushing a closed writer may throw an exception
-    memstr2 = openEmtpyFile();
+    memstr2 = openTruncated();
     bw2 = new BinaryWriter(memstr2);
     bw2.close();
     assert.throws(() => bw2.flush(), { code: CSCode.FileIsClosed });
@@ -258,7 +261,7 @@ describe('BinaryWriter Tests', () => {
 
   it('Close Tests', () => {
     // Closing multiple times should not throw an exception
-    let memStream = openEmtpyFile();
+    let memStream = openTruncated();
     let binaryWriter = new BinaryWriter(memStream);
     binaryWriter.close();
     binaryWriter.close();
@@ -266,14 +269,14 @@ describe('BinaryWriter Tests', () => {
   });
 
   it('Close Tests | Negative', () => {
-    let memStream = openEmtpyFile();
+    let memStream = openTruncated();
     let binaryWriter = new BinaryWriter(memStream);
     binaryWriter.close();
     validateDisposedExceptions(binaryWriter);
   });
 
-  function validateDisposedExceptions(binaryWriter: _BinaryWriter) {
-    assert.throws(() => binaryWriter.seek(1, SEEK_SET), { code: CSCode.FileIsClosed });
+  function validateDisposedExceptions(binaryWriter: BinaryWriter) {
+    assert.throws(() => binaryWriter.file.seek(1, SeekOrigin.Begin), { code: CSCode.FileIsClosed });
     assert.throws(() => binaryWriter.writeBufferEx(Buffer.alloc(2), 0, 2), { code: CSCode.FileIsClosed });
     assert.throws(() => binaryWriter.writeCharsEx(['2', '2'], 0, 2), { code: CSCode.FileIsClosed });
     assert.throws(() => binaryWriter.writeBoolean(true), { code: CSCode.FileIsClosed });
@@ -296,14 +299,31 @@ describe('BinaryWriter Tests', () => {
 
   it('OutStream', () => {
     class BinaryWriterOutStream extends BinaryWriter {
-      get getOutFd(): number { return this._fd; }
+      get getOutFd(): IFile { return this._file; }
     }
-    let stream = openEmtpyFile();
+    let stream = openTruncated();
     let bw = new BinaryWriterOutStream(stream);
     assert.equal(bw.getOutFd, stream);
   });
 
-  it.skip('Argument Type and Value Checking', () => {
+  it('Leave Open', () => {
+    let file = openTruncated();
+    assert.ok(file.canWrite, "ERROR: Before testing, file.canWrite property was false! What?");
 
+    // Test leaveOpen
+    let bw = new BinaryWriter(file, 'utf8', true);
+    bw.close();
+    assert.ok(file.canWrite, "ERROR: After closing a BinaryWriter with leaveOpen bool set, file.canWrite property was false!");
+
+    // Test not leaving open
+    bw = new BinaryWriter(file, 'utf8', false);
+    bw.close();
+    assert.ok(!file.canWrite, "ERROR: After closing a BinaryWriter with leaveOpen bool not set, file.canWrite property was true!");
+
+    // Test default
+    file = openTruncated();
+    bw = new BinaryWriter(file);
+    bw.close();
+    assert.ok(!file.canWrite, "ERROR: After closing a BinaryWriter with the default value for leaveOpen, file.canWrite property was true!");
   });
 });

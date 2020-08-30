@@ -1,12 +1,11 @@
-import fs from 'fs';
-import { seekSync } from 'fs-ext'
-import { readByte, tell, canSeek } from './utils/file'
+import { readByte } from './utils/file'
 import { SubArray } from './utils/array';
 import { raise } from './utils/error';
 import { CSCode } from './constants/error';
 import { IEncoding, Encoding, IDecoder } from './encoding';
 import { SeekOrigin } from './constants/mode';
 import { BIG_0, BIG_7Fh, LONG_MAX, LONG_WRAP } from './constants/number';
+import { IFile } from './addon/file';
 
 type char = string;
 
@@ -16,7 +15,7 @@ const BufferSize = 16;
  * Reads primitive data types as binary values in a specific encoding.
  */
 export class BinaryReader {
-  private readonly _fd: number;
+  private readonly _file: IFile;
   private readonly _decoder: IDecoder;
 
   // Performance optimization for Read() w/ Unicode. Speeds us up by ~40%
@@ -26,22 +25,25 @@ export class BinaryReader {
 
   private _canSeek = false;
 
+  // use for peekChar
+  private _nReadBytes = 0;
+
   /**
    * Initializes a new instance of the BinaryReader class based on the specified file descriptor and character encoding, and optionally leaves the file open.
    * @param input The input file descriptor.
    * @param encoding The character encoding to use, or an object implementing the IEncoding interface. Default to `'utf8'`
    * @param leaveOpen `true` to leave the file open after the BinaryReader object is disposed; otherwise, `false`. Default to `false`.
    */
-  constructor(input: number, encoding: BufferEncoding | string | IEncoding = 'utf8', leaveOpen = false) {
-    if (!Number.isSafeInteger(input)) throw TypeError('"input" must be a safe integer.');
+  constructor(input: IFile, encoding: BufferEncoding | string | IEncoding = 'utf8', leaveOpen = false) {
+    if (typeof input != 'object') throw TypeError('"input" must be an object that implement the IFile interface.');
     if (typeof encoding != 'string') throw TypeError('"encoding" must be a string or an instance that implements IEncoding.');
     if (typeof leaveOpen != 'boolean') throw TypeError('"leaveOpen" must be a boolean.');
 
-    this._canSeek = canSeek(input);
+    this._canSeek = input.canSeek;
     if (!this._canSeek)
       raise(ReferenceError('Input file is not readable.'), CSCode.FileNotReadable);
 
-    this._fd = input;
+    this._file = input;
     if (typeof encoding == 'string')
       this._decoder = new Encoding(encoding).getDecoder();
     else if (typeof encoding == 'object')
@@ -57,8 +59,8 @@ export class BinaryReader {
   /**
    * Get the underlying file descriptor of the BinaryReader.
    */
-  get baseFd(): number {
-    return this._fd;
+  get file(): IFile {
+    return this._file;
   }
 
   /**
@@ -67,7 +69,7 @@ export class BinaryReader {
   close(): void {
     if (!this._disposed) {
       if (!this._leaveOpen) {
-        fs.closeSync(this._fd);
+        this._file.close();
       }
       this._disposed = true;
     }
@@ -77,17 +79,6 @@ export class BinaryReader {
     if (this._disposed) {
       raise(ReferenceError('This BinaryReader instance is closed.'), CSCode.FileIsClosed);
     }
-  }
-
-  /**
-   * Sets the position within the current file.
-   * @param offset A byte offset relative to `origin`.
-   * @param origin A field indicating the reference point from which the new position is to be obtained.
-   * @returns The position with the current file.
-   */
-  seek(offset: number, origin: SeekOrigin): number {
-    this.throwIfDisposed();
-    return seekSync(this._fd, offset, origin);
   }
 
   /**
@@ -101,9 +92,8 @@ export class BinaryReader {
       return -1;
     }
 
-    var origPos = tell(this._fd);
     let ch = this.readCharCode();
-    seekSync(this._fd, origPos, SeekOrigin.Begin);
+    this._file.seek(-this._nReadBytes, SeekOrigin.Current);
     return ch;
   }
 
@@ -113,15 +103,11 @@ export class BinaryReader {
    */
   readCharCode(): number {
     this.throwIfDisposed();
+    this._nReadBytes = 0;
 
     let numBytes: number;
-    let posSav = 0;
 
-    if (this._canSeek) {
-      posSav = tell(this._fd);
-    }
-
-    let _charBytes = Buffer.allocUnsafe(MaxCharBytesSize);
+    let _charBytes = Buffer.allocUnsafe(2);
 
     // there isn't any decoder in JS world that can reuse output buffer
     let singleChar = '';
@@ -133,16 +119,20 @@ export class BinaryReader {
       // Assume 1 byte can be 1 char unless _2BytesPerChar is true.
       numBytes = this._2BytesPerChar ? 2 : 1;
 
-      let r = readByte(this._fd);
+      let r = readByte(this._file);
       _charBytes.writeUInt8(r < 0 ? r + 256 : r);
       if (r == -1) {
         numBytes = 0;
+      } else {
+        this._nReadBytes++;
       }
       if (numBytes == 2) {
-        r = readByte(this._fd);
+        r = readByte(this._file);
         _charBytes.writeUInt8(r < 0 ? r + 256 : r, 1);
         if (r == -1) {
           numBytes = 1;
+        } else {
+          this._nReadBytes++;
         }
       }
 
@@ -159,7 +149,7 @@ export class BinaryReader {
         // Handle surrogate char
 
         if (err.code == CSCode.SurrogateCharHit && this._canSeek) {
-          seekSync(this._fd, posSav - tell(this._fd), SeekOrigin.Current);
+          this._file.seek(-this._nReadBytes, SeekOrigin.Current);
         }
         // else - we can't do much here
 
@@ -180,7 +170,7 @@ export class BinaryReader {
   private internalReadByte(): number {
     this.throwIfDisposed();
 
-    let b = readByte(this._fd);
+    let b = readByte(this._file);
     if (b == -1) {
       raise(RangeError('Read beyond end-of-file.'), CSCode.ReadBeyondEndOfFile);
     }
@@ -313,7 +303,7 @@ export class BinaryReader {
     do {
       readLength = ((stringLength - currPos) > MaxCharBytesSize) ? MaxCharBytesSize : (stringLength - currPos);
 
-      n = fs.readSync(this._fd, _charBytes, 0, readLength, null);
+      n = this._file.read(_charBytes, 0, readLength);
       if (n == 0) {
         raise(RangeError('Read beyond end-of-file.'), CSCode.ReadBeyondEndOfFile);
       }
@@ -398,7 +388,7 @@ export class BinaryReader {
       if (numBytes > MaxCharBytesSize) {
         numBytes = MaxCharBytesSize;
       }
-      numBytes = fs.readSync(this._fd, _charBytes, 0, numBytes, null);
+      numBytes = this._file.read(_charBytes, 0, numBytes);
       let byteBuffer = _charBytes.subarray(0, numBytes);
 
       if (byteBuffer.length == 0) {
@@ -464,7 +454,7 @@ export class BinaryReader {
     }
     this.throwIfDisposed();
 
-    return fs.readSync(this._fd, buffer, index, count, null);
+    return this._file.read(buffer, index, count);
   }
 
   /**
@@ -475,7 +465,7 @@ export class BinaryReader {
   readIntoBuffer(buffer: Buffer): number {
     if (!Buffer.isBuffer(buffer)) throw TypeError('"buffer" must be a Buffer.');
     this.throwIfDisposed();
-    return fs.readSync(this._fd, buffer, 0, buffer.length, null);
+    return this._file.read(buffer);
   }
 
   /**
@@ -497,7 +487,7 @@ export class BinaryReader {
     let result = Buffer.allocUnsafe(count);
     let numRead = 0;
     do {
-      let n = fs.readSync(this._fd, result, numRead, count, null);
+      let n = this._file.read(result, numRead, count);
       if (n == 0) {
         break;
       }
@@ -520,7 +510,7 @@ export class BinaryReader {
     let buffer = Buffer.allocUnsafe(BufferSize);
     let bytesRead = 0;
     do {
-      let n = fs.readSync(this._fd, buffer, bytesRead, numBytes - bytesRead, null);
+      let n = this._file.read(buffer, bytesRead, numBytes - bytesRead);
       if (n == 0) {
         raise(RangeError('Read beyond end-of-file.'), CSCode.ReadBeyondEndOfFile);
       }
