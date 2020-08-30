@@ -26,7 +26,6 @@
   "license": "MIT",
   "devDependencies": {
     "@types/bindings": "^1.3.0",
-    "@types/fs-ext": "^2.0.0",
     "@types/fs-extra": "^9.0.1",
     "@types/lodash": "^4.14.157",
     "@types/mocha": "^7.0.2",
@@ -45,7 +44,6 @@
   "dependencies": {
     "@types/node": "^14.0.14",
     "bindings": "^1.5.0",
-    "fs-ext": "github:Meigyoku-Thmn/node-fs-ext#master",
     "iconv-lite": "github:Meigyoku-Thmn/iconv-lite#master",
     "nan": "^2.14.1"
   },
