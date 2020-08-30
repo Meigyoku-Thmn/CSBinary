@@ -11,8 +11,8 @@ static void invalid_parameter_function(LPCWSTR a, LPCWSTR b, LPCWSTR c, UINT d, 
 NAN_MODULE_INIT(Init) {
 #ifdef _WIN32
    _set_invalid_parameter_handler(invalid_parameter_function);
-#endif
    ImportNtDllFunctions();
+#endif
    FileWrap::Prepare(target);
    Constants::Prepare(target);
 }
