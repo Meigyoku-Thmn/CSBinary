@@ -44,7 +44,7 @@ HANDLE GetWindowsHandle(int fd);
 
 IOState GetFileState(HANDLE fHandle);
 #else
-IOFlag GetFileState(int fd);
+IOState GetFileState(int fd);
 #endif
 
 FILE *CreateFileFromFd(int fd);

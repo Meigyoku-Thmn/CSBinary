@@ -14,7 +14,7 @@ struct NodeException : public std::exception {
    std::string func;
    std::string path;
    NodeException(NodeError type, std::string message = "", std::string func = "", std::string path = "")
-      : std::exception(message.c_str()), type(type), message(message), func(func), path(path) {}
+      : std::exception(), type(type), message(message), func(func), path(path) {}
    const char *what() const noexcept {
       return message.c_str();
    }

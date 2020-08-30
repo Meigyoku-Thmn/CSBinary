@@ -150,7 +150,8 @@ IOState GetFileState(HANDLE fHandle) {
    return rs;
 }
 #else
-IOFlag GetFileState(int fd) {
+IOState GetFileState(int fd) {
+   IOState rs;
    int flags = fcntl(fd, F_GETFL);
    if (flags == -1)
       THROW_ERRNO;
