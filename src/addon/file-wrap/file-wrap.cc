@@ -107,7 +107,7 @@ namespace FileWrap {
          auto obj = Unwrap<File>(info.Holder());
          auto pos = TellFile(obj->file);
          THROW_IF_NOT_SAFE_NUMBER(pos);
-         info.GetReturnValue().Set(Nan::New(pos));
+         info.GetReturnValue().Set(Nan::New((double)pos));
       });
    }
    // read(bytes: NodeJS.ArrayBufferView, offset?: number, count?: number): number
