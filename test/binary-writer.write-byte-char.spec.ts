@@ -13,7 +13,8 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
     installHookToFile(fileArr) as any;
   });
   afterEach(() => {
-    fileArr = fileArr.reduce((acc, e) => (e.close(), acc), []);
+    fileArr.forEach(e => e.close());
+    fileArr.length = 0;
   });
   after(() => {
     removeHookFromFile();

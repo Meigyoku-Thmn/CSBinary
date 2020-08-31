@@ -5,7 +5,7 @@ import fs from 'fs';
 import { SeekOrigin } from '../src/constants/mode';
 import path from 'path';
 
-const TmpFilePath = 'tmp/f.tmp';
+export const TmpFilePath = path.join(__dirname, 'tmp/f.tmp');
 fse.ensureDirSync(path.join(__dirname, 'tmp'));
 
 const OriginalFile = File;
@@ -23,25 +23,25 @@ export function removeHookFromFile() {
 }
 
 export function openTruncated(): IFile {
-  const fd = fs.openSync(path.join(__dirname, TmpFilePath), 'w+');
+  const fd = fs.openSync(TmpFilePath, 'w+');
   return new File(fd);
 }
 
 export function openTruncatedToRead(): IFile {
-  fs.writeFileSync(path.join(__dirname, TmpFilePath), '', { flag: 'w' });
-  const fd = fs.openSync(path.join(__dirname, TmpFilePath), 'r');
+  fs.writeFileSync(TmpFilePath, '', { flag: 'w' });
+  const fd = fs.openSync(TmpFilePath, 'r');
   return new File(fd);
 }
 
-export function openWithContent(content: Buffer) {
-  fs.writeFileSync(path.join(__dirname, TmpFilePath), content, { flag: 'w' });
-  const fd = fs.openSync(path.join(__dirname, TmpFilePath), 'w+');
+export function openWithContent(content: Buffer): IFile {
+  fs.writeFileSync(TmpFilePath, content, { flag: 'w' });
+  const fd = fs.openSync(TmpFilePath, 'w+');
   return new File(fd);
 }
 
-export function openToReadWithContent(content: Buffer) {
-  fs.writeFileSync(path.join(__dirname, TmpFilePath), content, { flag: 'w' });
-  const fd = fs.openSync(path.join(__dirname, TmpFilePath), 'r');
+export function openToReadWithContent(content: Buffer): IFile {
+  fs.writeFileSync(TmpFilePath, content, { flag: 'w' });
+  const fd = fs.openSync(TmpFilePath, 'r');
   return new File(fd);
 }
 

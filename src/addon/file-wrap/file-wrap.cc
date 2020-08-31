@@ -201,7 +201,10 @@ namespace FileWrap {
 
          auto size = (size_t)info[0].As<Number>()->Value();
          auto obj = Unwrap<File>(info.Holder());
-         SetFileBufSize(obj->file, NULL, _IOFBF, size);
+         if (size != 0)
+            SetFileBufSize(obj->file, NULL, _IOFBF, size);
+         else
+            SetFileBufSize(obj->file, NULL, _IONBF, 0);
       });
    }
 }
