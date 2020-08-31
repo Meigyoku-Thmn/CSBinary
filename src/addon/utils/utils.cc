@@ -1,5 +1,6 @@
 #include "utils.h"
 #include <cstdio>
+#include <cmath>
 #ifndef _WIN32
 #include <unistd.h>
 #endif
@@ -164,19 +165,19 @@ IOState GetFileState(int fd) {
    rs.canAppend = isAppend;
    rs.canSeek = fseek(fd, 0, SEEK_CUR) == 0;
    if (isRead == false && isWrite == true && isAppend == true) {
-      rs.posixFlag = O_WRONLY | O_APPEND | O_BINARY;
+      rs.posixFlag = O_WRONLY | O_APPEND;
       rs.stdioFlag = "ab";
    } else if (isRead == true && isWrite == true && isAppend == true) {
-      rs.posixFlag = O_RDWR | O_APPEND | O_BINARY;
+      rs.posixFlag = O_RDWR | O_APPEND;
       rs.stdioFlag = "a+b";
    } else if (isRead == true && isWrite == false && isAppend == false) {
-      rs.posixFlag = O_RDONLY | O_BINARY;
+      rs.posixFlag = O_RDONLY;
       rs.stdioFlag = "rb";
    } else if (isRead == true && isWrite == true && isAppend == false) {
-      rs.posixFlag = O_RDWR | O_BINARY;
+      rs.posixFlag = O_RDWR;
       rs.stdioFlag = "r+b";
    } else if (isRead == false && isWrite == true && isAppend == false) {
-      rs.posixFlag = O_WRONLY | O_BINARY;
+      rs.posixFlag = O_WRONLY;
       rs.stdioFlag = "wb";
    } else {
       // This should not happen
