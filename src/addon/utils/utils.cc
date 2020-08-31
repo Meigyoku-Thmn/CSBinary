@@ -163,7 +163,7 @@ IOState GetFileState(int fd) {
    rs.canRead = isRead;
    rs.canWrite = isWrite;
    rs.canAppend = isAppend;
-   rs.canSeek = fseek(fd, 0, SEEK_CUR) == 0;
+   rs.canSeek = lseek(fd, 0, SEEK_CUR) != -1;
    if (isRead == false && isWrite == true && isAppend == true) {
       rs.posixFlag = O_WRONLY | O_APPEND;
       rs.stdioFlag = "ab";
