@@ -1,19 +1,9 @@
 import assert from 'assert';
-import { randomFillSync } from 'crypto';
-import { isEqual } from 'lodash';
-import {
-  BYTE_MIN, BYTE_MAX, SBYTE_MIN, SBYTE_MAX, SHORT_MIN, SHORT_MAX, USHORT_MIN, USHORT_MAX,
-  INT_MIN, INT_MAX, UINT_MIN, UINT_MAX, LONG_MIN, LONG_MAX, ULONG_MIN, ULONG_MAX
-} from '../src/constants/number';
-import { CSCode } from '../src/constants/error';
 import fs from 'fs';
-import { getRandomInt, openTruncated, installHookToFile, removeHookFromFile, openToReadWithContent, openWithContent, TmpFilePath } from './utils';
-import { BinaryReader } from '../src/binary-reader';
-import { BinaryWriter } from '../src/binary-writer';
+import { openTruncated, installHookToFile, removeHookFromFile, openToReadWithContent, openWithContent, TmpFilePath } from './utils';
 import { SeekOrigin } from '../src/constants/mode';
-import { writeByte, openNullDevice } from '../src/utils/file';
+import { openNullDevice } from '../src/utils/file';
 import { IFile } from '../src/addon/file';
-import { Decoder } from '../src/encoding';
 
 describe('File | Arguments Validation Test', () => {
   let fileArr: IFile[] = [];

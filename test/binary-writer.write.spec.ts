@@ -9,6 +9,7 @@ import { BinaryWriter } from '../src/binary-writer';
 import { SeekOrigin } from '../src/constants/mode';
 import { openTruncated, installHookToFile, removeHookFromFile } from './utils';
 import { IFile } from '../src/addon/file';
+import { Encoding } from '../src/encoding';
 
 describe('BinaryWriter | Write Tests', () => {
   let fileArr: IFile[] = [];
@@ -140,17 +141,38 @@ describe('BinaryWriter | Write Tests', () => {
       "\0\0\0\t\t\tHey\"\"", "\u0022\u0011", sb, ''
     ];
 
+    let encoding = new Encoding('utf8');
     writeTest(strArr, (bw, s) => bw.writeString(s), br => br.readString());
+    writeTest(strArr, (bw, s) => bw.writeRawString(s), (br, s) => br.readRawString(encoding.encode(s ?? ' ').length));
+    writeTest(strArr, (bw, s) => bw.writeCString(s), (br, s) => {
+      let rs = br.readRawString(encoding.encode(s ?? ' ').length + 1).replace(/\0*$/g, '');
+      if (rs.length != s.length)
+        assert.fail("String is not null-terminated.");
+      return rs;
+    });
+  });
+
+  it('Write String | Invalid Length', () => {
+    let file = openTruncated();
+    let dw = new BinaryWriter(file, 'utf8', true);
+    dw.write7BitEncodedInt(-1);
+    dw.close();
+    file.seek(0, SeekOrigin.Begin);
+    let dr = new BinaryReader(file);
+    assert.throws(() => dr.readString(), { code: CSCode.InvalidEncodedStringLength });
+    assert.throws(() => dr.readRawString(-1), { code: CSCode.InvalidEncodedStringLength });
   });
 
   it('Write String | Null', () => {
     let file = openTruncated();
     let dw2 = new BinaryWriter(file);
     assert.throws(() => dw2.writeString(null), TypeError);
+    assert.throws(() => dw2.writeCString(null), TypeError);
+    assert.throws(() => dw2.writeRawString(null), TypeError);
     dw2.close();
   });
 
-  function writeTest<T>(testElements: T[], write: (w: BinaryWriter, s: T) => void, read: (r: BinaryReader) => T) {
+  function writeTest<T>(testElements: T[], write: (w: BinaryWriter, s: T) => void, read: (r: BinaryReader, s?: T) => T) {
     let file = openTruncated();
     let writer = new BinaryWriter(file, 'utf8', true);
     let reader = new BinaryReader(file);
@@ -163,7 +185,7 @@ describe('BinaryWriter | Write Tests', () => {
     file.seek(0, SeekOrigin.Begin);
 
     for (let i = 0; i < testElements.length; i++) {
-      assert.strictEqual(read(reader).toString(), testElements[i].toString());
+      assert.strictEqual(read(reader, testElements[i]).toString(), testElements[i].toString());
     }
 
     // We've reached the end of the stream.  Check for expected EndOfStreamException

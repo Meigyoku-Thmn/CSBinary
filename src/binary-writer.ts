@@ -6,7 +6,6 @@ import {
   INT_MIN, INT_MAX, LONG_MIN, LONG_MAX, MASK_8_BIT, LONG_WRAP, BIG_0, BIG_7Fh, BIG_SEVEN, INT_WRAP
 } from './constants/number';
 import { IEncoding, Encoding } from './encoding';
-import { StringMode } from './constants/mode';
 import { IFile } from './addon/file';
 
 type char = string;
@@ -31,16 +30,18 @@ export class BinaryWriter {
    * @param leaveOpen `true` to leave the file open after the BinaryWriter object is disposed; otherwise, `false`.
    */
   constructor(output: IFile, encoding: BufferEncoding | string | IEncoding = 'utf8', leaveOpen = false) {
-    if (typeof output != 'object') throw TypeError('"output" must be an object that implement the IFile interface.');
-    if (typeof encoding != 'string') throw TypeError('"encoding" must be a string or an instance that implements IEncoding.');
+    if (output == null || typeof output != 'object')
+      throw TypeError('"output" must be an object that implement the IFile interface.');
     if (typeof leaveOpen != 'boolean') throw TypeError('"leaveOpen" must be a boolean.');
     if (!output.canWrite) raise(ReferenceError('Output file is not writable.'), CSCode.FileNotWritable);
 
     this._file = output;
     if (typeof encoding == 'string')
       this._encoding = new Encoding(encoding);
-    else if (typeof encoding == 'object')
+    else if (encoding != null && typeof encoding == 'object')
       this._encoding = encoding as IEncoding;
+    else
+      throw TypeError('"encoding" must be a string or an instance that implements IEncoding.');
     this._leaveOpen = leaveOpen;
   }
 
@@ -183,8 +184,6 @@ export class BinaryWriter {
     this.throwIfDisposed();
     let _chars = '';
     let end = index + count;
-    if (end > chars.length)
-      end = chars.length;
     for (let i = index; i < end; i++) {
       if (chars[i].length > 1)
         throw RangeError('Please use an actual single character array.');
@@ -204,11 +203,6 @@ export class BinaryWriter {
     let buffer = Buffer.allocUnsafe(8);
     buffer.writeDoubleLE(value);
     this._file.write(buffer);
-  }
-
-  /** Not supported */
-  writeDecimal(value: number): void {
-    throw Error('Decimal is not supported.');
   }
 
   /**
@@ -300,20 +294,32 @@ export class BinaryWriter {
    * @param value The value to write.
    * @param mode CStr to write C-String, RawStr to write the string as-is without null-terminated or prefixed-length
    */
-  writeString(value: string, mode?: StringMode): void {
+  writeString(value: string): void {
     if (typeof value != 'string') throw TypeError('"value" must be a string.');
     this.throwIfDisposed();
 
-    if (mode != StringMode.CStr && mode != StringMode.RawStr) {
-      let totalBytes = this._encoding.byteLength(value);
-      this.write7BitEncodedInt(totalBytes);
-    }
+    let totalBytes = this._encoding.byteLength(value);
+    this.write7BitEncodedInt(totalBytes);
     const bytes = this._encoding.encode(value);
     this._file.write(bytes);
-    if (mode == StringMode.CStr) {
-      const nullBytes = this._encoding.encode('\0');
-      this._file.write(nullBytes);
-    }
+  }
+
+  writeCString(value: string): void {
+    if (typeof value != 'string') throw TypeError('"value" must be a string.');
+    this.throwIfDisposed();
+
+    const bytes = this._encoding.encode(value);
+    this._file.write(bytes);
+    const nullBytes = this._encoding.encode('\0');
+    this._file.write(nullBytes);
+  }
+
+  writeRawString(value: string): void {
+    if (typeof value != 'string') throw TypeError('"value" must be a string.');
+    this.throwIfDisposed();
+
+    const bytes = this._encoding.encode(value);
+    this._file.write(bytes);
   }
 
   /**

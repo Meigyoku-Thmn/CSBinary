@@ -23,8 +23,6 @@ export class BinaryReader {
   private readonly _leaveOpen: boolean = false;
   private _disposed = false;
 
-  private _canSeek = false;
-
   // use for peekChar
   private _nReadBytes = 0;
 
@@ -35,19 +33,20 @@ export class BinaryReader {
    * @param leaveOpen `true` to leave the file open after the BinaryReader object is disposed; otherwise, `false`. Default to `false`.
    */
   constructor(input: IFile, encoding: BufferEncoding | string | IEncoding = 'utf8', leaveOpen = false) {
-    if (typeof input != 'object') throw TypeError('"input" must be an object that implement the IFile interface.');
-    if (typeof encoding != 'string') throw TypeError('"encoding" must be a string or an instance that implements IEncoding.');
+    if (input == null || typeof input != 'object')
+      throw TypeError('"input" must be an object that implement the IFile interface.');
     if (typeof leaveOpen != 'boolean') throw TypeError('"leaveOpen" must be a boolean.');
 
-    this._canSeek = input.canSeek;
-    if (!this._canSeek)
+    if (!input.canRead)
       raise(ReferenceError('Input file is not readable.'), CSCode.FileNotReadable);
 
     this._file = input;
     if (typeof encoding == 'string')
       this._decoder = new Encoding(encoding).getDecoder();
-    else if (typeof encoding == 'object')
+    else if (encoding != null && typeof encoding == 'object')
       this._decoder = (encoding as IEncoding).getDecoder();
+    else
+      throw TypeError('"encoding" must be a string or an instance that implements IEncoding.');
 
     // For Encodings that always use 2 bytes per char (or more),
     // special case them here to make Read() & Peek() faster.
@@ -88,7 +87,7 @@ export class BinaryReader {
   peekChar(): number {
     this.throwIfDisposed();
 
-    if (!this._canSeek) {
+    if (!this._file.canSeek) {
       return -1;
     }
 
@@ -148,7 +147,7 @@ export class BinaryReader {
       catch (err) {
         // Handle surrogate char
 
-        if (err.code == CSCode.SurrogateCharHit && this._canSeek) {
+        if (err.code == CSCode.SurrogateCharHit && this._file.canSeek) {
           this._file.seek(-this._nReadBytes, SeekOrigin.Current);
         }
         // else - we can't do much here
@@ -270,11 +269,6 @@ export class BinaryReader {
     return this.internalRead(8).readDoubleLE();
   }
 
-  /** Not supported */
-  readDecimal(): number {
-    throw TypeError('Decimal type number is not supported.');
-  }
-
   /**
    * Reads a string from the current file. The string is prefixed with the length, encoded as an integer seven bits at a time.
    * @returns The string being read.
@@ -282,13 +276,18 @@ export class BinaryReader {
   readString(): string {
     this.throwIfDisposed();
 
-    let currPos = 0;
-    let n: number;
-    let stringLength: number;
-    let readLength: number;
-
     // Length of the string in bytes, not chars
-    stringLength = this.read7BitEncodedInt();
+    let stringLength = this.read7BitEncodedInt();
+    return this.internalReadString(stringLength);
+  }
+
+  readRawString(length: number): string {
+    this.throwIfDisposed();
+
+    return this.internalReadString(length);
+  }
+
+  private internalReadString(stringLength: number): string {
     if (stringLength < 0) {
       raise(RangeError(`Invalid string\'s length: ${stringLength}.`), CSCode.InvalidEncodedStringLength);
     }
@@ -297,6 +296,9 @@ export class BinaryReader {
       return '';
     }
 
+    let currPos = 0;
+    let n: number;
+    let readLength: number;
     let _charBytes = Buffer.allocUnsafe(MaxCharBytesSize);
 
     let sb = '';

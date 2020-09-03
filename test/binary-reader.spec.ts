@@ -72,7 +72,6 @@ describe('BinaryReader Tests', () => {
 
     runTest(writer => writer.writeSingle(0.1234), reader => reader.readSingle());
     runTest(writer => writer.writeDouble(0.1234), reader => reader.readDouble());
-    // runTest(writer => writer.write((decimal)0.1234), reader => reader.readDecimal());
 
     // test non-numeric primitive types
 
@@ -81,6 +80,8 @@ describe('BinaryReader Tests', () => {
     runTest(writer => writer.writeString(''), reader => reader.readString());
     runTest(writer => writer.writeString("hello world"), reader => reader.readString());
     runTest(writer => writer.writeString('x'.repeat(1024 * 1024)), reader => reader.readString());
+    runTest(writer => writer.writeCString("hello"), reader => reader.readRawString("hello".length + 1));
+    runTest(writer => writer.writeRawString("hello"), reader => reader.readRawString("hello".length));
 
     function runTest(writeAction: (w: BinaryWriter) => void, readAction: (r: BinaryReader) => void) {
       let encoding: BufferEncoding = 'utf8';
@@ -177,7 +178,6 @@ describe('BinaryReader Tests', () => {
     assert.throws(() => binaryReader.readBytes(1), { code: CSCode.FileIsClosed });
     assert.throws(() => binaryReader.readChar(), { code: CSCode.FileIsClosed });
     assert.throws(() => binaryReader.readChars(1), { code: CSCode.FileIsClosed });
-    // assert.throws(() => binaryReader.readDecimal(), ReferenceError);
     assert.throws(() => binaryReader.readDouble(), { code: CSCode.FileIsClosed });
     assert.throws(() => binaryReader.readInt16(), { code: CSCode.FileIsClosed });
     assert.throws(() => binaryReader.readInt32(), { code: CSCode.FileIsClosed });
@@ -185,6 +185,7 @@ describe('BinaryReader Tests', () => {
     assert.throws(() => binaryReader.readSByte(), { code: CSCode.FileIsClosed });
     assert.throws(() => binaryReader.readSingle(), { code: CSCode.FileIsClosed });
     assert.throws(() => binaryReader.readString(), { code: CSCode.FileIsClosed });
+    assert.throws(() => binaryReader.readRawString(12), { code: CSCode.FileIsClosed });
     assert.throws(() => binaryReader.readUInt16(), { code: CSCode.FileIsClosed });
     assert.throws(() => binaryReader.readUInt32(), { code: CSCode.FileIsClosed });
     assert.throws(() => binaryReader.readUInt64(), { code: CSCode.FileIsClosed });
@@ -348,6 +349,21 @@ describe('BinaryReader Tests', () => {
     binaryReader.close();
     assert.throws(() => binaryReader.readIntoChars([]), { code: CSCode.FileIsClosed });
   });
+
+  it('PeekChar', () => {
+    let file = openToReadWithContent(Buffer.from('h'));
+    let binaryReader = new BinaryReader(file);
+    assert.ok(binaryReader.peekChar() == 'h'.charCodeAt(0));
+    binaryReader.readCharCode();
+    assert.ok(binaryReader.peekChar() == -1);
+  });
+
+  it('PeekChar | ThrowIfDisposed', () => {
+    let file = openTruncated();
+    let binaryReader = new BinaryReader(file);
+    binaryReader.close();
+    assert.throws(() => binaryReader.peekChar(), { code: CSCode.FileIsClosed });
+  })
 
   it('Leave Open', () => {
     let file = openTruncated();

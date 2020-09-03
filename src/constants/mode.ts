@@ -6,8 +6,3 @@ export enum SeekOrigin {
   Current = SEEK_CUR,
   End = SEEK_END,
 }
-
-export enum StringMode {
-  CStr = 1,
-  RawStr = 2,
-}

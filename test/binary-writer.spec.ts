@@ -7,6 +7,7 @@ import { BinaryWriter } from '../src/binary-writer';
 import fs from 'fs';
 import { SeekOrigin } from '../src/constants/mode';
 import { IFile } from '../src/addon/file';
+import { Encoding } from '../src/encoding';
 
 describe('BinaryWriter Tests', () => {
   let fileArr: IFile[] = [];
@@ -58,12 +59,18 @@ describe('BinaryWriter Tests', () => {
       let file = openTruncated();
       let writer = new BinaryWriter(file, encoding as BufferEncoding);
       let reader = new BinaryReader(file, encoding as BufferEncoding);
+      let _encoding = new Encoding(encoding);
+      let nullLen = _encoding.encode('\0').length;
 
       writer.writeString(testString);
+      writer.writeCString(testString);
+      writer.writeRawString(testString);
       writer.flush();
       file.seek(0, SeekOrigin.Begin);
 
-      assert.equal(reader.readString(), testString);
+      assert.equal(reader.readString(), testString);      
+      assert.equal(reader.readRawString(_encoding.encode(testString).length + nullLen).replace(/\0*$/g, ''), testString);
+      assert.equal(reader.readRawString(_encoding.encode(testString).length), testString);
       writer.close();
     }
   });
@@ -296,6 +303,8 @@ describe('BinaryWriter Tests', () => {
     assert.throws(() => binaryWriter.writeUInt32(4), { code: CSCode.FileIsClosed });
     assert.throws(() => binaryWriter.writeUInt64(BigInt(5)), { code: CSCode.FileIsClosed });
     assert.throws(() => binaryWriter.writeString("Bah"), { code: CSCode.FileIsClosed });
+    assert.throws(() => binaryWriter.writeCString("Hello"), { code: CSCode.FileIsClosed });
+    assert.throws(() => binaryWriter.writeRawString("Bye"), { code: CSCode.FileIsClosed });
   }
 
   it('OutStream', () => {
