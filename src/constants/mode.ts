@@ -1,5 +1,12 @@
 import { constants } from "../addon";
-const { SEEK_CUR, SEEK_SET, SEEK_END } = constants;
+const {
+  /** @internal */
+  SEEK_CUR,
+  /** @internal */
+  SEEK_SET,
+  /** @internal */
+  SEEK_END
+} = constants;
 
 export enum SeekOrigin {
   Begin = SEEK_SET,

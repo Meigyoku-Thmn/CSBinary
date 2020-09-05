@@ -20,5 +20,18 @@
     "dist/*",
     "types/*",
     "test/*"
-  ]
+  ],
+  "typedocOptions": {
+    "mode": "file",
+    "out": "docs",
+    "name": "CSBinary",
+    "includeVersion": true,
+    "stripInternal": true,
+    "exclude": [
+      "src/utils/**",      
+      "src/constants/error.ts",
+      "src/constants/number.ts",
+      "src/addon/index.ts"
+    ]
+  }
 }

@@ -9,7 +9,9 @@ import { IFile } from './addon/file';
 
 type char = string;
 
+/**@internal */
 const MaxCharBytesSize = 128;
+/**@internal */
 const BufferSize = 16;
 /**
  * Reads primitive data types as binary values in a specific encoding.

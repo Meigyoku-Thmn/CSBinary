@@ -1,0 +1,264 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>CSBinary - v2.0.0</title>
+	<meta name="description" content="Documentation for CSBinary - v2.0.0">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.json" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">CSBinary - v2.0.0</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+							<input type="checkbox" id="tsd-filter-only-exported" />
+							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="globals.html">Globals</a>
+				</li>
+			</ul>
+			<h1>CSBinary - v2.0.0</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<a href="#csbinary" id="csbinary" style="color: inherit; text-decoration: none;">
+					<h1>CSBinary</h1>
+				</a>
+				<p>I ported BinaryReader and BinaryWriter from Dotnet Core to NodeJS because reading and writing binary files non-linearly in NodeJS is very tedious.</p>
+				<p>Non-linear data processing (that means you can jump/&quot;seek&quot; back and forth at will all across a file to read its&#39; data) is not a popular thing in NodeJS world (people usually do streaming instead), but when you have to, then this library will come in handy. Beside, you want to write code in a scripting language for simplicity and convenience.</p>
+				<p>You don&#39;t have to write code like this anymore:</p>
+				<pre><code class="language-js"><span class="hljs-comment">// read one byte, two bytes and four bytes</span>
+<span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;fs&#x27;</span>);
+<span class="hljs-keyword">const</span> filePath = <span class="hljs-string">&#x27;&lt;put your file path here&gt;&#x27;</span>;
+<span class="hljs-keyword">const</span> fd = fs.openSync(filePath, <span class="hljs-string">&#x27;r&#x27;</span>);
+<span class="hljs-keyword">const</span> buffer = Buffer.alloc(<span class="hljs-number">4</span>);
+fs.readSync(fd, buffer, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>);
+<span class="hljs-built_in">console</span>.log(buffer.readUInt8());
+fs.readSync(fd, buffer, <span class="hljs-number">0</span>, <span class="hljs-number">2</span>);
+<span class="hljs-built_in">console</span>.log(buffer.readUInt16LE());
+fs.readSync(fd, buffer, <span class="hljs-number">0</span>, <span class="hljs-number">4</span>);
+<span class="hljs-built_in">console</span>.log(buffer.readUInt32LE());
+fs.closeSync(fd);</code></pre>
+				<p>With this library, you can just write:</p>
+				<pre><code class="language-js"><span class="hljs-comment">// read one byte, two bytes and four bytes</span>
+<span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;fs&#x27;</span>);
+<span class="hljs-keyword">const</span> { BinaryReader } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;csbinary&#x27;</span>);
+<span class="hljs-keyword">const</span> filePath = <span class="hljs-string">&#x27;&lt;put your file path here&gt;&#x27;</span>;
+<span class="hljs-keyword">const</span> reader = <span class="hljs-keyword">new</span> BinaryReader(fs.openSync(filePath, <span class="hljs-string">&#x27;r&#x27;</span>));
+<span class="hljs-built_in">console</span>.log(reader.readUInt8());
+<span class="hljs-built_in">console</span>.log(reader.readUInt16());
+<span class="hljs-built_in">console</span>.log(reader.readUInt32());
+reader.close();</code></pre>
+				<a href="#install" id="install" style="color: inherit; text-decoration: none;">
+					<h1>Install</h1>
+				</a>
+				<p>There is no package on npm yet.</p>
+				<pre><code class="language-bash">npm i --save github:Meigyoku-Thmn/CSBinary<span class="hljs-comment">#v1.1.0</span></code></pre>
+				<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
+					<h1>Usage</h1>
+				</a>
+				<p>Almost the same as .NET&#39;s BinaryReader and BinaryWriter.<br></p>
+				<p>Please refer to <a href="entry.ts">entry.ts</a> to know what are exported.</p>
+				<a href="#binaryreader" id="binaryreader" style="color: inherit; text-decoration: none;">
+					<h2>BinaryReader</h2>
+				</a>
+				<p>Mapping table of BinaryReader&#39;s methods from .NET to NodeJS:
+					| Method in .NET                                                | Method in NodeJS |
+					|---------------------------------------------------------------|------------------|
+					| BinaryReader(Stream input, Encoding encoding, bool leaveOpen) | constructor(input: number, encoding: BufferEncoding | string | IEncoding = &#39;utf8&#39;, leaveOpen = false)               |
+					| Stream BaseStream { get; }                                    | get baseFd(): number |
+					| void Close()                                                  | close(): void |
+					|                                                               | seek(offset: number, origin: SeekOrigin): number |
+					| int PeekChar()                                                | peekChar(): number
+					| int Read()                                                    | readCharCode(): number
+					| byte ReadByte()                                               | readByte(): number
+					| sbyte ReadSByte()                                             | readSByte(): number
+					| bool ReadBoolean()                                            | readBoolean(): boolean
+					| char ReadChar()                                               | readChar(): char
+					| short ReadInt16()                                             | readInt16(): number
+					| ushort ReadUInt16()                                           | readUInt16(): number
+					| int ReadInt32()                                               | readInt32(): number
+					| uint ReadUInt32()                                             | readUInt32(): number
+					| long ReadInt64()                                              | readInt64(): bigint
+					| ulong ReadUInt64()                                            | readUInt64(): bigint
+					| float ReadSingle()                                            | readSingle(): number
+					| double ReadDouble()                                           | readDouble(): number
+					| string ReadString()                                           | readString(): string
+					| int Read(char[] buffer, int index, int count)                 | readIntoCharsEx(buffer: char[], index: number, count: number): number
+					| int Read(Span<char> buffer)                                   | readIntoChars(buffer: char[]): number
+						| char[] ReadChars(int count)                                   | readChars(count: number): char[]
+						| int Read(byte[] buffer, int index, int count)                 | readIntoBufferEx(buffer: Buffer, index: number, count: number): number
+						| int Read(Span<byte> buffer)                                   | readIntoBuffer(buffer: Buffer): number
+							| byte[] ReadBytes(int count)                                   | readBytes(count: number): Buffer
+							| int Read7BitEncodedInt()                                      | read7BitEncodedInt(): number
+				| long Read7BitEncodedInt64()                                   | read7BitEncodedInt64(): bigint</p>
+				<a href="#binarywriter" id="binarywriter" style="color: inherit; text-decoration: none;">
+					<h2>BinaryWriter</h2>
+				</a>
+				<p>Mapping table of BinaryWriter&#39;s method from .NET to NodeJS:
+					| Method in .NET                                                 | Method in NodeJS |
+					|----------------------------------------------------------------|------------------|
+					| BinaryWriter(Stream output, Encoding encoding, bool leaveOpen) | constructor(output: number, encoding: BufferEncoding | string | IEncoding = &#39;utf8&#39;, leaveOpen = false) |
+					| static readonly BinaryWriter Null                              | static get null(): BinaryWriter
+					| Stream BaseStream { get; }                                     | get baseFd(): number
+					| void Close()                                                   | close(): void
+					|                                                                | async closeAsync(): Promise&lt;void&gt;
+					| void Flush()                                                   | flush(): void
+					| long Seek(int offset, SeekOrigin origin)                       | seek(offset: number, origin: SeekOrigin): number
+					| void Write(bool value)                                         | writeBoolean(value: boolean): void
+					| void Write(byte value)                                         | writeByte(value: number): void
+					| void Write(sbyte value)                                        | writeSByte(value: number): void
+					| void Write(byte[] buffer)                                      | writeBuffer(buffer: Buffer): void
+					| void Write(byte[] buffer, int index, int count)                | writeBufferEx(buffer: Buffer, index: number, count: number): void
+					| void Write(char ch)                                            | writeChar(ch: char): void
+					| void Write(char[] chars)                                       | writeChars(chars: char[]): void
+					| void Write(char[] chars, int index, int count)                 | writeCharsEx(chars: char[], index: number, count: number): void
+					| void Write(double value)                                       | writeDouble(value: number): void
+					| void Write(short value)                                        | writeInt16(value: number): void
+					| void Write(ushort value)                                       | writeUInt16(value: number): void
+					| void Write(int value)                                          | writeInt32(value: number): void
+					| void Write(uint value)                                         | writeUInt32(value: number): void
+					| void Write(long value)                                         | writeInt64(value: bigint): void
+					| void Write(ulong value)                                        | writeUInt64(value: bigint): void
+					| void Write(float value)                                        | writeSingle(value: number): void
+					| void Write(string value)                                       | writeString(value: string, mode?: StringMode): void
+					| void Write7BitEncodedInt(int value)                            | write7BitEncodedInt(value: number): void
+				| void Write7BitEncodedInt64(long value)                         | write7BitEncodedInt64(value: bigint): void</p>
+				<a href="#encoding" id="encoding" style="color: inherit; text-decoration: none;">
+					<h1>Encoding</h1>
+				</a>
+				<p>You can provide your own encoding by implementing the IEncoding interface, then pass your encoding instance to BinaryReader and BinaryWriter&#39;s constructor. You don&#39;t have to implement everything in the IEncoding interface.</p>
+				<a href="#limitations" id="limitations" style="color: inherit; text-decoration: none;">
+					<h1>Limitations</h1>
+				</a>
+				<ul>
+					<li>Dispose Pattern and Decimal are not supported.<br></li>
+					<li>File Buffering is not supported (please don&#39;t confuse this with Buffer class in NodeJS, they are different things).</li>
+					<li>There is no memory optimization for writing overly long string in BinaryWriter, so to avoid massive memory allocation you should not write such string.</li>
+					<li>writeChars and writeCharsEx will concat the array before writing, this may be slow on your system, I&#39;m still not sure about that.</li>
+				</ul>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="globals.html"><em>Globals</em></a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+					<li class=" tsd-kind-enum">
+						<a href="enums/seekorigin.html" class="tsd-kind-icon">Seek<wbr>Origin</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/binaryreader.html" class="tsd-kind-icon">Binary<wbr>Reader</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/binarywriter.html" class="tsd-kind-icon">Binary<wbr>Writer</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/decoder.html" class="tsd-kind-icon">Decoder</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/encoder.html" class="tsd-kind-icon">Encoder</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/encoding.html" class="tsd-kind-icon">Encoding</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/idecoder.html" class="tsd-kind-icon">IDecoder</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/iencoder.html" class="tsd-kind-icon">IEncoder</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/iencoding.html" class="tsd-kind-icon">IEncoding</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/ifile.html" class="tsd-kind-icon">IFile</a>
+					</li>
+					<li class=" tsd-kind-type-alias">
+						<a href="globals.html#char" class="tsd-kind-icon">char</a>
+					</li>
+					<li class=" tsd-kind-variable">
+						<a href="globals.html#file" class="tsd-kind-icon">File</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected property</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+</body>
+</html>
