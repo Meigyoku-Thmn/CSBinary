@@ -12,7 +12,8 @@
     "build": "node-gyp build",
     "rebuild": "node-gyp rebuild && rimraf types",
     "clean": "node-gyp clean && rimraf dist types coverage test/tmp",
-    "postinstall": "tsc"
+    "postinstall": "tsc",
+    "gen-doc": "typedoc"
   },
   "files": [
     "src",
@@ -39,6 +40,7 @@
     "rimraf": "^3.0.2",
     "ts-mocha": "^7.0.0",
     "ts-node": "^8.10.2",
+    "typedoc": "^0.19.1",
     "typescript": "^3.9.7"
   },
   "dependencies": {

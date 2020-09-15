@@ -29,8 +29,8 @@ export class BinaryReader {
   private _nReadBytes = 0;
 
   /**
-   * Initializes a new instance of the BinaryReader class based on the specified file descriptor and character encoding, and optionally leaves the file open.
-   * @param input The input file descriptor.
+   * Initializes a new instance of the BinaryReader class based on the specified IFile instance and character encoding, and optionally leaves the file open.
+   * @param input The input IFile instance.
    * @param encoding The character encoding to use, or an object implementing the IEncoding interface. Default to `'utf8'`
    * @param leaveOpen `true` to leave the file open after the BinaryReader object is disposed; otherwise, `false`. Default to `false`.
    */
@@ -58,7 +58,7 @@ export class BinaryReader {
   }
 
   /**
-   * Get the underlying file descriptor of the BinaryReader.
+   * Get the underlying file instance of the BinaryReader.
    */
   get file(): IFile {
     return this._file;
@@ -283,6 +283,11 @@ export class BinaryReader {
     return this.internalReadString(stringLength);
   }
 
+  /**
+   * Reads a string from the current file. You have to provide the length of it.
+   * @param length The number of bytes to read.
+   * @returns The string being read.
+   */
   readRawString(length: number): string {
     this.throwIfDisposed();
 

@@ -66,18 +66,19 @@
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>Converts a sequence of encoded bytes into a set of characters.</p>
+					</div>
+				</div>
+			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
 						<span class="target">IDecoder</span>
 					</li>
-				</ul>
-			</section>
-			<section class="tsd-panel">
-				<h3>Implemented by</h3>
-				<ul class="tsd-hierarchy">
-					<li><a href="../classes/decoder.html" class="tsd-signature-type">Decoder</a></li>
 				</ul>
 			</section>
 			<section class="tsd-panel-group tsd-index-group">
@@ -108,9 +109,14 @@
 					<div class="tsd-signature tsd-kind-icon">has<wbr>State<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Meigyoku-Thmn/CSBinary/blob/cd030cd/src/encoding.ts#L20">src/encoding.ts:20</a></li>
+							<li>Defined in <a href="https://github.com/Meigyoku-Thmn/CSBinary/blob/22eed67/src/encoding.ts#L44">src/encoding.ts:44</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Check if this decoder currently has accumulated state in the internal buffer.</p>
+						</div>
+					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
@@ -125,9 +131,14 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Meigyoku-Thmn/CSBinary/blob/cd030cd/src/encoding.ts#L22">src/encoding.ts:22</a></li>
+									<li>Defined in <a href="https://github.com/Meigyoku-Thmn/CSBinary/blob/22eed67/src/encoding.ts#L51">src/encoding.ts:51</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns any remaining input stored in the internal buffer as a string. Bytes representing incomplete characters will be replaced with substitution characters appropriate for the character encoding.</p>
+								</div>
+							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
 						</li>
 					</ul>
@@ -142,13 +153,21 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Meigyoku-Thmn/CSBinary/blob/cd030cd/src/encoding.ts#L21">src/encoding.ts:21</a></li>
+									<li>Defined in <a href="https://github.com/Meigyoku-Thmn/CSBinary/blob/22eed67/src/encoding.ts#L49">src/encoding.ts:49</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns a decoded string, ensuring that any incomplete multibyte characters at the end of the Buffer are omitted from the returned string and stored in an internal buffer for the next call to write() or end().</p>
+								</div>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>buf: <span class="tsd-signature-type">Buffer</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>A buffer containing the bytes to decode.</p>
+									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
@@ -175,15 +194,6 @@
 					</li>
 					<li class=" tsd-kind-class">
 						<a href="../classes/binarywriter.html" class="tsd-kind-icon">Binary<wbr>Writer</a>
-					</li>
-					<li class=" tsd-kind-class">
-						<a href="../classes/decoder.html" class="tsd-kind-icon">Decoder</a>
-					</li>
-					<li class=" tsd-kind-class">
-						<a href="../classes/encoder.html" class="tsd-kind-icon">Encoder</a>
-					</li>
-					<li class=" tsd-kind-class">
-						<a href="../classes/encoding.html" class="tsd-kind-icon">Encoding</a>
 					</li>
 				</ul>
 				<ul class="current">

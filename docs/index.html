@@ -72,114 +72,83 @@
 				<p>You don&#39;t have to write code like this anymore:</p>
 				<pre><code class="language-js"><span class="hljs-comment">// read one byte, two bytes and four bytes</span>
 <span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;fs&#x27;</span>);
-<span class="hljs-keyword">const</span> filePath = <span class="hljs-string">&#x27;&lt;put your file path here&gt;&#x27;</span>;
-<span class="hljs-keyword">const</span> fd = fs.openSync(filePath, <span class="hljs-string">&#x27;r&#x27;</span>);
+
+<span class="hljs-keyword">const</span> fd = fs.openSync(<span class="hljs-string">&#x27;&lt;put your file path here&gt;&#x27;</span>, <span class="hljs-string">&#x27;r&#x27;</span>);
 <span class="hljs-keyword">const</span> buffer = Buffer.alloc(<span class="hljs-number">4</span>);
+
 fs.readSync(fd, buffer, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>);
 <span class="hljs-built_in">console</span>.log(buffer.readUInt8());
 fs.readSync(fd, buffer, <span class="hljs-number">0</span>, <span class="hljs-number">2</span>);
 <span class="hljs-built_in">console</span>.log(buffer.readUInt16LE());
 fs.readSync(fd, buffer, <span class="hljs-number">0</span>, <span class="hljs-number">4</span>);
 <span class="hljs-built_in">console</span>.log(buffer.readUInt32LE());
+
 fs.closeSync(fd);</code></pre>
 				<p>With this library, you can just write:</p>
 				<pre><code class="language-js"><span class="hljs-comment">// read one byte, two bytes and four bytes</span>
 <span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;fs&#x27;</span>);
-<span class="hljs-keyword">const</span> { BinaryReader } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;csbinary&#x27;</span>);
-<span class="hljs-keyword">const</span> filePath = <span class="hljs-string">&#x27;&lt;put your file path here&gt;&#x27;</span>;
-<span class="hljs-keyword">const</span> reader = <span class="hljs-keyword">new</span> BinaryReader(fs.openSync(filePath, <span class="hljs-string">&#x27;r&#x27;</span>));
+<span class="hljs-keyword">const</span> { BinaryReader, File } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;csbinary&#x27;</span>);
+
+<span class="hljs-keyword">const</span> file = File(fs.openSync(<span class="hljs-string">&#x27;&lt;put your file path here&gt;&#x27;</span>, <span class="hljs-string">&#x27;r&#x27;</span>));
+<span class="hljs-keyword">const</span> reader = <span class="hljs-keyword">new</span> BinaryReader(file);
+
 <span class="hljs-built_in">console</span>.log(reader.readUInt8());
 <span class="hljs-built_in">console</span>.log(reader.readUInt16());
 <span class="hljs-built_in">console</span>.log(reader.readUInt32());
+
 reader.close();</code></pre>
-				<a href="#install" id="install" style="color: inherit; text-decoration: none;">
-					<h1>Install</h1>
+				<a href="#installation" id="installation" style="color: inherit; text-decoration: none;">
+					<h1>Installation</h1>
 				</a>
 				<p>There is no package on npm yet.</p>
-				<pre><code class="language-bash">npm i --save github:Meigyoku-Thmn/CSBinary<span class="hljs-comment">#v1.1.0</span></code></pre>
-				<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
-					<h1>Usage</h1>
+				<pre><code class="language-bash">npm i --save github:Meigyoku-Thmn/CSBinary<span class="hljs-comment">#v2.0.0</span></code></pre>
+				<a href="#api-reference" id="api-reference" style="color: inherit; text-decoration: none;">
+					<h1>API reference</h1>
 				</a>
-				<p>Almost the same as .NET&#39;s BinaryReader and BinaryWriter.<br></p>
-				<p>Please refer to <a href="entry.ts">entry.ts</a> to know what are exported.</p>
-				<a href="#binaryreader" id="binaryreader" style="color: inherit; text-decoration: none;">
-					<h2>BinaryReader</h2>
+				<p>Please refer to {link to documentation}.</p>
+				<a href="#examples" id="examples" style="color: inherit; text-decoration: none;">
+					<h1>Examples</h1>
 				</a>
-				<p>Mapping table of BinaryReader&#39;s methods from .NET to NodeJS:
-					| Method in .NET                                                | Method in NodeJS |
-					|---------------------------------------------------------------|------------------|
-					| BinaryReader(Stream input, Encoding encoding, bool leaveOpen) | constructor(input: number, encoding: BufferEncoding | string | IEncoding = &#39;utf8&#39;, leaveOpen = false)               |
-					| Stream BaseStream { get; }                                    | get baseFd(): number |
-					| void Close()                                                  | close(): void |
-					|                                                               | seek(offset: number, origin: SeekOrigin): number |
-					| int PeekChar()                                                | peekChar(): number
-					| int Read()                                                    | readCharCode(): number
-					| byte ReadByte()                                               | readByte(): number
-					| sbyte ReadSByte()                                             | readSByte(): number
-					| bool ReadBoolean()                                            | readBoolean(): boolean
-					| char ReadChar()                                               | readChar(): char
-					| short ReadInt16()                                             | readInt16(): number
-					| ushort ReadUInt16()                                           | readUInt16(): number
-					| int ReadInt32()                                               | readInt32(): number
-					| uint ReadUInt32()                                             | readUInt32(): number
-					| long ReadInt64()                                              | readInt64(): bigint
-					| ulong ReadUInt64()                                            | readUInt64(): bigint
-					| float ReadSingle()                                            | readSingle(): number
-					| double ReadDouble()                                           | readDouble(): number
-					| string ReadString()                                           | readString(): string
-					| int Read(char[] buffer, int index, int count)                 | readIntoCharsEx(buffer: char[], index: number, count: number): number
-					| int Read(Span<char> buffer)                                   | readIntoChars(buffer: char[]): number
-						| char[] ReadChars(int count)                                   | readChars(count: number): char[]
-						| int Read(byte[] buffer, int index, int count)                 | readIntoBufferEx(buffer: Buffer, index: number, count: number): number
-						| int Read(Span<byte> buffer)                                   | readIntoBuffer(buffer: Buffer): number
-							| byte[] ReadBytes(int count)                                   | readBytes(count: number): Buffer
-							| int Read7BitEncodedInt()                                      | read7BitEncodedInt(): number
-				| long Read7BitEncodedInt64()                                   | read7BitEncodedInt64(): bigint</p>
-				<a href="#binarywriter" id="binarywriter" style="color: inherit; text-decoration: none;">
-					<h2>BinaryWriter</h2>
+				<p>Please refer to {Create a separate example md file, embedding examples from Runkit}</p>
+				<a href="#encoding-and-file" id="encoding-and-file" style="color: inherit; text-decoration: none;">
+					<h1>Encoding and File</h1>
 				</a>
-				<p>Mapping table of BinaryWriter&#39;s method from .NET to NodeJS:
-					| Method in .NET                                                 | Method in NodeJS |
-					|----------------------------------------------------------------|------------------|
-					| BinaryWriter(Stream output, Encoding encoding, bool leaveOpen) | constructor(output: number, encoding: BufferEncoding | string | IEncoding = &#39;utf8&#39;, leaveOpen = false) |
-					| static readonly BinaryWriter Null                              | static get null(): BinaryWriter
-					| Stream BaseStream { get; }                                     | get baseFd(): number
-					| void Close()                                                   | close(): void
-					|                                                                | async closeAsync(): Promise&lt;void&gt;
-					| void Flush()                                                   | flush(): void
-					| long Seek(int offset, SeekOrigin origin)                       | seek(offset: number, origin: SeekOrigin): number
-					| void Write(bool value)                                         | writeBoolean(value: boolean): void
-					| void Write(byte value)                                         | writeByte(value: number): void
-					| void Write(sbyte value)                                        | writeSByte(value: number): void
-					| void Write(byte[] buffer)                                      | writeBuffer(buffer: Buffer): void
-					| void Write(byte[] buffer, int index, int count)                | writeBufferEx(buffer: Buffer, index: number, count: number): void
-					| void Write(char ch)                                            | writeChar(ch: char): void
-					| void Write(char[] chars)                                       | writeChars(chars: char[]): void
-					| void Write(char[] chars, int index, int count)                 | writeCharsEx(chars: char[], index: number, count: number): void
-					| void Write(double value)                                       | writeDouble(value: number): void
-					| void Write(short value)                                        | writeInt16(value: number): void
-					| void Write(ushort value)                                       | writeUInt16(value: number): void
-					| void Write(int value)                                          | writeInt32(value: number): void
-					| void Write(uint value)                                         | writeUInt32(value: number): void
-					| void Write(long value)                                         | writeInt64(value: bigint): void
-					| void Write(ulong value)                                        | writeUInt64(value: bigint): void
-					| void Write(float value)                                        | writeSingle(value: number): void
-					| void Write(string value)                                       | writeString(value: string, mode?: StringMode): void
-					| void Write7BitEncodedInt(int value)                            | write7BitEncodedInt(value: number): void
-				| void Write7BitEncodedInt64(long value)                         | write7BitEncodedInt64(value: bigint): void</p>
-				<a href="#encoding" id="encoding" style="color: inherit; text-decoration: none;">
-					<h1>Encoding</h1>
-				</a>
-				<p>You can provide your own encoding by implementing the IEncoding interface, then pass your encoding instance to BinaryReader and BinaryWriter&#39;s constructor. You don&#39;t have to implement everything in the IEncoding interface.</p>
+				<p>You can provide your own encoding by implementing the IEncoding interface, then pass your encoding instance to BinaryReader and BinaryWriter&#39;s constructor. You don&#39;t have to implement everything in the IEncoding interface. Please refer to {Place link to interfaces} to see what can be implemented.</p>
+				<p>Similarly, you can provide your own IFile implementation. Please refer to {Place link to interface} to see what can be implemented.</p>
 				<a href="#limitations" id="limitations" style="color: inherit; text-decoration: none;">
 					<h1>Limitations</h1>
 				</a>
 				<ul>
-					<li>Dispose Pattern and Decimal are not supported.<br></li>
-					<li>File Buffering is not supported (please don&#39;t confuse this with Buffer class in NodeJS, they are different things).</li>
-					<li>There is no memory optimization for writing overly long string in BinaryWriter, so to avoid massive memory allocation you should not write such string.</li>
-					<li>writeChars and writeCharsEx will concat the array before writing, this may be slow on your system, I&#39;m still not sure about that.</li>
+					<li>This libary cannot perform asynchronous i/o operation;</li>
+					<li>Dispose Pattern and Decimal are not supported;</li>
+					<li>There is no memory optimization for writing overly long string in BinaryWriter, so to avoid massive memory allocation you should not write such string;</li>
+					<li>writeChars and writeCharsEx will concat the array before writing, this may be slow on your system, I&#39;m still not sure about that;</li>
 				</ul>
+				<a href="#pitfalls" id="pitfalls" style="color: inherit; text-decoration: none;">
+					<h1>Pitfalls</h1>
+				</a>
+				<p>If you are going to use the same file descriptor for BinaryReader and BinaryWriter, then you should use the same IFile instance for them, using different IFile instances will lead to unpredictable outcome of the 2 classes:</p>
+				<pre><code class="language-js"><span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;fs&#x27;</span>);
+<span class="hljs-keyword">const</span> { BinaryReader, BinaryWriter, File } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;csbinary&#x27;</span>);
+<span class="hljs-keyword">const</span> fd = fs.openSync(filePath, <span class="hljs-string">&#x27;rw&#x27;</span>);
+<span class="hljs-comment">// this is very wrong</span>
+<span class="hljs-keyword">const</span> reader = <span class="hljs-keyword">new</span> BinaryReader(File(fd), <span class="hljs-string">&#x27;utf8&#x27;</span>, <span class="hljs-literal">true</span>);
+<span class="hljs-keyword">const</span> writer = <span class="hljs-keyword">new</span> BinaryWriter(File(fd));
+<span class="hljs-comment">// ***</span>
+reader.close();
+writer.close();</code></pre>
+				<p>Please use the same IFile instance for them:</p>
+				<pre><code class="language-js"><span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;fs&#x27;</span>);
+<span class="hljs-keyword">const</span> { BinaryReader, BinaryWriter, File } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;csbinary&#x27;</span>);
+<span class="hljs-keyword">const</span> fd = fs.openSync(filePath, <span class="hljs-string">&#x27;rw&#x27;</span>);
+<span class="hljs-comment">// this is the right way</span>
+<span class="hljs-keyword">const</span> file = File(fd);
+<span class="hljs-keyword">const</span> reader = <span class="hljs-keyword">new</span> BinaryReader(file, <span class="hljs-string">&#x27;utf8&#x27;</span>, <span class="hljs-literal">true</span>);
+<span class="hljs-keyword">const</span> writer = <span class="hljs-keyword">new</span> BinaryWriter(file);
+<span class="hljs-comment">// ***</span>
+reader.close();
+writer.close();</code></pre>
+				<p>If you manipulate the underlying file&#39;s position directly (by fs methods) while using BinaryReader/BinaryWriter, unexpected error will be bound to happen. Use the seek method of IFile instead. But if you disable file buffering then this is fine.</p>
 			</div>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
@@ -200,15 +169,6 @@ reader.close();</code></pre>
 					</li>
 					<li class=" tsd-kind-class">
 						<a href="classes/binarywriter.html" class="tsd-kind-icon">Binary<wbr>Writer</a>
-					</li>
-					<li class=" tsd-kind-class">
-						<a href="classes/decoder.html" class="tsd-kind-icon">Decoder</a>
-					</li>
-					<li class=" tsd-kind-class">
-						<a href="classes/encoder.html" class="tsd-kind-icon">Encoder</a>
-					</li>
-					<li class=" tsd-kind-class">
-						<a href="classes/encoding.html" class="tsd-kind-icon">Encoding</a>
 					</li>
 					<li class=" tsd-kind-interface">
 						<a href="interfaces/idecoder.html" class="tsd-kind-icon">IDecoder</a>

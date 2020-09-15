@@ -24,8 +24,8 @@ export class BinaryWriter {
   private _disposed: boolean = false;
 
   /**
-   * Initializes a new instance of the BinaryWriter class based on the specified file and character encoding, and optionally leaves the file open.
-   * @param output The output file.
+   * Initializes a new instance of the BinaryWriter class based on the specified IFile instance and character encoding, and optionally leaves the file open.
+   * @param output The output file, expecting an IFile instance.
    * @param encoding The character encoding to use, or an object implementing the IEncoding interface. Default to `'utf8'`
    * @param leaveOpen `true` to leave the file open after the BinaryWriter object is disposed; otherwise, `false`.
    */
@@ -292,7 +292,6 @@ export class BinaryWriter {
   /**
    * Writes a length-prefixed string to this file in the current encoding of the BinaryWriter, and advances the current position of the file in accordance with the encoding used and the specific characters being written to the file.
    * @param value The value to write.
-   * @param mode CStr to write C-String, RawStr to write the string as-is without null-terminated or prefixed-length
    */
   writeString(value: string): void {
     if (typeof value != 'string') throw TypeError('"value" must be a string.');
@@ -304,6 +303,10 @@ export class BinaryWriter {
     this._file.write(bytes);
   }
 
+  /**
+   * Write a null-terminated string to this file in the current encoding of the BinaryWriter, and advances the current position of the file in accordance with the encoding used and the specific characters being written to the file.
+   * @param value The value to write.
+   */
   writeCString(value: string): void {
     if (typeof value != 'string') throw TypeError('"value" must be a string.');
     this.throwIfDisposed();
@@ -314,6 +317,10 @@ export class BinaryWriter {
     this._file.write(nullBytes);
   }
 
+  /**
+   * Write a plain string to this file in the current encoding of the BinaryWriter, and advances the current position of the file in accordance with the encoding used and the specific characters being written to the file.
+   * @param value The value to write.
+   */
   writeRawString(value: string): void {
     if (typeof value != 'string') throw TypeError('"value" must be a string.');
     this.throwIfDisposed();

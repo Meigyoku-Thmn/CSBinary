@@ -66,18 +66,19 @@
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>Represents a character encoding.</p>
+					</div>
+				</div>
+			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
 						<span class="target">IEncoding</span>
 					</li>
-				</ul>
-			</section>
-			<section class="tsd-panel">
-				<h3>Implemented by</h3>
-				<ul class="tsd-hierarchy">
-					<li><a href="../classes/encoding.html" class="tsd-signature-type">Encoding</a></li>
 				</ul>
 			</section>
 			<section class="tsd-panel-group tsd-index-group">
@@ -109,13 +110,21 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Meigyoku-Thmn/CSBinary/blob/cd030cd/src/encoding.ts#L8">src/encoding.ts:8</a></li>
+									<li>Defined in <a href="https://github.com/Meigyoku-Thmn/CSBinary/blob/22eed67/src/encoding.ts#L15">src/encoding.ts:15</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns the byte length of a string when encoded using this encoding</p>
+								</div>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>str: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>A value to calculate the length of.</p>
+									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
@@ -132,13 +141,21 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Meigyoku-Thmn/CSBinary/blob/cd030cd/src/encoding.ts#L9">src/encoding.ts:9</a></li>
+									<li>Defined in <a href="https://github.com/Meigyoku-Thmn/CSBinary/blob/22eed67/src/encoding.ts#L20">src/encoding.ts:20</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Decode a buffer to a string. Any incomplete characters will be replaced with substitution characters appropriate for the character encoding.</p>
+								</div>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>buf: <span class="tsd-signature-type">Buffer</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>A buffer to decode.</p>
+									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
@@ -155,13 +172,21 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Meigyoku-Thmn/CSBinary/blob/cd030cd/src/encoding.ts#L10">src/encoding.ts:10</a></li>
+									<li>Defined in <a href="https://github.com/Meigyoku-Thmn/CSBinary/blob/22eed67/src/encoding.ts#L25">src/encoding.ts:25</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Encode a string to a buffer. Any incomplete characters will be replaced with substitution characters and encoded appropriate for the character encoding.</p>
+								</div>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>str: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>A string to encode.</p>
+									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Buffer</span></h4>
@@ -178,9 +203,14 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Meigyoku-Thmn/CSBinary/blob/cd030cd/src/encoding.ts#L6">src/encoding.ts:6</a></li>
+									<li>Defined in <a href="https://github.com/Meigyoku-Thmn/CSBinary/blob/22eed67/src/encoding.ts#L8">src/encoding.ts:8</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Obtain a decoder that converts an encoded sequence of bytes into string.</p>
+								</div>
+							</div>
 							<h4 class="tsd-returns-title">Returns <a href="idecoder.html" class="tsd-signature-type">IDecoder</a></h4>
 						</li>
 					</ul>
@@ -195,9 +225,14 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Meigyoku-Thmn/CSBinary/blob/cd030cd/src/encoding.ts#L7">src/encoding.ts:7</a></li>
+									<li>Defined in <a href="https://github.com/Meigyoku-Thmn/CSBinary/blob/22eed67/src/encoding.ts#L10">src/encoding.ts:10</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Obtains an encoder that converts a sequence of Unicode characters into an encoded sequence of bytes.</p>
+								</div>
+							</div>
 							<h4 class="tsd-returns-title">Returns <a href="iencoder.html" class="tsd-signature-type">IEncoder</a></h4>
 						</li>
 					</ul>
@@ -222,15 +257,6 @@
 					</li>
 					<li class=" tsd-kind-class">
 						<a href="../classes/binarywriter.html" class="tsd-kind-icon">Binary<wbr>Writer</a>
-					</li>
-					<li class=" tsd-kind-class">
-						<a href="../classes/decoder.html" class="tsd-kind-icon">Decoder</a>
-					</li>
-					<li class=" tsd-kind-class">
-						<a href="../classes/encoder.html" class="tsd-kind-icon">Encoder</a>
-					</li>
-					<li class=" tsd-kind-class">
-						<a href="../classes/encoding.html" class="tsd-kind-icon">Encoding</a>
 					</li>
 					<li class=" tsd-kind-interface">
 						<a href="idecoder.html" class="tsd-kind-icon">IDecoder</a>
