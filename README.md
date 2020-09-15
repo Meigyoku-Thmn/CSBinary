@@ -42,7 +42,7 @@ npm i --save github:Meigyoku-Thmn/CSBinary#v2.0.0
 ```
 
 # API reference
-Please refer to {link to documentation}.
+Please refer to https://meigyoku-thmn.github.io/CSBinary/.
 
 # Examples
 Please refer to {Create a separate example md file, embedding examples from Runkit}
