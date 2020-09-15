@@ -40,6 +40,7 @@ There is no package on npm yet.
 ```bash
 npm i --save github:Meigyoku-Thmn/CSBinary#v2.0.0
 ```
+You need a C/C++ compiler toolchain for installing this package. Refer to https://github.com/nodejs/node-gyp to know how to setup a compiler toolchain for your system.
 
 # API reference
 Please refer to the [CSBinary API Reference](https://meigyoku-thmn.github.io/CSBinary/).
