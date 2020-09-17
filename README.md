@@ -36,9 +36,8 @@ console.log(reader.readUInt32());
 reader.close();
 ```
 # Installation
-There is no package on npm yet.
 ```bash
-npm i --save github:Meigyoku-Thmn/CSBinary#v2.0.0
+npm i --save csbinary
 ```
 You need a C/C++ compiler toolchain for installing this package. Refer to https://github.com/nodejs/node-gyp to know how to setup a compiler toolchain for your system.
 
