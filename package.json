@@ -43,7 +43,7 @@
   "dependencies": {
     "@types/node": "^14.6.2",
     "bindings": "^1.5.0",
-    "iconv-lite": "github:Meigyoku-Thmn/iconv-lite#master",
+    "iconv-lite": "npm:@meigyokuthmn/iconv-lite@^0.7.0-pre",
     "nan": "^2.14.1"
   },
   "gypfile": true
