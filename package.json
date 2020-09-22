@@ -10,7 +10,9 @@
     "test:coverage": "nyc --reporter=html --reporter=text --reporter=text-summary npm test",
     "config": "node-gyp configure",
     "build": "node-gyp build",
-    "rebuild": "node-gyp rebuild && rimraf types",
+    "build:debug": "node-gyp build --debug",
+    "rebuild": "npm run clean && node-gyp rebuild",
+    "rebuild:debug": "npm run clean && node-gyp rebuild --debug",
     "clean": "node-gyp clean && rimraf dist types coverage test/tmp",
     "postinstall": "tsc",
     "gen-doc": "typedoc"
