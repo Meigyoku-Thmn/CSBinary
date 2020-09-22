@@ -41,6 +41,7 @@ namespace FileWrap {
       }
       static NAN_METHOD(ThrowIfClosed);
       ~File() {
+         if (this->isClose) return;
          fclose(this->file);
          this->isClose = true;
       }
