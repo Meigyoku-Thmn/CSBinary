@@ -1,6 +1,6 @@
 {
   "name": "csbinary",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "A port of BinaryReader and BinaryWriter from .NET Core to NodeJS",
   "main": "dist/entry.js",
   "types": "types/entry.d.ts",
