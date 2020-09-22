@@ -6,10 +6,9 @@ import { INT_MIN, INT_MAX, LONG_MIN, LONG_MAX } from '../src/constants/number';
 import { CSCode } from '../src/constants/error';
 
 describe('BinaryWriter | Arguments Validation Test', () => {
-  let fileArr: IFile[] = [];
-  let File: (new (fd: number) => IFile) & ((fd: number) => IFile);
+  const fileArr: IFile[] = [];
   before(() => {
-    File = installHookToFile(fileArr) as any;
+    installHookToFile(fileArr);
   });
   afterEach(() => {
     fileArr.forEach(e => e.close());
@@ -28,10 +27,10 @@ describe('BinaryWriter | Arguments Validation Test', () => {
   it('Constructor | Negative', () => {
     const file = openTruncated();
     assert.throws(() => new BinaryWriter(null), TypeError);
-    assert.throws(() => new BinaryWriter(2 as any), TypeError);
+    assert.throws(() => new BinaryWriter(2 as never), TypeError);
     assert.throws(() => new BinaryWriter(file, null), TypeError);
     assert.throws(() => new BinaryWriter(file, 'haha'), { message: 'Unknown character encoding.' });
-    assert.throws(() => new BinaryWriter(file, 'utf8', 2 as any), TypeError);
+    assert.throws(() => new BinaryWriter(file, 'utf8', 2 as never), TypeError);
     assert.throws(() => new BinaryWriter(openTruncatedToRead()), { code: CSCode.FileNotWritable });
   });
 
@@ -44,7 +43,7 @@ describe('BinaryWriter | Arguments Validation Test', () => {
   it('WriteBoolean | Negative', () => {
     const bw = BinaryWriter.null;
     assert.throws(() => bw.writeBoolean(null), TypeError);
-    assert.throws(() => bw.writeBoolean(2 as any), TypeError);
+    assert.throws(() => bw.writeBoolean(2 as never), TypeError);
   });
 
   it('WriteByte | Negative', () => {
@@ -64,14 +63,14 @@ describe('BinaryWriter | Arguments Validation Test', () => {
   it('WriteBuffer | Negative', () => {
     const bw = BinaryWriter.null;
     assert.throws(() => bw.writeBuffer(null), TypeError);
-    assert.throws(() => bw.writeBuffer(2 as any), TypeError);
+    assert.throws(() => bw.writeBuffer(2 as never), TypeError);
   });
 
   it('WriteBufferEx | Negative', () => {
     const bw = BinaryWriter.null;
     const buffer = Buffer.alloc(0);
     assert.throws(() => bw.writeBufferEx(null, 0, 0), TypeError);
-    assert.throws(() => bw.writeBufferEx(2 as any, 0, 0), TypeError);
+    assert.throws(() => bw.writeBufferEx(2 as never, 0, 0), TypeError);
     assert.throws(() => bw.writeBufferEx(null, null, 0), TypeError);
     assert.throws(() => bw.writeBufferEx(null, 0, null), TypeError);
     assert.throws(() => bw.writeBufferEx(buffer, Number.MIN_SAFE_INTEGER - 2, 0), TypeError);
@@ -81,7 +80,7 @@ describe('BinaryWriter | Arguments Validation Test', () => {
   it('WriteChar | Negative', () => {
     const bw = BinaryWriter.null;
     assert.throws(() => bw.writeChar(null), TypeError);
-    assert.throws(() => bw.writeChar(2 as any), TypeError);
+    assert.throws(() => bw.writeChar(2 as never), TypeError);
     assert.throws(() => bw.writeChar('null'), TypeError);
     assert.throws(() => bw.writeChar('\uD83D'), RangeError);
   });
@@ -89,14 +88,14 @@ describe('BinaryWriter | Arguments Validation Test', () => {
   it('WriteChars', () => {
     const bw = BinaryWriter.null;
     assert.throws(() => bw.writeChars(null), TypeError);
-    assert.throws(() => bw.writeChars(2 as any), TypeError);
+    assert.throws(() => bw.writeChars(2 as never), TypeError);
     assert.throws(() => bw.writeChars(['s', 'null']), RangeError);
   });
 
   it('WriteCharsEx | Negative', () => {
     const bw = BinaryWriter.null;
     assert.throws(() => bw.writeCharsEx(null, 0, 0), TypeError);
-    assert.throws(() => bw.writeCharsEx(2 as any, 0, 0), TypeError);
+    assert.throws(() => bw.writeCharsEx(2 as never, 0, 0), TypeError);
     assert.throws(() => bw.writeCharsEx(null, null, 0), TypeError);
     assert.throws(() => bw.writeCharsEx(null, 0, null), TypeError);
     assert.throws(() => bw.writeCharsEx([], Number.MIN_SAFE_INTEGER - 2, 0), TypeError);
@@ -110,7 +109,7 @@ describe('BinaryWriter | Arguments Validation Test', () => {
   it('WriteDouble | Negative', () => {
     const bw = BinaryWriter.null;
     assert.throws(() => bw.writeDouble(null), TypeError);
-    assert.throws(() => bw.writeDouble([] as any), TypeError);
+    assert.throws(() => bw.writeDouble([] as never), TypeError);
   });
 
   it('WriteInt16 | Negative', () => {
@@ -140,31 +139,31 @@ describe('BinaryWriter | Arguments Validation Test', () => {
   it('WriteInt64 | Negative', () => {
     const bw = BinaryWriter.null;
     assert.throws(() => bw.writeInt64(null), TypeError);
-    assert.throws(() => bw.writeInt64([] as any), TypeError);
+    assert.throws(() => bw.writeInt64([] as never), TypeError);
   });
 
   it('WriteUInt64 | Negative', () => {
     const bw = BinaryWriter.null;
     assert.throws(() => bw.writeUInt64(null), TypeError);
-    assert.throws(() => bw.writeUInt64([] as any), TypeError);
+    assert.throws(() => bw.writeUInt64([] as never), TypeError);
   });
 
   it('WriteSingle | Negative', () => {
     const bw = BinaryWriter.null;
     assert.throws(() => bw.writeSingle(null), TypeError);
-    assert.throws(() => bw.writeSingle([] as any), TypeError);
+    assert.throws(() => bw.writeSingle([] as never), TypeError);
   });
 
   it('WriteString | Negative', () => {
     const bw = BinaryWriter.null;
     assert.throws(() => bw.writeString(null), TypeError);
-    assert.throws(() => bw.writeString([] as any), TypeError);
+    assert.throws(() => bw.writeString([] as never), TypeError);
   });
 
   it('Write7BitEncodedInt | Negative', () => {
     const bw = BinaryWriter.null;
     assert.throws(() => bw.write7BitEncodedInt(null), TypeError);
-    assert.throws(() => bw.write7BitEncodedInt([] as any), TypeError);
+    assert.throws(() => bw.write7BitEncodedInt([] as never), TypeError);
     assert.throws(() => bw.write7BitEncodedInt(Number.MIN_SAFE_INTEGER - 2), TypeError);
     assert.throws(() => bw.write7BitEncodedInt(INT_MIN - 1), RangeError);
     assert.throws(() => bw.write7BitEncodedInt(INT_MAX + 1), RangeError);
@@ -173,7 +172,7 @@ describe('BinaryWriter | Arguments Validation Test', () => {
   it('Write7BitEncodedInt64 | Negative', () => {
     const bw = BinaryWriter.null;
     assert.throws(() => bw.write7BitEncodedInt64(null), TypeError);
-    assert.throws(() => bw.write7BitEncodedInt64([] as any), TypeError);
+    assert.throws(() => bw.write7BitEncodedInt64([] as never), TypeError);
     assert.throws(() => bw.write7BitEncodedInt64(LONG_MIN - BigInt(1)), RangeError);
     assert.throws(() => bw.write7BitEncodedInt64(LONG_MAX + BigInt(1)), RangeError);
   });

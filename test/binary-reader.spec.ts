@@ -16,10 +16,10 @@ import { IFile } from '../src/addon/file';
 import { Decoder } from '../src/encoding';
 
 describe('BinaryReader Tests', () => {
-  let fileArr: IFile[] = [];
+  const fileArr: IFile[] = [];
   let File: (new (fd: number) => IFile) & ((fd: number) => IFile);
   before(() => {
-    File = installHookToFile(fileArr) as any;
+    File = installHookToFile(fileArr);
   });
   afterEach(() => {
     fileArr.forEach(e => e.close());
@@ -30,16 +30,16 @@ describe('BinaryReader Tests', () => {
   });
 
   it('Close Tests', () => {
-    let file = openTruncated();
-    let binaryReader = new BinaryReader(file);
+    const file = openTruncated();
+    const binaryReader = new BinaryReader(file);
     binaryReader.close();
     binaryReader.close();
     binaryReader.close();
   });
 
   it('Close Tests | Negative', () => {
-    let file = openTruncated();
-    let binaryReader = new BinaryReader(file);
+    const file = openTruncated();
+    const binaryReader = new BinaryReader(file);
     binaryReader.close();
     validateDisposedExceptions(binaryReader);
   });
@@ -78,30 +78,30 @@ describe('BinaryReader Tests', () => {
     runTest(writer => writer.writeBoolean(true), reader => reader.readBoolean());
     runTest(writer => writer.writeBoolean(false), reader => reader.readBoolean());
     runTest(writer => writer.writeString(''), reader => reader.readString());
-    runTest(writer => writer.writeString("hello world"), reader => reader.readString());
+    runTest(writer => writer.writeString('hello world'), reader => reader.readString());
     runTest(writer => writer.writeString('x'.repeat(1024 * 1024)), reader => reader.readString());
-    runTest(writer => writer.writeCString("hello"), reader => reader.readRawString("hello".length + 1));
-    runTest(writer => writer.writeRawString("hello"), reader => reader.readRawString("hello".length));
+    runTest(writer => writer.writeCString('hello'), reader => reader.readRawString('hello'.length + 1));
+    runTest(writer => writer.writeRawString('hello'), reader => reader.readRawString('hello'.length));
 
     function runTest(writeAction: (w: BinaryWriter) => void, readAction: (r: BinaryReader) => void) {
-      let encoding: BufferEncoding = 'utf8';
-      let file = openTruncated();
+      const encoding: BufferEncoding = 'utf8';
+      const file = openTruncated();
 
       // First, call the write action twice
 
-      let writer = new BinaryWriter(file, encoding, true);
+      const writer = new BinaryWriter(file, encoding, true);
       writeAction(writer);
       writeAction(writer);
       writer.close();
 
       // Make sure we populated the inner file, then truncate it before EOF reached.
 
-      let fdLen = fs.fstatSync(file.fd).size;
+      const fdLen = fs.fstatSync(file.fd).size;
       assert.ok(fdLen > 0);
       file.seek(0, SeekOrigin.Begin); // reset read pointer
-      fs.ftruncateSync(file.fd, fdLen - 1) // truncate the last byte of the file
+      fs.ftruncateSync(file.fd, fdLen - 1); // truncate the last byte of the file
 
-      let reader = new BinaryReader(file, encoding);
+      const reader = new BinaryReader(file, encoding);
       readAction(reader); // should succeed
       assert.throws(() => readAction(reader), { code: CSCode.ReadBeyondEndOfFile }); // should fail
       reader.close();
@@ -113,11 +113,11 @@ describe('BinaryReader Tests', () => {
   */
 
   it('Read7BitEncodedInt | Allows Overlong Encodings', () => {
-    const file = openToReadWithContent(Buffer.from([0x9F, 0x00 /* overlong */]))
+    const file = openToReadWithContent(Buffer.from([0x9F, 0x00 /* overlong */]));
     const reader = new BinaryReader(file);
 
     const actual = reader.read7BitEncodedInt();
-    assert.equal(actual, 0x1F);
+    assert.strictEqual(actual, 0x1F);
     reader.close();
   });
 
@@ -143,7 +143,7 @@ describe('BinaryReader Tests', () => {
     const reader = new BinaryReader(file);
 
     const actual = reader.read7BitEncodedInt64();
-    assert.equal(actual, 0x1F);
+    assert.strictEqual(actual, BigInt(0x1F));
     reader.close();
   });
 
@@ -166,8 +166,8 @@ describe('BinaryReader Tests', () => {
   });
 
   function validateDisposedExceptions(binaryReader: BinaryReader) {
-    let byteBuffer = Buffer.alloc(10);
-    let charBuffer = new Array<string>(10);
+    const byteBuffer = Buffer.alloc(10);
+    const charBuffer = new Array<string>(10);
 
     assert.throws(() => binaryReader.peekChar(), { code: CSCode.FileIsClosed });
     assert.throws(() => binaryReader.readCharCode(), { code: CSCode.FileIsClosed });
@@ -196,8 +196,8 @@ describe('BinaryReader Tests', () => {
     // simulate a buggy decoder, no encoder should return null like this
     Decoder.prototype.write = () => null;
 
-    let file = openToReadWithContent(randomFillSync(Buffer.alloc(100), 0, 100));
-    let reader = new BinaryReader(file);
+    const file = openToReadWithContent(randomFillSync(Buffer.alloc(100), 0, 100));
+    const reader = new BinaryReader(file);
     assert.throws(() => reader.readIntoCharsEx(new Array<string>(10), 0, 10), TypeError);
     reader.close();
 
@@ -205,24 +205,24 @@ describe('BinaryReader Tests', () => {
   });
 
   it('Read | Char Array', () => {
-    let testSuite = [
+    const testSuite = [
       [100, 0, 100, 100, 100],
       [100, 25, 50, 100, 50],
       [50, 0, 100, 100, 50],
       [0, 0, 10, 10, 0]
     ];
-    for (let [sourceSize, index, count, destinationSize, expectedReadLength] of testSuite) {
-      let file = openTruncated();
-      let source = new Array<string>(sourceSize);
+    for (const [sourceSize, index, count, destinationSize, expectedReadLength] of testSuite) {
+      const file = openTruncated();
+      const source = new Array<string>(sourceSize);
       for (let i = 0; i < sourceSize; i++) {
         source[i] = String.fromCharCode(getRandomInt(0, 127));
       }
       file.write(Buffer.from(source.join(''), 'ascii'));
       file.seek(0, SeekOrigin.Begin);
-      let reader = new BinaryReader(file, 'ascii');
-      let destination = new Array<string>(destinationSize).fill(null);
-      let readCount = reader.readIntoCharsEx(destination, index, count);
-      assert.equal(readCount, expectedReadLength);
+      const reader = new BinaryReader(file, 'ascii');
+      const destination = new Array<string>(destinationSize).fill(null);
+      const readCount = reader.readIntoCharsEx(destination, index, count);
+      assert.strictEqual(readCount, expectedReadLength);
       assert.ok(isEqual(source.slice(0, readCount), destination.slice(index, index + readCount)));
 
       // Make sure we didn't write past the end
@@ -232,30 +232,30 @@ describe('BinaryReader Tests', () => {
   });
 
   it('Read Chars', () => {
-    let testSuite = [
+    const testSuite = [
       [['h', 'e', 'l', 'l', 'o'], 5, ['h', 'e', 'l', 'l', 'o']],
       [['h', 'e', 'l', 'l', 'o'], 8, ['h', 'e', 'l', 'l', 'o']],
       [['h', 'e', '\0', '\0', 'o'], 5, ['h', 'e', '\0', '\0', 'o']],
       [['h', 'e', 'l', 'l', 'o'], 0, []],
       [[], 5, []],
     ];
-    for (let [source, readLength, expected] of testSuite) {
-      let file = openTruncated();
+    for (const [source, readLength, expected] of testSuite) {
+      const file = openTruncated();
       file.write(Buffer.from((source as string[]).join(''), 'ascii'));
       file.seek(0, SeekOrigin.Begin);
 
-      let reader = new BinaryReader(file);
-      let destination = reader.readChars(readLength as number);
+      const reader = new BinaryReader(file);
+      const destination = reader.readChars(readLength as number);
       assert.ok(isEqual(expected, destination));
       reader.close();
     }
-  })
+  });
 
   it('Read Chars | Over Reads', () => {
-    let testSuite: BufferEncoding[] = ['utf16le', 'utf8'];
-    for (let encoding of testSuite) {
+    const testSuite: BufferEncoding[] = ['utf16le', 'utf8'];
+    for (const encoding of testSuite) {
       // ChunkingStream returns less than requested (simulated because there is no "Stream" in NodeJS)
-      let oldRead = File.prototype.read;
+      const oldRead = File.prototype.read;
       File.prototype.read = function (bytes: Buffer, offset?: number, count?: number) {
         if (offset == null || count == null) {
           offset = 0;
@@ -265,19 +265,19 @@ describe('BinaryReader Tests', () => {
         return oldRead.bind(this)(bytes, offset, count);
       };
 
-      let data1 = "hello world \ud83d\ude03!".split(''); // 14 code points, 15 chars in UTF-16, 17 bytes in UTF-8
-      let data2 = 0xABCDEF01;
+      const data1 = 'hello world \ud83d\ude03!'.split(''); // 14 code points, 15 chars in UTF-16, 17 bytes in UTF-8
+      const data2 = 0xABCDEF01;
 
-      let file = openTruncated();
-      let writer = new BinaryWriter(file, encoding, true);
+      const file = openTruncated();
+      const writer = new BinaryWriter(file, encoding, true);
       writer.writeChars(data1);
       writer.writeUInt32(data2);
       writer.close();
 
       file.seek(0, SeekOrigin.Begin);
-      let reader = new BinaryReader(file, encoding);
+      const reader = new BinaryReader(file, encoding);
       assert.ok(isEqual(reader.readChars(data1.length), data1));
-      assert.equal(reader.readUInt32(), data2);
+      assert.strictEqual(reader.readUInt32(), data2);
       reader.close();
 
       File.prototype.read = oldRead;
@@ -285,19 +285,19 @@ describe('BinaryReader Tests', () => {
   });
 
   it('Read | Byte Span', () => {
-    let testSuite = [
+    const testSuite = [
       [100, 100, 100],
       [100, 50, 50],
       [50, 100, 50],
       [10, 0, 0],
       [0, 10, 0]
     ];
-    for (let [sourceSize, destinationSize, expectedReadLength] of testSuite) {
-      let source = randomFillSync(Buffer.alloc(sourceSize), 0, sourceSize);
-      let file = openToReadWithContent(source);
-      let reader = new BinaryReader(file);
-      let destination = Buffer.alloc(destinationSize);
-      let readCount = reader.readIntoBuffer(destination);
+    for (const [sourceSize, destinationSize, expectedReadLength] of testSuite) {
+      const source = randomFillSync(Buffer.alloc(sourceSize), 0, sourceSize);
+      const file = openToReadWithContent(source);
+      const reader = new BinaryReader(file);
+      const destination = Buffer.alloc(destinationSize);
+      const readCount = reader.readIntoBuffer(destination);
       assert.ok(isEqual(expectedReadLength, readCount));
       assert.ok(isEqual(source.subarray(0, expectedReadLength), destination.subarray(0, expectedReadLength)));
 
@@ -308,33 +308,33 @@ describe('BinaryReader Tests', () => {
   });
 
   it('Read | Byte Span | ThrowIfDisposed', () => {
-    let file = openTruncated();
-    let binaryReader = new BinaryReader(file);
+    const file = openTruncated();
+    const binaryReader = new BinaryReader(file);
     binaryReader.close();
     assert.throws(() => binaryReader.readIntoBuffer(Buffer.alloc(0)), { code: CSCode.FileIsClosed });
   });
 
   it('Read | Char Span', () => {
-    let testSuite = [
+    const testSuite = [
       [100, 100, 100],
       [100, 50, 50],
       [50, 100, 50],
       [10, 0, 0],
       [0, 10, 0],
     ];
-    for (let [sourceSize, destinationSize, expectedReadLength] of testSuite) {
-      let file = openTruncated();
-      let source = new Array<string>(sourceSize);
+    for (const [sourceSize, destinationSize, expectedReadLength] of testSuite) {
+      const file = openTruncated();
+      const source = new Array<string>(sourceSize);
       for (let i = 0; i < sourceSize; i++) {
         source[i] = String.fromCharCode(getRandomInt(0, 127));
       }
       file.write(Buffer.from(source.join(''), 'ascii'));
       file.seek(0, SeekOrigin.Begin);
 
-      let reader = new BinaryReader(file, 'ascii');
-      let destination = new Array<string>(destinationSize).fill(null);
-      let readCount = reader.readIntoChars(destination);
-      assert.equal(readCount, expectedReadLength);
+      const reader = new BinaryReader(file, 'ascii');
+      const destination = new Array<string>(destinationSize).fill(null);
+      const readCount = reader.readIntoChars(destination);
+      assert.strictEqual(readCount, expectedReadLength);
       assert.ok(isEqual(source.slice(0, expectedReadLength), destination.slice(0, expectedReadLength)));
 
       // Make sure we didn't write past the end
@@ -344,47 +344,47 @@ describe('BinaryReader Tests', () => {
   });
 
   it('Read | Char Span | ThrowIfDisposed', () => {
-    let file = openTruncated();
-    let binaryReader = new BinaryReader(file);
+    const file = openTruncated();
+    const binaryReader = new BinaryReader(file);
     binaryReader.close();
     assert.throws(() => binaryReader.readIntoChars([]), { code: CSCode.FileIsClosed });
   });
 
   it('PeekChar', () => {
-    let file = openToReadWithContent(Buffer.from('h'));
-    let binaryReader = new BinaryReader(file);
+    const file = openToReadWithContent(Buffer.from('h'));
+    const binaryReader = new BinaryReader(file);
     assert.ok(binaryReader.peekChar() == 'h'.charCodeAt(0));
     binaryReader.readCharCode();
     assert.ok(binaryReader.peekChar() == -1);
   });
 
   it('PeekChar | ThrowIfDisposed', () => {
-    let file = openTruncated();
-    let binaryReader = new BinaryReader(file);
+    const file = openTruncated();
+    const binaryReader = new BinaryReader(file);
     binaryReader.close();
     assert.throws(() => binaryReader.peekChar(), { code: CSCode.FileIsClosed });
-  })
+  });
 
   it('Leave Open', () => {
     let file = openTruncated();
     writeByte(file, 'a'.charCodeAt(0));
     file.seek(0, SeekOrigin.Begin);
-    assert.ok(file.canRead, "ERROR: Before testing, file.canRead property was false! What?");
+    assert.ok(file.canRead, 'ERROR: Before testing, file.canRead property was false! What?');
 
     // Test leaveOpen.
     let br = new BinaryReader(file, 'utf8', true);
     br.close();
-    assert.ok(file.canRead, "ERROR: After closing a BinaryReader with leaveOpen bool set, file.canRead returns false!");
+    assert.ok(file.canRead, 'ERROR: After closing a BinaryReader with leaveOpen bool set, file.canRead returns false!');
 
     // Test not leaving open
     br = new BinaryReader(file, 'utf8', false);
     br.close();
-    assert.ok(!file.canRead, "ERROR: After closing a BinaryReader with leaveOpen bool not set, file.canRead returns true!");
+    assert.ok(!file.canRead, 'ERROR: After closing a BinaryReader with leaveOpen bool not set, file.canRead returns true!');
 
     // Test default
     file = openTruncated();
     br = new BinaryReader(file);
     br.close();
-    assert.ok(!file.canRead, "ERROR: After closing a BinaryReader with the default value for leaveOpen, file.canRead returns true!")
+    assert.ok(!file.canRead, 'ERROR: After closing a BinaryReader with the default value for leaveOpen, file.canRead returns true!');
   });
 });

@@ -8,9 +8,9 @@ import { installHookToFile, removeHookFromFile, openTruncated } from './utils';
 import { SeekOrigin } from '../src/constants/mode';
 
 describe('BinaryWriter | Write Byte Char Tests', () => {
-  let fileArr: IFile[] = [];
+  const fileArr: IFile[] = [];
   before(() => {
-    installHookToFile(fileArr) as any;
+    installHookToFile(fileArr);
   });
   afterEach(() => {
     fileArr.forEach(e => e.close());
@@ -27,9 +27,9 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
   /// 3) Casting an int to char and writing it, works.
   /// </summary>
   it('Write Char', () => {
-    let mstr = openTruncated();
-    let dw2 = new BinaryWriter(mstr, 'utf8', true);
-    let dr2 = new BinaryReader(mstr);
+    const mstr = openTruncated();
+    const dw2 = new BinaryWriter(mstr, 'utf8', true);
+    const dr2 = new BinaryReader(mstr);
 
     let chArr: string[] = [];
     let ii = 0;
@@ -42,8 +42,8 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
     dw2.flush();
     mstr.seek(0, SeekOrigin.Begin);
     for (ii = 0; ii < chArr.length; ii++) {
-      let c = dr2.readChar();
-      assert.equal(c, chArr[ii]);
+      const c = dr2.readChar();
+      assert.strictEqual(c, chArr[ii]);
     }
     assert.throws(() => dr2.readChar(), { code: CSCode.ReadBeyondEndOfFile });
 
@@ -55,11 +55,11 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
 
     //A high-surrogate is a Unicode code point in the range U+D800 through U+DBFF and a low-surrogate is a Unicode code point in the range U+DC00 through U+DFFF
     let ch: string;
-    let mem = openTruncated();
-    let writer = new BinaryWriter(mem, 'utf16le');
+    const mem = openTruncated();
+    const writer = new BinaryWriter(mem, 'utf16le');
 
     //between 1 <= x < 255
-    let randomNumbers = [1, 254, 210, 200, 105, 135, 98, 54];
+    const randomNumbers = [1, 254, 210, 200, 105, 135, 98, 54];
     for (let i = 0; i < randomNumbers.length; i++) {
       ch = String.fromCharCode(randomNumbers[i]);
       writer.writeChar(ch);
@@ -74,8 +74,8 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
 
     //A high-surrogate is a Unicode code point in the range U+D800 through U+DBFF and a low-surrogate is a Unicode code point in the range U+DC00 through U+DFFF
     let ch: string;
-    let mem = openTruncated();
-    let writer = new BinaryWriter(mem, 'utf16le');
+    const mem = openTruncated();
+    const writer = new BinaryWriter(mem, 'utf16le');
     // between 55296 <= x < 56319
     let randomNumbers = [55296, 56318, 55305, 56019, 55888, 55900, 56251];
     for (let i = 0; i < randomNumbers.length; i++) {
@@ -96,14 +96,14 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
   /// Writing bytes casted to chars and using a different encoding; Windows932.
   /// </summary>
   it('Write Char 2', () => {
-    let stream = openTruncated();
+    const stream = openTruncated();
     // string name = Windows932, codepage = 932
     // reference: https://docs.microsoft.com/en-us/windows/desktop/Intl/code-page-identifiers
 
-    let codepageName = 'Windows932' as BufferEncoding;
-    let writer = new BinaryWriter(stream, codepageName, true);
+    const codepageName = 'Windows932' as BufferEncoding;
+    const writer = new BinaryWriter(stream, codepageName, true);
 
-    let bytes = Buffer.from([0x01, 0x02, 0x03, 0x04, 0x05]);
+    const bytes = Buffer.from([0x01, 0x02, 0x03, 0x04, 0x05]);
 
     writer.writeChar(String.fromCharCode(0x30ca)); // The katakana character 'na'
     writer.writeBuffer(bytes);
@@ -111,12 +111,12 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
     writer.writeChar('\0');
 
     stream.seek(0, SeekOrigin.Begin);
-    let reader = new BinaryReader(stream, codepageName);
-    let japanese = reader.readChar();
-    assert.equal(japanese.charCodeAt(0), 0x30ca);
-    let readBytes = reader.readBytes(5);
+    const reader = new BinaryReader(stream, codepageName);
+    const japanese = reader.readChar();
+    assert.strictEqual(japanese.charCodeAt(0), 0x30ca);
+    const readBytes = reader.readBytes(5);
     for (let i = 0; i < 5; i++) {
-      assert.equal(bytes[i], readBytes[i]);
+      assert.strictEqual(bytes[i], readBytes[i]);
     }
 
     writer.close();
@@ -128,21 +128,21 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
   /// </summary>
   it('Write Byte', () => {
     let ii = 0;
-    let byteArr = [BYTE_MIN, BYTE_MAX, 100, 1, 10, Math.floor(BYTE_MAX / 2), BYTE_MAX - 100]
+    const byteArr = [BYTE_MIN, BYTE_MAX, 100, 1, 10, Math.floor(BYTE_MAX / 2), BYTE_MAX - 100];
 
     // [] read/Write with Memorystream
-    let mstr = openTruncated();
-    let dw2 = new BinaryWriter(mstr, 'utf8', true);
+    const mstr = openTruncated();
+    const dw2 = new BinaryWriter(mstr, 'utf8', true);
 
     for (ii = 0; ii < byteArr.length; ii++)
       dw2.writeByte(byteArr[ii]);
 
     dw2.flush();
     mstr.seek(0, SeekOrigin.Begin);
-    let dr2 = new BinaryReader(mstr);
+    const dr2 = new BinaryReader(mstr);
 
     for (ii = 0; ii < byteArr.length; ii++)
-      assert.equal(dr2.readByte(), byteArr[ii]);
+      assert.strictEqual(dr2.readByte(), byteArr[ii]);
 
     // [] Check End Of Stream
     assert.throws(() => dr2.readByte(), { code: CSCode.ReadBeyondEndOfFile });
@@ -157,24 +157,24 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
   /// </summary>
   it('Write SByte', () => {
     let ii = 0;
-    let sbArr = [
+    const sbArr = [
       SBYTE_MIN, SBYTE_MAX, -100, 100, 0, Math.floor(SBYTE_MIN / 2), Math.floor(SBYTE_MAX / 2),
       10, 20, 30, -10, -20, -30, SBYTE_MAX - 100
     ];
 
     // [] read/Write with Memorystream
-    let mstr = openTruncated();
-    let dw2 = new BinaryWriter(mstr, 'utf8', true);
+    const mstr = openTruncated();
+    const dw2 = new BinaryWriter(mstr, 'utf8', true);
 
     for (ii = 0; ii < sbArr.length; ii++)
       dw2.writeSByte(sbArr[ii]);
 
     dw2.flush();
     mstr.seek(0, SeekOrigin.Begin);
-    let dr2 = new BinaryReader(mstr)
+    const dr2 = new BinaryReader(mstr);
 
     for (ii = 0; ii < sbArr.length; ii++)
-      assert.equal(dr2.readSByte(), sbArr[ii]);
+      assert.strictEqual(dr2.readSByte(), sbArr[ii]);
 
     dw2.close();
     dr2.close();
@@ -186,20 +186,20 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
   /// </summary>
   it('Write SByte | Negative', () => {
     let ii = 0;
-    let sbArr = [
+    const sbArr = [
       SBYTE_MIN, SBYTE_MAX, -100, 100, 0, Math.floor(SBYTE_MIN / 2), Math.floor(SBYTE_MAX / 2),
       10, 20, 30, -10, -20, -30, SBYTE_MAX - 100
     ];
 
-    let mstr = openTruncated();
-    let dw2 = new BinaryWriter(mstr, 'utf8', true);
+    const mstr = openTruncated();
+    const dw2 = new BinaryWriter(mstr, 'utf8', true);
 
     for (ii = 0; ii < sbArr.length; ii++)
       dw2.writeSByte(sbArr[ii]);
 
     dw2.flush();
 
-    let dr2 = new BinaryReader(mstr);
+    const dr2 = new BinaryReader(mstr);
     // [] Check End Of Stream
     assert.throws(() => dr2.readSByte(), { code: CSCode.ReadBeyondEndOfFile });
 
@@ -209,20 +209,20 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
 
   it('Write Buffer', () => {
     let ii = 0;
-    let byteArr = Buffer.from([BYTE_MIN, BYTE_MAX, 1, 5, 10, 100, 200]);
+    const byteArr = Buffer.from([BYTE_MIN, BYTE_MAX, 1, 5, 10, 100, 200]);
 
     // [] read/Write with Memorystream
-    let mstr = openTruncated();
-    let dw2 = new BinaryWriter(mstr, 'utf8', true);
+    const mstr = openTruncated();
+    const dw2 = new BinaryWriter(mstr, 'utf8', true);
 
     dw2.writeBuffer(byteArr);
     dw2.flush();
     mstr.seek(0, SeekOrigin.Begin);
 
-    let dr2 = new BinaryReader(mstr);
+    const dr2 = new BinaryReader(mstr);
 
     for (ii = 0; ii < byteArr.length; ii++)
-      assert.equal(dr2.readByte(), byteArr[ii]);
+      assert.strictEqual(dr2.readByte(), byteArr[ii]);
 
     // [] Check End Of Stream
     assert.throws(() => dr2.readByte(), { code: CSCode.ReadBeyondEndOfFile });
@@ -232,9 +232,9 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
   });
 
   it('Write Buffer | Negative', () => {
-    let iArrInvalidValues = [-1, -2, -100, -1000, -10000, -100000, -1000000, -10000000, -100000000, -1000000000, INT_MIN, SHORT_MIN];
-    let iArrLargeValues = [INT_MAX, INT_MAX - 1, Math.floor(INT_MAX / 2), Math.floor(INT_MAX / 10), Math.floor(INT_MAX / 100)];
-    let bArr = Buffer.alloc(0);
+    const iArrInvalidValues = [-1, -2, -100, -1000, -10000, -100000, -1000000, -10000000, -100000000, -1000000000, INT_MIN, SHORT_MIN];
+    const iArrLargeValues = [INT_MAX, INT_MAX - 1, Math.floor(INT_MAX / 2), Math.floor(INT_MAX / 10), Math.floor(INT_MAX / 100)];
+    const bArr = Buffer.alloc(0);
     // [] ArgumentNullException for null argument
     let mstr = openTruncated();
     let dw2 = new BinaryWriter(mstr);
@@ -243,7 +243,7 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
     dw2.close();
 
     // [] ArgumentNullException for null argument
-    mstr = openTruncated()
+    mstr = openTruncated();
     dw2 = new BinaryWriter(mstr);
     assert.throws(() => dw2.writeBufferEx(null, 0, 0), TypeError);
 
@@ -276,13 +276,9 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
   /// 2) Tests exceptional scenarios.
   /// </summary>
   it('Write Buffer 2', () => {
-    let dw2: BinaryWriter;
-    let dr2: BinaryReader;
-    let mstr: IFile;
     let bArr = Buffer.alloc(0);
     let ii = 0;
     let bReadArr = Buffer.alloc(0);
-    let returnValue: number;
 
     bArr = Buffer.alloc(1000);
     bArr[0] = BYTE_MIN;
@@ -292,21 +288,21 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
       bArr[ii] = ii % 255;
 
     // []read/ Write character values 0-1000 with  Memorystream
-    mstr = openTruncated();
-    dw2 = new BinaryWriter(mstr, 'utf8', true);
+    const mstr = openTruncated();
+    const dw2 = new BinaryWriter(mstr, 'utf8', true);
 
     dw2.writeBufferEx(bArr, 0, bArr.length);
     dw2.flush();
     mstr.seek(0, SeekOrigin.Begin);
 
-    dr2 = new BinaryReader(mstr);
+    const dr2 = new BinaryReader(mstr);
     bReadArr = Buffer.alloc(bArr.length);
-    returnValue = dr2.readIntoBufferEx(bReadArr, 0, bArr.length);
+    const returnValue = dr2.readIntoBufferEx(bReadArr, 0, bArr.length);
 
-    assert.equal(returnValue, bArr.length);
+    assert.strictEqual(returnValue, bArr.length);
 
     for (ii = 0; ii < bArr.length; ii++)
-      assert.equal(bReadArr[ii], bArr[ii]);
+      assert.strictEqual(bReadArr[ii], bArr[ii]);
 
     dw2.close();
     dr2.close();
@@ -319,7 +315,7 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
   /// </summary>
   it('Write Char Array', () => {
     let ii = 0;
-    let chArr = new Array<string>(1000);
+    const chArr = new Array<string>(1000);
     chArr[0] = '\0';
     chArr[1] = String.fromCharCode(65535);
     chArr[2] = '1';
@@ -332,17 +328,17 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
       chArr[ii] = String.fromCharCode(ii);
 
     // [] read/Write with Memorystream
-    let mstr = openTruncated();
-    let dw2 = new BinaryWriter(mstr, 'utf8', true);
+    const mstr = openTruncated();
+    const dw2 = new BinaryWriter(mstr, 'utf8', true);
 
     dw2.writeChars(chArr);
     dw2.flush();
     mstr.seek(0, SeekOrigin.Begin);
 
-    let dr2 = new BinaryReader(mstr);
+    const dr2 = new BinaryReader(mstr);
 
     for (ii = 0; ii < chArr.length; ii++)
-      assert.equal(dr2.readChar(), chArr[ii]);
+      assert.strictEqual(dr2.readChar(), chArr[ii]);
 
     // [] Check End Of Stream
     assert.throws(() => dr2.readChar(), { code: CSCode.ReadBeyondEndOfFile });
@@ -352,9 +348,9 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
   });
 
   it('Write Char Array | Negative', () => {
-    let iArrInvalidValues = [-1, -2, -100, -1000, -10000, -100000, -1000000, -10000000, -100000000, -1000000000, INT_MIN, SHORT_MIN];
-    let iArrLargeValues = [INT_MAX, INT_MAX - 1, Math.floor(INT_MAX / 2), Math.floor(INT_MAX / 10), Math.floor(INT_MAX / 100)];
-    let chArr = new Array<string>(1000);
+    const iArrInvalidValues = [-1, -2, -100, -1000, -10000, -100000, -1000000, -10000000, -100000000, -1000000000, INT_MIN, SHORT_MIN];
+    const iArrLargeValues = [INT_MAX, INT_MAX - 1, Math.floor(INT_MAX / 2), Math.floor(INT_MAX / 10), Math.floor(INT_MAX / 100)];
+    const chArr = new Array<string>(1000);
 
     // [] ArgumentNullException for null argument
     let mstr = openTruncated();
@@ -412,13 +408,13 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
   /// then it returns 0xfffd, which is why BinaryReader.ReadChar needs to do an explicit check. (It always throws when it encounters a surrogate)
   /// </summary>
   it('Write Char Array 2', () => {
-    let mem = openTruncated();
-    let writer = new BinaryWriter(mem, 'utf16le', true);
+    const mem = openTruncated();
+    const writer = new BinaryWriter(mem, 'utf16le', true);
 
     // between 55296 <= x < 56319
 
     // between 56320 <= x < 57343
-    let randomChars = [
+    const randomChars = [
       55296, 57297, 55513, 56624, 55334, 56957, 55857,
       56355, 56095, 56887, 56126, 56735, 55748, 56405,
       55787, 56707, 56300, 56417, 55465, 56944
@@ -426,12 +422,12 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
 
     writer.writeChars(randomChars);
     mem.seek(0, SeekOrigin.Begin);
-    let reader = new BinaryReader(mem, 'utf16le');
+    const reader = new BinaryReader(mem, 'utf16le');
 
     for (let i = 0; i < 50; i++) {
       try {
         reader.readChar();
-        assert.equal(i, 1);
+        assert.strictEqual(i, 1);
       } catch (err) {
         if (err.code != CSCode.SurrogateCharHit)
           throw err;
@@ -440,9 +436,9 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
       }
     }
 
-    let chars = reader.readChars(randomChars.length);
+    const chars = reader.readChars(randomChars.length);
     for (let i = 0; i < randomChars.length; i++)
-      assert.equal(chars[i], randomChars[i]);
+      assert.strictEqual(chars[i], randomChars[i]);
 
     writer.close();
     reader.close();
@@ -454,7 +450,7 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
   /// 2) Tests Exceptional cases.
   /// </summary>
   it('Write Char Array 3', () => {
-    let chArr = new Array<string>(1000);
+    const chArr = new Array<string>(1000);
     chArr[0] = '\0';
     chArr[1] = String.fromCharCode(65535);
     chArr[2] = '1';
@@ -468,56 +464,56 @@ describe('BinaryWriter | Write Byte Char Tests', () => {
 
     // []read/ Write character values 0-1000 with  Memorystream
 
-    let mstr = openTruncated();
-    let dw2 = new BinaryWriter(mstr, 'utf8', true);
+    const mstr = openTruncated();
+    const dw2 = new BinaryWriter(mstr, 'utf8', true);
 
     dw2.writeCharsEx(chArr, 0, chArr.length);
     dw2.flush();
     mstr.seek(0, SeekOrigin.Begin);
 
-    let dr2 = new BinaryReader(mstr);
-    let chReadArr = new Array<string>(chArr.length);
-    let charsRead = dr2.readIntoCharsEx(chReadArr, 0, chArr.length);
-    assert.equal(charsRead, chArr.length);
+    const dr2 = new BinaryReader(mstr);
+    const chReadArr = new Array<string>(chArr.length);
+    const charsRead = dr2.readIntoCharsEx(chReadArr, 0, chArr.length);
+    assert.strictEqual(charsRead, chArr.length);
 
     for (let ii = 0; ii < chArr.length; ii++)
-      assert.equal(chReadArr[ii], chArr[ii]);
+      assert.strictEqual(chReadArr[ii], chArr[ii]);
 
     dw2.close();
     dr2.close();
   });
 
   it('Write Span', () => {
-    let bytes = Buffer.from([4, 2, 7, 0xFF]);
-    let chars = ['a', '7', String.fromCharCode(65535)];
+    const bytes = Buffer.from([4, 2, 7, 0xFF]);
+    const chars = ['a', '7', String.fromCharCode(65535)];
 
-    let memoryStream = openTruncated();
-    let binaryWriter = new BinaryWriter(memoryStream, 'utf16le');
+    const memoryStream = openTruncated();
+    const binaryWriter = new BinaryWriter(memoryStream, 'utf16le');
     binaryWriter.writeBuffer(bytes);
     binaryWriter.writeChars(chars);
 
-    let baseStream = binaryWriter.file;
+    const baseStream = binaryWriter.file;
     baseStream.seek(2, SeekOrigin.Begin);
 
     let b = Buffer.alloc(1);
     baseStream.read(b);
-    assert.equal(b.readUInt8(), 7);
+    assert.strictEqual(b.readUInt8(), 7);
     baseStream.read(b);
-    assert.equal(b.readUInt8(), 0xFF);
+    assert.strictEqual(b.readUInt8(), 0xFF);
 
     let testChar: string;
     b = Buffer.alloc(2);
 
     baseStream.read(b);
     testChar = b.toString('utf16le');
-    assert.equal(testChar, 'a');
+    assert.strictEqual(testChar, 'a');
 
     baseStream.read(b);
     testChar = b.toString('utf16le');
-    assert.equal(testChar, '7');
+    assert.strictEqual(testChar, '7');
 
     baseStream.read(b);
     testChar = b.toString('utf16le');
-    assert.equal(testChar, String.fromCharCode(65535));
+    assert.strictEqual(testChar, String.fromCharCode(65535));
   });
 });

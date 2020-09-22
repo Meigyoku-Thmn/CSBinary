@@ -6,9 +6,9 @@ import { openNullDevice } from '../src/utils/file';
 import { CSCode } from '../src/constants/error';
 
 describe('BinaryReader | Arguments Validation Test', () => {
-  let fileArr: IFile[] = [];
+  const fileArr: IFile[] = [];
   before(() => {
-    installHookToFile(fileArr) as any;
+    installHookToFile(fileArr);
   });
   afterEach(() => {
     fileArr.forEach(e => e.close());
@@ -27,10 +27,10 @@ describe('BinaryReader | Arguments Validation Test', () => {
   it('Constructor | Negative', () => {
     const file = openTruncated();
     assert.throws(() => new BinaryReader(null), TypeError);
-    assert.throws(() => new BinaryReader(2 as any), TypeError);
+    assert.throws(() => new BinaryReader(2 as never), TypeError);
     assert.throws(() => new BinaryReader(file, null), TypeError);
     assert.throws(() => new BinaryReader(file, 'haha'), { message: 'Unknown character encoding.' });
-    assert.throws(() => new BinaryReader(file, 'utf8', 2 as any), TypeError);
+    assert.throws(() => new BinaryReader(file, 'utf8', 2 as never), TypeError);
     assert.throws(() => new BinaryReader(openNullDevice()), { code: CSCode.FileNotReadable });
   });
 
@@ -43,7 +43,7 @@ describe('BinaryReader | Arguments Validation Test', () => {
   it('ReadIntoCharsEx | Negative', () => {
     const br = new BinaryReader(openTruncated());
     assert.throws(() => br.readIntoCharsEx(null, 0, 0), TypeError);
-    assert.throws(() => br.readIntoCharsEx(2 as any, 0, 0), TypeError);
+    assert.throws(() => br.readIntoCharsEx(2 as never, 0, 0), TypeError);
     assert.throws(() => br.readIntoCharsEx(null, null, 0), TypeError);
     assert.throws(() => br.readIntoCharsEx(null, 0, null), TypeError);
     assert.throws(() => br.readIntoCharsEx([], Number.MIN_SAFE_INTEGER - 2, 0), TypeError);
@@ -56,7 +56,7 @@ describe('BinaryReader | Arguments Validation Test', () => {
   it('ReadIntoChars | Negative', () => {
     const br = new BinaryReader(openTruncated());
     assert.throws(() => br.readIntoChars(null), TypeError);
-    assert.throws(() => br.readIntoChars(3 as any), TypeError);
+    assert.throws(() => br.readIntoChars(3 as never), TypeError);
   });
 
   it('ReadChars | Negative', () => {
@@ -70,7 +70,7 @@ describe('BinaryReader | Arguments Validation Test', () => {
     const br = new BinaryReader(openTruncated());
     const buffer = Buffer.alloc(0);
     assert.throws(() => br.readIntoBufferEx(null, 0, 0), TypeError);
-    assert.throws(() => br.readIntoBufferEx(4 as any, 0, 0), TypeError);
+    assert.throws(() => br.readIntoBufferEx(4 as never, 0, 0), TypeError);
     assert.throws(() => br.readIntoBufferEx(null, null, 0), TypeError);
     assert.throws(() => br.readIntoBufferEx(null, 0, null), TypeError);
     assert.throws(() => br.readIntoBufferEx(buffer, Number.MIN_SAFE_INTEGER - 2, 0), TypeError);
@@ -83,7 +83,7 @@ describe('BinaryReader | Arguments Validation Test', () => {
   it('ReadIntoBuffer | Negative', () => {
     const br = new BinaryReader(openTruncated());
     assert.throws(() => br.readIntoBuffer(null), TypeError);
-    assert.throws(() => br.readIntoBuffer(54 as any), TypeError);
+    assert.throws(() => br.readIntoBuffer(54 as never), TypeError);
   });
 
   it('ReadBytes', () => {

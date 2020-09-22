@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { IFile, File } from '../addon/file'
+import { IFile, File } from '../addon/file';
 
 const poxisPlatforms = new Set<typeof process.platform>([
   'aix', 'android', 'cygwin', 'darwin', 'freebsd', 'linux', 'netbsd', 'openbsd', 'sunos']);
@@ -7,15 +7,15 @@ const isPosix = poxisPlatforms.has(process.platform);
 const isWin32 = process.platform == 'win32';
 
 export function readByte(file: IFile): number {
-  let oneByteArray = Buffer.allocUnsafe(1);
-  let r = file.read(oneByteArray);
+  const oneByteArray = Buffer.allocUnsafe(1);
+  const r = file.read(oneByteArray);
   if (r == 0)
     return -1;
   return oneByteArray[0];
 }
 
 export function writeByte(file: IFile, value: number): void {
-  let oneByteArray = Buffer.allocUnsafe(1);
+  const oneByteArray = Buffer.allocUnsafe(1);
   oneByteArray.writeUInt8(value);
   file.write(oneByteArray);
 }
@@ -28,6 +28,6 @@ export function openNullDevice(): IFile {
   else if (isWin32)
     fd = fs.openSync('//./nul', 'w');
   else
-    throw Error("I don't know how to open a null device on your system.");
+    throw Error('I don\'t know how to open a null device on your system.');
   return File(fd);
 }

@@ -24,20 +24,20 @@ export class SubArray<T> {
 
   private constructor(private arr: T[], private start: number, private end: number) { }
 
-  get(i: number) {
+  get(i: number): T {
     return this.arr[i + this.start];
   }
-  set(i: number, value: T) {
-    return this.arr[i + this.start] = value;
+  set(i: number, value: T): void {
+    this.arr[i + this.start] = value;
   }
   /* istanbul ignore next */
-  sub(start = 0, length = this.length - start) {
+  sub(start = 0, length = this.length - start): SubArray<T> {
     return SubArray.from(this.arr, this.start + start, this.start + start + length);
   }
-  get length() {
+  get length(): number {
     return this.end - this.start;
   }
-  get isEmpty() {
+  get isEmpty(): boolean {
     return 0 >= this.length;
   }
-};
+}

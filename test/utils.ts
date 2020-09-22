@@ -1,24 +1,24 @@
-let { File } = require('../src/addon/file');
 import fse from 'fs-extra';
-import { IFile } from '../src/addon/file';
+import { IFile, File as _File } from '../src/addon/file';
 import fs from 'fs';
 import { SeekOrigin } from '../src/constants/mode';
 import path from 'path';
 
+let File = _File;
 export const TmpFilePath = path.join(__dirname, 'tmp/f.tmp');
 fse.ensureDirSync(path.join(__dirname, 'tmp'));
 
 const OriginalFile = File;
-export function installHookToFile(fileArr: IFile[]) {
-  return File = class FileEx extends File {
+export function installHookToFile(fileArr: IFile[]): typeof File {
+  return File = (class FileEx extends _File {
     constructor(fd: number) {
       super(fd);
-      fileArr.push(this as any);
+      fileArr.push(this);
     }
-  };
+  }) as never;
 }
 
-export function removeHookFromFile() {
+export function removeHookFromFile(): void {
   File = OriginalFile;
 }
 
@@ -59,7 +59,7 @@ export function getFileContent(file: IFile): Buffer {
 /**
  * The maximum is exclusive and the minimum is inclusive
  */
-export function getRandomInt(min: number, max: number) {
+export function getRandomInt(min: number, max: number): number {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min)) + min;

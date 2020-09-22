@@ -10,9 +10,9 @@ import { IFile } from '../src/addon/file';
 import { Encoding } from '../src/encoding';
 
 describe('BinaryWriter Tests', () => {
-  let fileArr: IFile[] = [];
+  const fileArr: IFile[] = [];
   before(() => {
-    installHookToFile(fileArr) as any;
+    installHookToFile(fileArr);
   });
   afterEach(() => {
     fileArr.forEach(e => e.close());
@@ -24,9 +24,9 @@ describe('BinaryWriter Tests', () => {
 
   it('Ctor And Write Tests', () => {
     // [] Smoke test to ensure that we can write with the constructed writer
-    let file = openTruncated();
-    let dw2 = new BinaryWriter(file, 'utf8', true);
-    let dr2 = new BinaryReader(file);
+    const file = openTruncated();
+    const dw2 = new BinaryWriter(file, 'utf8', true);
+    const dr2 = new BinaryReader(file);
     dw2.writeBoolean(true);
     dw2.flush();
     file.seek(0, SeekOrigin.Begin);
@@ -44,23 +44,23 @@ describe('BinaryWriter Tests', () => {
     assert.throws(() => new BinaryWriter(openTruncatedToRead()), { code: CSCode.FileNotWritable });
 
     // [] Can't construct a BinaryWriter with a closed file
-    let file = openTruncated();
+    const file = openTruncated();
     file.close();
     assert.throws(() => new BinaryWriter(file), { code: CSCode.FileNotWritable });
   });
 
   it('Encoding Ctor And Write Tests', () => {
-    let testSuite = [
-      ['utf8', "This is UTF8\u00FF"],
-      ['utf16be', "This is BigEndianUnicode\u00FF"],
-      ['utf16le', "This is Unicode\u00FF"],
+    const testSuite = [
+      ['utf8', 'This is UTF8\u00FF'],
+      ['utf16be', 'This is BigEndianUnicode\u00FF'],
+      ['utf16le', 'This is Unicode\u00FF'],
     ];
-    for (let [encoding, testString] of testSuite) {
-      let file = openTruncated();
-      let writer = new BinaryWriter(file, encoding as BufferEncoding);
-      let reader = new BinaryReader(file, encoding as BufferEncoding);
-      let _encoding = new Encoding(encoding);
-      let nullLen = _encoding.encode('\0').length;
+    for (const [encoding, testString] of testSuite) {
+      const file = openTruncated();
+      const writer = new BinaryWriter(file, encoding as BufferEncoding);
+      const reader = new BinaryReader(file, encoding as BufferEncoding);
+      const _encoding = new Encoding(encoding);
+      const nullLen = _encoding.encode('\0').length;
 
       writer.writeString(testString);
       writer.writeCString(testString);
@@ -68,9 +68,9 @@ describe('BinaryWriter Tests', () => {
       writer.flush();
       file.seek(0, SeekOrigin.Begin);
 
-      assert.equal(reader.readString(), testString);      
-      assert.equal(reader.readRawString(_encoding.encode(testString).length + nullLen).replace(/\0*$/g, ''), testString);
-      assert.equal(reader.readRawString(_encoding.encode(testString).length), testString);
+      assert.strictEqual(reader.readString(), testString);      
+      assert.strictEqual(reader.readRawString(_encoding.encode(testString).length + nullLen).replace(/\0*$/g, ''), testString);
+      assert.strictEqual(reader.readRawString(_encoding.encode(testString).length), testString);
       writer.close();
     }
   });
@@ -83,7 +83,7 @@ describe('BinaryWriter Tests', () => {
   });
 
   it('Seek Tests', () => {
-    let iArrLargeValues = [
+    const iArrLargeValues = [
       10000, 100000, Math.floor(INT_MAX / 200), Math.floor(INT_MAX / 1000), SHORT_MAX,
       INT_MAX, INT_MAX - 1, Math.floor(INT_MAX / 2), Math.floor(INT_MAX / 10), Math.floor(INT_MAX / 100)
     ];
@@ -96,30 +96,30 @@ describe('BinaryWriter Tests', () => {
 
     mstr = openTruncated();
     dw2 = new BinaryWriter(mstr);
-    dw2.writeChars("Hello, this is my string".split(''));
+    dw2.writeChars('Hello, this is my string'.split(''));
     for (let iLoop = 0; iLoop < iArrLargeValues.length; iLoop++) {
       dw2.file.seek(iArrLargeValues[iLoop], SeekOrigin.Begin);
       lReturn = dw2.file.tell();
 
-      assert.equal(lReturn, iArrLargeValues[iLoop]);
+      assert.strictEqual(lReturn, iArrLargeValues[iLoop]);
     }
     dw2.close();
 
     // [] Seek from start of stream
     mstr = openTruncated();
     dw2 = new BinaryWriter(mstr);
-    dw2.writeChars("0123456789".split(''));
+    dw2.writeChars('0123456789'.split(''));
     dw2.file.seek(0, SeekOrigin.Begin);
     lReturn = dw2.file.tell();
 
-    assert.equal(lReturn, 0);
+    assert.strictEqual(lReturn, 0);
 
-    dw2.writeChars("lki".split(''));
+    dw2.writeChars('lki'.split(''));
     dw2.flush();
     bArr = getFileContent(mstr);
     sb = bArr.reduce((acc, e) => acc + String.fromCharCode(e), '');
 
-    assert.equal(sb, "lki3456789");
+    assert.strictEqual(sb, 'lki3456789');
 
     dw2.close();
 
@@ -127,77 +127,77 @@ describe('BinaryWriter Tests', () => {
     mstr = openTruncated();
     dw2 = new BinaryWriter(mstr);
 
-    dw2.writeChars("0123456789".split(''));
+    dw2.writeChars('0123456789'.split(''));
     dw2.file.seek(3, SeekOrigin.Begin);
     lReturn = dw2.file.tell();
 
-    assert.equal(lReturn, 3);
+    assert.strictEqual(lReturn, 3);
 
-    dw2.writeChars("lk".split(''));
+    dw2.writeChars('lk'.split(''));
     dw2.flush();
     bArr = getFileContent(mstr);
     sb = bArr.reduce((acc, e) => acc + String.fromCharCode(e), '');
 
-    assert.equal(sb, "012lk56789");
+    assert.strictEqual(sb, '012lk56789');
 
     dw2.close();
 
     // [] Seek from end of stream
     mstr = openTruncated();
     dw2 = new BinaryWriter(mstr);
-    dw2.writeChars("0123456789".split(''));
+    dw2.writeChars('0123456789'.split(''));
     dw2.file.seek(-3, SeekOrigin.End);
     lReturn = dw2.file.tell();
 
-    assert.equal(lReturn, 7);
+    assert.strictEqual(lReturn, 7);
 
-    dw2.writeChars("ll".split(''));
+    dw2.writeChars('ll'.split(''));
     dw2.flush();
     bArr = getFileContent(mstr);
     sb = bArr.reduce((acc, e) => acc + String.fromCharCode(e), '');
 
-    assert.equal(sb, "0123456ll9");
+    assert.strictEqual(sb, '0123456ll9');
 
     dw2.close();
 
     // [] Seeking from current position
     mstr = openTruncated();
     dw2 = new BinaryWriter(mstr);
-    dw2.writeChars("0123456789".split(''));
+    dw2.writeChars('0123456789'.split(''));
     dw2.file.seek(2, SeekOrigin.Begin);
     dw2.file.seek(2, SeekOrigin.Current);
     lReturn = dw2.file.tell();
 
-    assert.equal(lReturn, 4);
+    assert.strictEqual(lReturn, 4);
 
-    dw2.writeChars("ll".split(''));
+    dw2.writeChars('ll'.split(''));
     dw2.flush();
     bArr = getFileContent(mstr);
     sb = bArr.reduce((acc, e) => acc + String.fromCharCode(e), '');
 
-    assert.equal(sb, "0123ll6789");
+    assert.strictEqual(sb, '0123ll6789');
 
     dw2.close();
 
     // [] Seeking past the end from middle
     mstr = openTruncated();
     dw2 = new BinaryWriter(mstr);
-    dw2.writeChars("0123456789".split(''));
+    dw2.writeChars('0123456789'.split(''));
     dw2.file.seek(4, SeekOrigin.End);  //This won't throw any exception now.
     lReturn = dw2.file.tell();
 
-    assert.equal(lReturn, 14);
+    assert.strictEqual(lReturn, 14);
 
     dw2.close();
 
     // [] Seek past the end from beginning
     mstr = openTruncated();
     dw2 = new BinaryWriter(mstr);
-    dw2.writeChars("0123456789".split(''));
+    dw2.writeChars('0123456789'.split(''));
     dw2.file.seek(11, SeekOrigin.Begin); //This won't throw any exception now.
     lReturn = dw2.file.tell();
 
-    assert.equal(lReturn, 11);
+    assert.strictEqual(lReturn, 11);
 
     dw2.close();
 
@@ -208,42 +208,42 @@ describe('BinaryWriter Tests', () => {
     dw2.file.seek(10, SeekOrigin.Begin);
     lReturn = dw2.file.tell();
 
-    assert.equal(lReturn, 10);
+    assert.strictEqual(lReturn, 10);
 
-    dw2.writeChars("ll".split(''));
+    dw2.writeChars('ll'.split(''));
     bArr = getFileContent(mstr);
     sb = bArr.reduce((acc, e) => acc + String.fromCharCode(e), '');
 
-    assert.equal(sb, "0123456789ll");
+    assert.strictEqual(sb, '0123456789ll');
 
     dw2.close();
   });
 
   it('Seek Tests | Negative Offset', () => {
-    let testSuite = [-1, -2, -10000, INT_MIN];
-    for (let invalidValue of testSuite) {
+    const testSuite = [-1, -2, -10000, INT_MIN];
+    for (const invalidValue of testSuite) {
       // [] IOException if offset is negative
-      let memStream = openTruncated();
-      let writer = new BinaryWriter(memStream);
+      const memStream = openTruncated();
+      const writer = new BinaryWriter(memStream);
       writer.writeChars('Hello, this is my string'.split(''));
-      assert.throws(() => writer.file.seek(invalidValue, SeekOrigin.Begin), { code: "EINVAL" })
+      assert.throws(() => writer.file.seek(invalidValue, SeekOrigin.Begin), { code: 'EINVAL' });
       writer.close();
     }
   });
 
   it('Seek Tests | Invalid SeekOrigin', () => {
     // [] ArgumentException for invalid seekOrigin
-    let memStream = openTruncated();
-    let writer = new BinaryWriter(memStream);
-    writer.writeChars("0123456789".split(''));
+    const memStream = openTruncated();
+    const writer = new BinaryWriter(memStream);
+    writer.writeChars('0123456789'.split(''));
     assert.throws(() => writer.file.seek(3, null), TypeError);
     writer.close();
   });
 
   it('BaseStream Tests', () => {
     // [] Get the base stream for MemoryStream
-    let ms2 = openTruncated();
-    let sr2 = new BinaryWriter(ms2);
+    const ms2 = openTruncated();
+    const sr2 = new BinaryWriter(ms2);
     assert.strictEqual(sr2.file, ms2);
     sr2.close();
   });
@@ -252,12 +252,12 @@ describe('BinaryWriter Tests', () => {
     // [] Check that flush updates the underlying stream
     let memstr2 = openTruncated();
     let bw2 = new BinaryWriter(memstr2);
-    let str = "HelloWorld";
-    let expectedLength = str.length + 1; // 1 for 7-bit encoded length
+    const str = 'HelloWorld';
+    const expectedLength = str.length + 1; // 1 for 7-bit encoded length
     bw2.writeString(str);
-    assert.equal(fs.fstatSync(memstr2.fd).size, 0);
+    assert.strictEqual(fs.fstatSync(memstr2.fd).size, 0);
     bw2.flush();
-    assert.equal(fs.fstatSync(memstr2.fd).size, expectedLength);
+    assert.strictEqual(fs.fstatSync(memstr2.fd).size, expectedLength);
     bw2.close();
 
     // [] Flushing a closed writer may throw an exception
@@ -269,16 +269,16 @@ describe('BinaryWriter Tests', () => {
 
   it('Close Tests', () => {
     // Closing multiple times should not throw an exception
-    let memStream = openTruncated();
-    let binaryWriter = new BinaryWriter(memStream);
+    const memStream = openTruncated();
+    const binaryWriter = new BinaryWriter(memStream);
     binaryWriter.close();
     binaryWriter.close();
     binaryWriter.close();
   });
 
   it('Close Tests | Negative', () => {
-    let memStream = openTruncated();
-    let binaryWriter = new BinaryWriter(memStream);
+    const memStream = openTruncated();
+    const binaryWriter = new BinaryWriter(memStream);
     binaryWriter.close();
     validateDisposedExceptions(binaryWriter);
   });
@@ -297,43 +297,43 @@ describe('BinaryWriter Tests', () => {
     assert.throws(() => binaryWriter.writeInt32(33), { code: CSCode.FileIsClosed });
     assert.throws(() => binaryWriter.writeInt64(BigInt(42)), { code: CSCode.FileIsClosed });
     assert.throws(() => binaryWriter.writeSByte(4), { code: CSCode.FileIsClosed });
-    assert.throws(() => binaryWriter.writeString("Hello There"), { code: CSCode.FileIsClosed });
+    assert.throws(() => binaryWriter.writeString('Hello There'), { code: CSCode.FileIsClosed });
     assert.throws(() => binaryWriter.writeSingle(4.3), { code: CSCode.FileIsClosed });
     assert.throws(() => binaryWriter.writeUInt16(3), { code: CSCode.FileIsClosed });
     assert.throws(() => binaryWriter.writeUInt32(4), { code: CSCode.FileIsClosed });
     assert.throws(() => binaryWriter.writeUInt64(BigInt(5)), { code: CSCode.FileIsClosed });
-    assert.throws(() => binaryWriter.writeString("Bah"), { code: CSCode.FileIsClosed });
-    assert.throws(() => binaryWriter.writeCString("Hello"), { code: CSCode.FileIsClosed });
-    assert.throws(() => binaryWriter.writeRawString("Bye"), { code: CSCode.FileIsClosed });
+    assert.throws(() => binaryWriter.writeString('Bah'), { code: CSCode.FileIsClosed });
+    assert.throws(() => binaryWriter.writeCString('Hello'), { code: CSCode.FileIsClosed });
+    assert.throws(() => binaryWriter.writeRawString('Bye'), { code: CSCode.FileIsClosed });
   }
 
   it('OutStream', () => {
     class BinaryWriterOutStream extends BinaryWriter {
       get getOutFd(): IFile { return this._file; }
     }
-    let stream = openTruncated();
-    let bw = new BinaryWriterOutStream(stream);
-    assert.equal(bw.getOutFd, stream);
+    const stream = openTruncated();
+    const bw = new BinaryWriterOutStream(stream);
+    assert.strictEqual(bw.getOutFd, stream);
   });
 
   it('Leave Open', () => {
     let file = openTruncated();
-    assert.ok(file.canWrite, "ERROR: Before testing, file.canWrite property was false! What?");
+    assert.ok(file.canWrite, 'ERROR: Before testing, file.canWrite property was false! What?');
 
     // Test leaveOpen
     let bw = new BinaryWriter(file, 'utf8', true);
     bw.close();
-    assert.ok(file.canWrite, "ERROR: After closing a BinaryWriter with leaveOpen bool set, file.canWrite property was false!");
+    assert.ok(file.canWrite, 'ERROR: After closing a BinaryWriter with leaveOpen bool set, file.canWrite property was false!');
 
     // Test not leaving open
     bw = new BinaryWriter(file, 'utf8', false);
     bw.close();
-    assert.ok(!file.canWrite, "ERROR: After closing a BinaryWriter with leaveOpen bool not set, file.canWrite property was true!");
+    assert.ok(!file.canWrite, 'ERROR: After closing a BinaryWriter with leaveOpen bool not set, file.canWrite property was true!');
 
     // Test default
     file = openTruncated();
     bw = new BinaryWriter(file);
     bw.close();
-    assert.ok(!file.canWrite, "ERROR: After closing a BinaryWriter with the default value for leaveOpen, file.canWrite property was true!");
+    assert.ok(!file.canWrite, 'ERROR: After closing a BinaryWriter with the default value for leaveOpen, file.canWrite property was true!');
   });
 });

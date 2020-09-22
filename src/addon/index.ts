@@ -1,5 +1,5 @@
 import bindings from 'bindings';
-const addon = bindings("addon.node");
+const addon = bindings('addon.node');
 
 export const getFileState = addon.GetFileState as (fd: number) => {
   canRead: boolean;

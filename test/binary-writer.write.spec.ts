@@ -12,9 +12,9 @@ import { IFile } from '../src/addon/file';
 import { Encoding } from '../src/encoding';
 
 describe('BinaryWriter | Write Tests', () => {
-  let fileArr: IFile[] = [];
+  const fileArr: IFile[] = [];
   before(() => {
-    installHookToFile(fileArr) as any;
+    installHookToFile(fileArr);
   });
   afterEach(() => {
     fileArr.forEach(e => e.close());
@@ -26,9 +26,9 @@ describe('BinaryWriter | Write Tests', () => {
 
   it('Write Boolean', async () => {
     // [] Write a series of booleans to a stream
-    let file = openTruncated();
-    let dw2 = new BinaryWriter(file, 'utf8', true);
-    let dr2 = new BinaryReader(file);
+    const file = openTruncated();
+    const dw2 = new BinaryWriter(file, 'utf8', true);
+    const dr2 = new BinaryReader(file);
 
     dw2.writeBoolean(false);
     dw2.writeBoolean(false);
@@ -46,15 +46,15 @@ describe('BinaryWriter | Write Tests', () => {
     assert.ok(dr2.readBoolean());
     assert.ok(!dr2.readBoolean());
     assert.ok(dr2.readBoolean());
-    assert.equal(dr2.readInt32(), 5);
-    assert.equal(dr2.readInt32(), 0);
+    assert.strictEqual(dr2.readInt32(), 5);
+    assert.strictEqual(dr2.readInt32(), 0);
 
     dw2.close();
     dr2.close();
   });
 
   it('Write Single', () => {
-    let sglArr = [
+    const sglArr = [
       SINGLE_MIN, SINGLE_MAX, SINGLE_EPSILON, Infinity, -Infinity, 0,
       0, Math.fround(-1E20), Math.fround(-3.5E-20), Math.fround(1.4E-10), Math.fround(10000.2), Math.fround(2.3E30),
     ];
@@ -63,7 +63,7 @@ describe('BinaryWriter | Write Tests', () => {
   });
 
   it('Write Double', () => {
-    let dblArr = [
+    const dblArr = [
       -Infinity, Infinity, DOUBLE_EPSILON, DOUBLE_MIN, DOUBLE_MAX,
       -3E59, -1000.5, -1E-40, 3.4E-37, 0.45, 5.55, 3.4899E233,
     ];
@@ -72,19 +72,19 @@ describe('BinaryWriter | Write Tests', () => {
   });
 
   it('Write Int16', () => {
-    let i16Arr = [SHORT_MIN, SHORT_MAX, 0, -10000, 10000, -50, 50];
+    const i16Arr = [SHORT_MIN, SHORT_MAX, 0, -10000, 10000, -50, 50];
 
     writeTest(i16Arr, (bw, s) => bw.writeInt16(s), br => br.readInt16());
   });
 
   it('Write Int32', () => {
-    let i32Arr = [INT_MIN, INT_MAX, 0, -10000, 10000, -50, 50];
+    const i32Arr = [INT_MIN, INT_MAX, 0, -10000, 10000, -50, 50];
 
     writeTest(i32Arr, (bw, s) => bw.writeInt32(s), br => br.readInt32());
   });
 
   it('Write 7 Bit Encoded Int', () => {
-    let i32Arr = [
+    const i32Arr = [
       INT_MIN, INT_MAX, 0, -10000, 10000, -50, 50,
       0, -1, -101
     ];
@@ -93,7 +93,7 @@ describe('BinaryWriter | Write Tests', () => {
   });
 
   it('Write Int64', () => {
-    let i64Arr = [
+    const i64Arr = [
       LONG_MIN, LONG_MAX, 0, -10000, 10000, -50, 50
     ].map(e => BigInt(e));
 
@@ -101,7 +101,7 @@ describe('BinaryWriter | Write Tests', () => {
   });
 
   it('Write 7 Bit Encoded Int64', () => {
-    let i64Arr = [
+    const i64Arr = [
       LONG_MIN, LONG_MAX, 0, -10000, 10000, -50, 50,
       0, -1, -101,
     ].map(e => BigInt(e));
@@ -110,7 +110,7 @@ describe('BinaryWriter | Write Tests', () => {
   });
 
   it('Write UInt16', () => {
-    let ui16Arr = [
+    const ui16Arr = [
       USHORT_MIN, USHORT_MAX, 0, 100, 1000, 10000, USHORT_MAX - 100
     ];
 
@@ -118,7 +118,7 @@ describe('BinaryWriter | Write Tests', () => {
   });
 
   it('Write UInt32', () => {
-    let ui32Arr = [
+    const ui32Arr = [
       UINT_MIN, UINT_MAX, 0, 100, 1000, 10000, UINT_MAX - 100
     ];
 
@@ -126,7 +126,7 @@ describe('BinaryWriter | Write Tests', () => {
   });
 
   it('Write UInt64', () => {
-    let ui64Arr = [
+    const ui64Arr = [
       ULONG_MIN, ULONG_MAX, 0, 100, 1000, 10000, ULONG_MAX - BigInt(100)
     ].map(e => BigInt(e));
 
@@ -134,38 +134,38 @@ describe('BinaryWriter | Write Tests', () => {
   });
 
   it('Write String', () => {
-    let sb = 'abc'.repeat(5);
-    let strArr = [
-      "ABC", "\t\t\n\n\n\0\r\r\v\v\t\0\rHello", "This is a normal string", "12345667789!@#$%^&&())_+_)@#",
-      "ABSDAFJPIRUETROPEWTGRUOGHJDOLJHLDHWEROTYIETYWsdifhsiudyoweurscnkjhdfusiyugjlskdjfoiwueriye", "     ",
-      "\0\0\0\t\t\tHey\"\"", "\u0022\u0011", sb, ''
+    const sb = 'abc'.repeat(5);
+    const strArr = [
+      'ABC', '\t\t\n\n\n\0\r\r\v\v\t\0\rHello', 'This is a normal string', '12345667789!@#$%^&&())_+_)@#',
+      'ABSDAFJPIRUETROPEWTGRUOGHJDOLJHLDHWEROTYIETYWsdifhsiudyoweurscnkjhdfusiyugjlskdjfoiwueriye', '     ',
+      '\0\0\0\t\t\tHey""', '\u0022\u0011', sb, ''
     ];
 
-    let encoding = new Encoding('utf8');
+    const encoding = new Encoding('utf8');
     writeTest(strArr, (bw, s) => bw.writeString(s), br => br.readString());
     writeTest(strArr, (bw, s) => bw.writeRawString(s), (br, s) => br.readRawString(encoding.encode(s ?? ' ').length));
     writeTest(strArr, (bw, s) => bw.writeCString(s), (br, s) => {
-      let rs = br.readRawString(encoding.encode(s ?? ' ').length + 1).replace(/\0*$/g, '');
+      const rs = br.readRawString(encoding.encode(s ?? ' ').length + 1).replace(/\0*$/g, '');
       if (rs.length != s.length)
-        assert.fail("String is not null-terminated.");
+        assert.fail('String is not null-terminated.');
       return rs;
     });
   });
 
   it('Write String | Invalid Length', () => {
-    let file = openTruncated();
-    let dw = new BinaryWriter(file, 'utf8', true);
+    const file = openTruncated();
+    const dw = new BinaryWriter(file, 'utf8', true);
     dw.write7BitEncodedInt(-1);
     dw.close();
     file.seek(0, SeekOrigin.Begin);
-    let dr = new BinaryReader(file);
+    const dr = new BinaryReader(file);
     assert.throws(() => dr.readString(), { code: CSCode.InvalidEncodedStringLength });
     assert.throws(() => dr.readRawString(-1), { code: CSCode.InvalidEncodedStringLength });
   });
 
   it('Write String | Null', () => {
-    let file = openTruncated();
-    let dw2 = new BinaryWriter(file);
+    const file = openTruncated();
+    const dw2 = new BinaryWriter(file);
     assert.throws(() => dw2.writeString(null), TypeError);
     assert.throws(() => dw2.writeCString(null), TypeError);
     assert.throws(() => dw2.writeRawString(null), TypeError);
@@ -173,9 +173,9 @@ describe('BinaryWriter | Write Tests', () => {
   });
 
   function writeTest<T>(testElements: T[], write: (w: BinaryWriter, s: T) => void, read: (r: BinaryReader, s?: T) => T) {
-    let file = openTruncated();
-    let writer = new BinaryWriter(file, 'utf8', true);
-    let reader = new BinaryReader(file);
+    const file = openTruncated();
+    const writer = new BinaryWriter(file, 'utf8', true);
+    const reader = new BinaryReader(file);
 
     for (let i = 0; i < testElements.length; i++) {
       write(writer, testElements[i]);
@@ -189,7 +189,7 @@ describe('BinaryWriter | Write Tests', () => {
     }
 
     // We've reached the end of the stream.  Check for expected EndOfStreamException
-    assert.throws(() => read(reader), { code: CSCode.ReadBeyondEndOfFile })
+    assert.throws(() => read(reader), { code: CSCode.ReadBeyondEndOfFile });
 
     writer.close();
     reader.close();

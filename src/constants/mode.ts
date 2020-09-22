@@ -1,4 +1,4 @@
-import { constants } from "../addon";
+import { constants } from '../addon';
 const {
   /** @internal */
   SEEK_CUR,

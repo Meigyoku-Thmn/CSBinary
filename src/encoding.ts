@@ -55,7 +55,7 @@ export interface IDecoder {
 export class Encoding implements IEncoding {
   constructor(private encoding: string | BufferEncoding) {
     if (!iconv.encodingExists(encoding))
-      raise(Error('Unknown character encoding.'), CSCode.InvalidCharacterEncoding)
+      raise(Error('Unknown character encoding.'), CSCode.InvalidCharacterEncoding);
   }
   getDecoder(): IDecoder {
     return new Decoder(this.encoding);
@@ -82,7 +82,7 @@ export class Encoder implements IEncoder {
   }
   get hasState(): boolean {
     return this.encoder.hasState;
-  };
+  }
   write(str: string): Buffer {
     return this.encoder.write(str);
   }
@@ -99,7 +99,7 @@ export class Decoder implements IDecoder {
   }
   get hasState(): boolean {
     return this.decoder.hasState;
-  };
+  }
   write(buf: Buffer): string {
     return this.decoder.write(buf);
   }

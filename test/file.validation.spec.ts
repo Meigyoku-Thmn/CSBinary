@@ -6,10 +6,10 @@ import { openNullDevice } from '../src/utils/file';
 import { IFile } from '../src/addon/file';
 
 describe('File | Arguments Validation Test', () => {
-  let fileArr: IFile[] = [];
+  const fileArr: IFile[] = [];
   let File: (new (fd: number) => IFile) & ((fd: number) => IFile);
   before(() => {
-    File = installHookToFile(fileArr) as any;
+    File = installHookToFile(fileArr);
   });
   afterEach(() => {
     fileArr.forEach(e => e.close());
@@ -21,13 +21,13 @@ describe('File | Arguments Validation Test', () => {
 
   it('Open from file descriptor', () => {
     openTruncated();
-    openWithContent(Buffer.from("Hello World"));
+    openWithContent(Buffer.from('Hello World'));
   });
 
   it('Open from file descriptor | Negative', () => {
     assert.throws(() => new File(99999), { code: 'EBADF' });
     assert.throws(() => new File(Number.MAX_SAFE_INTEGER), TypeError);
-    assert.throws(() => new File('kdjkf' as any), TypeError);
+    assert.throws(() => new File('kdjkf' as never), TypeError);
   });
 
   it('Can get back file descriptor from File', () => {
@@ -53,8 +53,8 @@ describe('File | Arguments Validation Test', () => {
     const file = openNullDevice();
 
     assert.throws(() => file.write(null), TypeError);
-    assert.throws(() => file.write(Buffer.alloc(1), "2" as any, -1), TypeError);
-    assert.throws(() => file.write(Buffer.alloc(1), 0, "2" as any), TypeError);
+    assert.throws(() => file.write(Buffer.alloc(1), '2' as never, -1), TypeError);
+    assert.throws(() => file.write(Buffer.alloc(1), 0, '2' as never), TypeError);
 
     assert.throws(() => file.write(Buffer.alloc(1), -1), RangeError);
     assert.throws(() => file.write(Buffer.alloc(1), 2), RangeError);
@@ -67,9 +67,9 @@ describe('File | Arguments Validation Test', () => {
   });
 
   it('Read', () => {
-    let originalRead = File.prototype.read;
+    const originalRead = File.prototype.read;
     File.prototype.read = function (bytes: NodeJS.ArrayBufferView, offset?: number, count?: number) {
-      let rs = originalRead.bind(this)(bytes, offset, count);
+      const rs = originalRead.bind(this)(bytes, offset, count);
       this.seek(0, SeekOrigin.Begin);
       return rs;
     };
@@ -82,9 +82,9 @@ describe('File | Arguments Validation Test', () => {
   });
 
   it('Read | Negative', () => {
-    let originalRead = File.prototype.read;
+    const originalRead = File.prototype.read;
     File.prototype.read = function (bytes: NodeJS.ArrayBufferView, offset?: number, count?: number) {
-      let rs = originalRead.bind(this)(bytes, offset, count);
+      const rs = originalRead.bind(this)(bytes, offset, count);
       this.seek(0, SeekOrigin.Begin);
       return rs;
     };
@@ -92,8 +92,8 @@ describe('File | Arguments Validation Test', () => {
     const file = openToReadWithContent(Buffer.alloc(1));
 
     assert.throws(() => file.read(null), TypeError);
-    assert.throws(() => file.read(Buffer.alloc(1), "2" as any, -1), TypeError);
-    assert.throws(() => file.read(Buffer.alloc(1), 0, "2" as any), TypeError);
+    assert.throws(() => file.read(Buffer.alloc(1), '2' as never, -1), TypeError);
+    assert.throws(() => file.read(Buffer.alloc(1), 0, '2' as never), TypeError);
 
     assert.throws(() => file.read(Buffer.alloc(1), -1), RangeError);
     assert.throws(() => file.read(Buffer.alloc(1), 2), RangeError);
@@ -112,13 +112,13 @@ describe('File | Arguments Validation Test', () => {
     file.seek(1, SeekOrigin.Begin);
     file.seek(1, SeekOrigin.Current);
     file.seek(-2, SeekOrigin.End);
-    file.seek(11, SeekOrigin.Begin)
+    file.seek(11, SeekOrigin.Begin);
   });
 
   it('Seek | Negative', () => {
     const file = openToReadWithContent(Buffer.alloc(10));
     assert.throws(() => file.seek(-1, SeekOrigin.Begin), { code: 'EINVAL' });
-    assert.throws(() => file.seek(-1, 'i' as any), TypeError);
+    assert.throws(() => file.seek(-1, 'i' as never), TypeError);
     assert.throws(() => file.seek(null, SeekOrigin.Begin), TypeError);
   });
 

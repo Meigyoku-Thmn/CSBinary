@@ -1,4 +1,4 @@
-import { readByte } from './utils/file'
+import { readByte } from './utils/file';
 import { SubArray } from './utils/array';
 import { raise } from './utils/error';
 import { CSCode } from './constants/error';
@@ -93,7 +93,7 @@ export class BinaryReader {
       return -1;
     }
 
-    let ch = this.readCharCode();
+    const ch = this.readCharCode();
     this._file.seek(-this._nReadBytes, SeekOrigin.Current);
     return ch;
   }
@@ -108,7 +108,7 @@ export class BinaryReader {
 
     let numBytes: number;
 
-    let _charBytes = Buffer.allocUnsafe(2);
+    const _charBytes = Buffer.allocUnsafe(2);
 
     // there isn't any decoder in JS world that can reuse output buffer
     let singleChar = '';
@@ -144,7 +144,7 @@ export class BinaryReader {
       try {
         singleChar = this._decoder.write(_charBytes.subarray(0, numBytes));
         if (singleChar.length > 1)
-          raise(Error("BinaryReader hit a surrogate char in the read method."), CSCode.SurrogateCharHit);
+          raise(Error('BinaryReader hit a surrogate char in the read method.'), CSCode.SurrogateCharHit);
       }
       catch (err) {
         // Handle surrogate char
@@ -171,7 +171,7 @@ export class BinaryReader {
   private internalReadByte(): number {
     this.throwIfDisposed();
 
-    let b = readByte(this._file);
+    const b = readByte(this._file);
     if (b == -1) {
       raise(RangeError('Read beyond end-of-file.'), CSCode.ReadBeyondEndOfFile);
     }
@@ -184,7 +184,7 @@ export class BinaryReader {
    * @returns A signed byte read from the current file.
    */
   readSByte(): number {
-    let rs = this.internalReadByte();
+    const rs = this.internalReadByte();
     return rs > 127 ? rs - 256 : rs;
   }
 
@@ -201,7 +201,7 @@ export class BinaryReader {
    * @returns A character read from the current file.
    */
   readChar(): char {
-    let value = this.readCharCode();
+    const value = this.readCharCode();
     if (value == -1) {
       raise(RangeError('Read beyond end-of-file.'), CSCode.ReadBeyondEndOfFile);
     }
@@ -279,7 +279,7 @@ export class BinaryReader {
     this.throwIfDisposed();
 
     // Length of the string in bytes, not chars
-    let stringLength = this.read7BitEncodedInt();
+    const stringLength = this.read7BitEncodedInt();
     return this.internalReadString(stringLength);
   }
 
@@ -296,7 +296,7 @@ export class BinaryReader {
 
   private internalReadString(stringLength: number): string {
     if (stringLength < 0) {
-      raise(RangeError(`Invalid string\'s length: ${stringLength}.`), CSCode.InvalidEncodedStringLength);
+      raise(RangeError(`Invalid string's length: ${stringLength}.`), CSCode.InvalidEncodedStringLength);
     }
 
     if (stringLength == 0) {
@@ -306,7 +306,7 @@ export class BinaryReader {
     let currPos = 0;
     let n: number;
     let readLength: number;
-    let _charBytes = Buffer.allocUnsafe(MaxCharBytesSize);
+    const _charBytes = Buffer.allocUnsafe(MaxCharBytesSize);
 
     let sb = '';
     do {
@@ -317,7 +317,7 @@ export class BinaryReader {
         raise(RangeError('Read beyond end-of-file.'), CSCode.ReadBeyondEndOfFile);
       }
 
-      let strRead = this._decoder.write(_charBytes.subarray(0, n))
+      const strRead = this._decoder.write(_charBytes.subarray(0, n));
 
       if (currPos == 0 && n == stringLength) {
         return strRead;
@@ -392,19 +392,19 @@ export class BinaryReader {
         }
       }
 
-      let _charBytes = Buffer.allocUnsafe(MaxCharBytesSize);
+      const _charBytes = Buffer.allocUnsafe(MaxCharBytesSize);
 
       if (numBytes > MaxCharBytesSize) {
         numBytes = MaxCharBytesSize;
       }
       numBytes = this._file.read(_charBytes, 0, numBytes);
-      let byteBuffer = _charBytes.subarray(0, numBytes);
+      const byteBuffer = _charBytes.subarray(0, numBytes);
 
       if (byteBuffer.length == 0) {
         break;
       }
 
-      let strRead = this._decoder.write(byteBuffer);
+      const strRead = this._decoder.write(byteBuffer);
       for (let i = 0; i < strRead.length; i++)
         buffer.set(i, strRead[i]);
       buffer = buffer.sub(strRead.length);
@@ -433,7 +433,7 @@ export class BinaryReader {
     }
 
     let chars = new Array<char>(count);
-    let n = this.internalReadChars(SubArray.from(chars));
+    const n = this.internalReadChars(SubArray.from(chars));
     if (n != count) {
       chars = chars.slice(0, n);
     }
@@ -496,7 +496,7 @@ export class BinaryReader {
     let result = Buffer.allocUnsafe(count);
     let numRead = 0;
     do {
-      let n = this._file.read(result, numRead, count);
+      const n = this._file.read(result, numRead, count);
       if (n == 0) {
         break;
       }
@@ -516,10 +516,10 @@ export class BinaryReader {
   private internalRead(numBytes: number): Buffer {
     this.throwIfDisposed();
 
-    let buffer = Buffer.allocUnsafe(BufferSize);
+    const buffer = Buffer.allocUnsafe(BufferSize);
     let bytesRead = 0;
     do {
-      let n = this._file.read(buffer, bytesRead, numBytes - bytesRead);
+      const n = this._file.read(buffer, bytesRead, numBytes - bytesRead);
       if (n == 0) {
         raise(RangeError('Read beyond end-of-file.'), CSCode.ReadBeyondEndOfFile);
       }

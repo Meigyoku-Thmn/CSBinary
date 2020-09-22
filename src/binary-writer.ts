@@ -1,4 +1,4 @@
-import { writeByte, openNullDevice } from './utils/file'
+import { writeByte, openNullDevice } from './utils/file';
 import { isSurrogate } from './utils/string';
 import { raise } from './utils/error';
 import { CSCode } from './constants/error';
@@ -21,7 +21,7 @@ export class BinaryWriter {
   protected _file: IFile;
   private readonly _encoding: IEncoding;
   private readonly _leaveOpen: boolean = false;
-  private _disposed: boolean = false;
+  private _disposed = false;
 
   /**
    * Initializes a new instance of the BinaryWriter class based on the specified IFile instance and character encoding, and optionally leaves the file open.
@@ -87,7 +87,7 @@ export class BinaryWriter {
   writeBoolean(value: boolean): void {
     if (typeof value != 'boolean') throw TypeError('"value" must be a boolean.');
     this.throwIfDisposed();
-    let buffer = Buffer.allocUnsafe(1).fill(value ? 1 : 0);
+    const buffer = Buffer.allocUnsafe(1).fill(value ? 1 : 0);
     this._file.write(buffer);
   }
 
@@ -183,7 +183,7 @@ export class BinaryWriter {
       throw RangeError('"index + count" must not be greater than chars\' length.');
     this.throwIfDisposed();
     let _chars = '';
-    let end = index + count;
+    const end = index + count;
     for (let i = index; i < end; i++) {
       if (chars[i].length > 1)
         throw RangeError('Please use an actual single character array.');
@@ -200,7 +200,7 @@ export class BinaryWriter {
   writeDouble(value: number): void {
     if (typeof value != 'number') throw TypeError('"value" must be a number.');
     this.throwIfDisposed();
-    let buffer = Buffer.allocUnsafe(8);
+    const buffer = Buffer.allocUnsafe(8);
     buffer.writeDoubleLE(value);
     this._file.write(buffer);
   }
@@ -212,7 +212,7 @@ export class BinaryWriter {
   writeInt16(value: number): void {
     if (!Number.isSafeInteger(value)) throw TypeError('"value" must be a safe integer.');
     this.throwIfDisposed();
-    let buffer = Buffer.allocUnsafe(2);
+    const buffer = Buffer.allocUnsafe(2);
     buffer.writeInt16LE(value);
     this._file.write(buffer);
   }
@@ -224,7 +224,7 @@ export class BinaryWriter {
   writeUInt16(value: number): void {
     if (!Number.isSafeInteger(value)) throw TypeError('"value" must be a safe integer.');
     this.throwIfDisposed();
-    let buffer = Buffer.allocUnsafe(2);
+    const buffer = Buffer.allocUnsafe(2);
     buffer.writeUInt16LE(value);
     this._file.write(buffer);
   }
@@ -236,7 +236,7 @@ export class BinaryWriter {
   writeInt32(value: number): void {
     if (!Number.isSafeInteger(value)) throw TypeError('"value" must be a safe integer.');
     this.throwIfDisposed();
-    let buffer = Buffer.allocUnsafe(4);
+    const buffer = Buffer.allocUnsafe(4);
     buffer.writeInt32LE(value);
     this._file.write(buffer);
   }
@@ -248,7 +248,7 @@ export class BinaryWriter {
   writeUInt32(value: number): void {
     if (!Number.isSafeInteger(value)) throw TypeError('"value" must be a safe integer.');
     this.throwIfDisposed();
-    let buffer = Buffer.allocUnsafe(4);
+    const buffer = Buffer.allocUnsafe(4);
     buffer.writeUInt32LE(value);
     this._file.write(buffer);
   }
@@ -260,7 +260,7 @@ export class BinaryWriter {
   writeInt64(value: bigint): void {
     if (typeof value != 'bigint') throw TypeError('"value" must be a bigint.');
     this.throwIfDisposed();
-    let buffer = Buffer.allocUnsafe(8);
+    const buffer = Buffer.allocUnsafe(8);
     buffer.writeBigInt64LE(value);
     this._file.write(buffer);
   }
@@ -272,7 +272,7 @@ export class BinaryWriter {
   writeUInt64(value: bigint): void {
     if (typeof value != 'bigint') throw TypeError('"value" must be a bigint.');
     this.throwIfDisposed();
-    let buffer = Buffer.allocUnsafe(8);
+    const buffer = Buffer.allocUnsafe(8);
     buffer.writeBigUInt64LE(value);
     this._file.write(buffer);
   }
@@ -284,7 +284,7 @@ export class BinaryWriter {
   writeSingle(value: number): void {
     if (typeof value != 'number') throw TypeError('"value" must be a number.');
     this.throwIfDisposed();
-    let buffer = Buffer.allocUnsafe(4);
+    const buffer = Buffer.allocUnsafe(4);
     buffer.writeFloatLE(value);
     this._file.write(buffer);
   }
@@ -297,7 +297,7 @@ export class BinaryWriter {
     if (typeof value != 'string') throw TypeError('"value" must be a string.');
     this.throwIfDisposed();
 
-    let totalBytes = this._encoding.byteLength(value);
+    const totalBytes = this._encoding.byteLength(value);
     this.write7BitEncodedInt(totalBytes);
     const bytes = this._encoding.encode(value);
     this._file.write(bytes);
@@ -335,7 +335,7 @@ export class BinaryWriter {
    */
   write7BitEncodedInt(value: number): void {
     if (!Number.isSafeInteger(value)) throw TypeError('"value" must be a safe integer.');
-    if (value < INT_MIN || value > INT_MAX) throw RangeError(`"value" must be in range [${INT_MIN}:${INT_MAX}}].`)
+    if (value < INT_MIN || value > INT_MAX) throw RangeError(`"value" must be in range [${INT_MIN}:${INT_MAX}}].`);
     this.throwIfDisposed();
 
     let uValue = value < 0 ? value + INT_WRAP : value;
@@ -366,7 +366,7 @@ export class BinaryWriter {
     // when on, tells reader to continue reading more bytes.
 
     while (uValue > BIG_7Fh) {
-      this.writeByte(Number(BigInt.asUintN(8, uValue)) | 0x80)
+      this.writeByte(Number(BigInt.asUintN(8, uValue)) | 0x80);
       uValue >>= BIG_SEVEN;
     }
 
