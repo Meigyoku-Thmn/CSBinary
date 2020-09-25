@@ -5,7 +5,7 @@
     "removeComments": false,
     "preserveConstEnums": true,
     "outDir": "dist",
-    "sourceMap": true,
+    "inlineSourceMap": true,
     "target": "ES2017",
     "moduleResolution": "Node",
     "esModuleInterop": true,

@@ -1,6 +1,6 @@
 {
   "name": "csbinary",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "A port of BinaryReader and BinaryWriter from .NET Core to NodeJS",
   "main": "dist/entry.js",
   "types": "types/entry.d.ts",
@@ -13,8 +13,11 @@
     "build:debug": "node-gyp build --debug",
     "rebuild": "npm run clean && node-gyp rebuild",
     "rebuild:debug": "npm run clean && node-gyp rebuild --debug",
+    "major": "npm --no-git-tag-version --no-commit-hooks version major",
+    "minor": "npm --no-git-tag-version --no-commit-hooks version minor",
+    "patch": "npm --no-git-tag-version --no-commit-hooks version patch",
+    "prepack": "tsc",
     "clean": "node-gyp clean && rimraf dist types coverage test/tmp",
-    "postinstall": "tsc",
     "gen-doc": "typedoc"
   },
   "keywords": [
@@ -27,6 +30,8 @@
   ],
   "files": [
     "src",
+    "dist",
+    "types",
     "binding.gyp",
     "entry.ts",
     "README.md",
@@ -49,6 +54,7 @@
     "@types/fs-extra": "^9.0.1",
     "@types/lodash": "^4.14.161",
     "@types/mocha": "^7.0.2",
+    "@types/node": "^14.6.2",
     "@typescript-eslint/eslint-plugin": "^4.2.0",
     "@typescript-eslint/parser": "^4.2.0",
     "eslint": "^7.9.0",
@@ -63,7 +69,6 @@
     "typescript": "^3.9.7"
   },
   "dependencies": {
-    "@types/node": "^14.6.2",
     "bindings": "^1.5.0",
     "iconv-lite": "npm:@meigyokuthmn/iconv-lite@^0.7.0-pre",
     "nan": "^2.14.1"
