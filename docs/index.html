@@ -3,8 +3,8 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>CSBinary - v2.0.0</title>
-	<meta name="description" content="Documentation for CSBinary - v2.0.0">
+	<title>CSBinary - v2.0.4</title>
+	<meta name="description" content="Documentation for CSBinary - v2.0.4">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="assets/css/main.css">
 </head>
@@ -22,7 +22,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="index.html" class="title">CSBinary - v2.0.0</a>
+					<a href="index.html" class="title">CSBinary - v2.0.4</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -56,7 +56,7 @@
 					<a href="globals.html">Globals</a>
 				</li>
 			</ul>
-			<h1>CSBinary - v2.0.0</h1>
+			<h1>CSBinary - v2.0.4</h1>
 		</div>
 	</div>
 </header>
@@ -67,8 +67,12 @@
 				<a href="#csbinary" id="csbinary" style="color: inherit; text-decoration: none;">
 					<h1>CSBinary</h1>
 				</a>
-				<p>I ported BinaryReader and BinaryWriter from Dotnet Core to NodeJS because reading and writing binary files non-linearly in NodeJS is very tedious.</p>
-				<p>Non-linear data processing (that means you can jump/&quot;seek&quot; back and forth at will all across a file to read its&#39; data) is not a popular thing in NodeJS world (people usually do streaming instead), but when you have to, then this library will come in handy. Beside, you want to write code in a scripting language for simplicity and convenience.</p>
+				<p>I ported BinaryReader and BinaryWriter from Dotnet Core to NodeJS because reading
+				and writing binary files non-linearly in NodeJS is very tedious.</p>
+				<p>Non-linear data processing (that means you can jump/&quot;seek&quot; back and forth at will all across a file
+					to read its&#39; data) is not a popular thing in NodeJS world (people usually do streaming instead),
+					but when you have to, then this library will come in handy.
+				Beside, you want to write code in a scripting language for simplicity and convenience.</p>
 				<p>You don&#39;t have to write code like this anymore:</p>
 				<pre><code class="language-js"><span class="hljs-comment">// read one byte, two bytes and four bytes</span>
 <span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;fs&#x27;</span>);
@@ -101,7 +105,9 @@ reader.close();</code></pre>
 					<h1>Installation</h1>
 				</a>
 				<pre><code class="language-bash">npm i --save csbinary</code></pre>
-				<p>You need a C/C++ compiler toolchain for installing this package. Refer to <a href="https://github.com/nodejs/node-gyp">https://github.com/nodejs/node-gyp</a> to know how to setup a compiler toolchain for your system.</p>
+				<p>You need a C/C++ compiler toolchain for installing this package.
+					Refer to the <a href="https://github.com/nodejs/node-gyp">node-gyp repository</a> to
+				know how to setup a compiler toolchain for your system.</p>
 				<a href="#api-reference" id="api-reference" style="color: inherit; text-decoration: none;">
 					<h1>API reference</h1>
 				</a>
@@ -109,25 +115,33 @@ reader.close();</code></pre>
 				<a href="#examples" id="examples" style="color: inherit; text-decoration: none;">
 					<h1>Examples</h1>
 				</a>
-				<p>Please refer to {Create a separate example md file, embedding examples from Runkit}</p>
+				<p>Please refer to the <a href="https://github.com/Meigyoku-Thmn/CSBinary/blob/master/EXAMPLE.md">Example page</a>.</p>
 				<a href="#encoding-and-file" id="encoding-and-file" style="color: inherit; text-decoration: none;">
 					<h1>Encoding and File</h1>
 				</a>
-				<p>You can provide your own encoding by implementing the IEncoding interface, then pass your encoding instance to BinaryReader and BinaryWriter&#39;s constructor. You don&#39;t have to implement everything in the IEncoding interface. Please refer to <a href="https://github.com/Meigyoku-Thmn/CSBinary/blob/master/src/encoding.ts">encoding.ts</a> to see what can be implemented.</p>
-				<p>Similarly, you can provide your own IFile implementation. Please refer to <a href="https://github.com/Meigyoku-Thmn/CSBinary/blob/master/src/addon/file.ts">addon/file.ts</a> to see what can be implemented.</p>
+				<p>You can provide your own encoding by implementing the IEncoding interface,
+					then pass your encoding instance to BinaryReader and BinaryWriter&#39;s constructor.
+					You don&#39;t have to implement everything in the IEncoding interface.
+					Please refer to the <a href="https://github.com/Meigyoku-Thmn/CSBinary/blob/master/src/encoding.ts">encoding.ts</a> file
+				to see what can be implemented.</p>
+				<p>Similarly, you can provide your own IFile implementation.
+					Please refer to the <a href="https://github.com/Meigyoku-Thmn/CSBinary/blob/master/src/addon/file.ts">addon/file.ts</a> file
+				to see what can be implemented.</p>
 				<a href="#limitations" id="limitations" style="color: inherit; text-decoration: none;">
 					<h1>Limitations</h1>
 				</a>
-				<ul>
-					<li>This libary cannot perform asynchronous i/o operation (not a popular usecase for binary files on disk anyway);</li>
-					<li>Dispose Pattern and Decimal are not supported (because there is no such thing in any Javascript engine by default);</li>
-					<li>There is no memory optimization for writing overly long string in BinaryWriter, so to avoid massive memory allocation you should not write such string;</li>
-					<li>writeChars and writeCharsEx will concat the array before writing, this may be slow on your system, I&#39;m still not sure about that;</li>
-				</ul>
+				<p>This libary cannot perform asynchronous i/o operation (not a popular usecase for binary files on disk anyway);</p>
+				<p>Dispose Pattern and Decimal are not supported (because there is no such thing in any Javascript engine by default);</p>
+				<p>There is no memory optimization for writing overly long string in BinaryWriter,
+				so to avoid massive memory allocation you should not write such string;</p>
+				<p>writeChars and writeCharsEx will concat the array before writing,
+				this may be slow on your system, I&#39;m still not sure about that;</p>
 				<a href="#pitfalls" id="pitfalls" style="color: inherit; text-decoration: none;">
 					<h1>Pitfalls</h1>
 				</a>
-				<p>If you are going to use the same file descriptor for BinaryReader and BinaryWriter, then you should use the same IFile instance for them, using different IFile instances will lead to unpredictable outcome of the 2 classes:</p>
+				<p>If you are going to use the same file descriptor for BinaryReader and BinaryWriter,
+					then you should use the same IFile instance for them, using different IFile instances
+				will lead to unpredictable outcome of the 2 classes:</p>
 				<pre><code class="language-js"><span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;fs&#x27;</span>);
 <span class="hljs-keyword">const</span> { BinaryReader, BinaryWriter, File } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;csbinary&#x27;</span>);
 <span class="hljs-keyword">const</span> fd = fs.openSync(filePath, <span class="hljs-string">&#x27;rw&#x27;</span>);
@@ -148,7 +162,10 @@ writer.close();</code></pre>
 <span class="hljs-comment">// ***</span>
 reader.close();
 writer.close();</code></pre>
-				<p>If you manipulate the underlying file&#39;s position directly (by fs methods) while using BinaryReader/BinaryWriter, unexpected error will be bound to happen. Use the seek method of IFile instead. But if you <a href="https://meigyoku-thmn.github.io/CSBinary/interfaces/ifile.html#setbufsize">disable file buffering</a> then this is fine.</p>
+				<p>If you manipulate the underlying file&#39;s position directly (by fs methods) while
+					using BinaryReader/BinaryWriter, unexpected error will be bound to happen.
+					Use the seek method of IFile instead.
+				But if you <a href="https://meigyoku-thmn.github.io/CSBinary/interfaces/ifile.html#setbufsize">disable file buffering</a> then this is fine.</p>
 				<pre><code class="language-js"><span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;fs&#x27;</span>);
 <span class="hljs-keyword">const</span> { BinaryReader, BinaryWriter, File, SeekOrigin } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;csbinary&#x27;</span>);
 <span class="hljs-keyword">const</span> fd = fs.openSync(filePath, <span class="hljs-string">&#x27;rw&#x27;</span>);
@@ -158,7 +175,6 @@ writer.close();</code></pre>
 fs.readSync(fd, buffer, <span class="hljs-number">0</span>, <span class="hljs-number">2</span>, <span class="hljs-number">4</span>); <span class="hljs-comment">// or any thing that can change the file&#x27;s position</span>
 <span class="hljs-comment">// you should do this instead</span>
 reader.file.seek(<span class="hljs-number">4</span>, SeekOrigin.Begin);
-<span class="hljs-comment">// or</span>
 reader.file.read(buffer, <span class="hljs-number">0</span>, <span class="hljs-number">2</span>);
 
 reader.close();</code></pre>

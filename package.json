@@ -16,7 +16,7 @@
     "major": "npm --no-git-tag-version --no-commit-hooks version major",
     "minor": "npm --no-git-tag-version --no-commit-hooks version minor",
     "patch": "npm --no-git-tag-version --no-commit-hooks version patch",
-    "prepack": "tsc",
+    "prepack": "npm run clean && tsc",
     "clean": "node-gyp clean && rimraf dist types coverage test/tmp",
     "gen-doc": "typedoc"
   },

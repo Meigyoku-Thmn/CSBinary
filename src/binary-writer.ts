@@ -14,6 +14,9 @@ type char = string;
  * Writes primitive types in binary to a file and supports writing strings in a specific encoding.
  */
 export class BinaryWriter {
+  /**
+   * Get a BinaryWriter instance with no backing store.
+   */
   static get null(): BinaryWriter {
     return new BinaryWriter(openNullDevice());
   }
