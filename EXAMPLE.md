@@ -24,7 +24,7 @@ br.close();
 ```
 ## Read and extract data from the DAR archive format
 Read an archive file based on [DAR archive format](https://wiki.xentax.com/index.php/Metal_Gear_Solid_DAR),
-used in Metal Gear Solid.<br>
+used in [Metal Gear Solid](https://en.wikipedia.org/wiki/Metal_Gear_Solid_(1998_video_game)).<br>
 [***(Run in Repl.it)***](https://repl.it/@Meigyoku_Thmn/CSBinary-Example-Read-DAR-archive-format)
 ```js
 const https = require('follow-redirects').https;
@@ -65,7 +65,7 @@ const url = "https://github.com/Meigyoku-Thmn/CSBinary/raw/master/sample/0exampl
 ```
 ## Read and extract data from the IWAD archive format
 Read an archive file based on [IWAD archive format](https://wiki.xentax.com/index.php/WAD_IWAD),
-used in Doom games, Duke Nukem 3D...<br>
+used in [Doom](https://en.wikipedia.org/wiki/Doom_(1993_video_game)) games, [Duke Nukem 3D](https://en.wikipedia.org/wiki/Duke_Nukem_3D)...<br>
 The fixed file length here is 32 bytes instead of 8 bytes.<br>
 [***(Run in Repl.it)***](https://repl.it/@Meigyoku_Thmn/CSBinary-Example-Read-IWAD-archive-format)
 ```js
