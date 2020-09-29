@@ -54,7 +54,7 @@ Please refer to the [CSBinary API Reference](https://meigyoku-thmn.github.io/CSB
 Please refer to the [Example page](https://github.com/Meigyoku-Thmn/CSBinary/blob/master/EXAMPLE.md).
 
 # Encoding and File
-You can provide your own encoding by implementing the IEncoding interface,
+By default, this library uses [iconv-lite](https://github.com/ashtuchkin/iconv-lite) as the internal encoding system. You can provide your own encoding by implementing the IEncoding interface,
 then pass your encoding instance to BinaryReader and BinaryWriter's constructor.
 You don't have to implement everything in the IEncoding interface.
 Please refer to the [encoding.ts](https://github.com/Meigyoku-Thmn/CSBinary/blob/master/src/encoding.ts) file
