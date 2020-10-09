@@ -45,7 +45,7 @@ npm i --save csbinary
 ```
 You need a C/C++ compiler toolchain for installing this package.
 Refer to the [node-gyp repository](https://github.com/nodejs/node-gyp) to
-know how to setup a compiler toolchain for your system.
+know how to setup a compiler toolchain for your system. On Windows, manual installation is recommended.
 
 # API reference
 Please refer to the [CSBinary API Reference](https://meigyoku-thmn.github.io/CSBinary/).
