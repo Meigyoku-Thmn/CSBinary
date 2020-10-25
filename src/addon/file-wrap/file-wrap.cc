@@ -42,10 +42,11 @@ namespace FileWrap {
    File::File(const Napi::CallbackInfo &info) : Napi::ObjectWrap<File>(info), fd(-1), file(NULL) {
       auto env = info.Env();
       HandleException(env, [&]() {
-         if (!info[0].IsNumber()) // fd
-            throw NodeException(NodeError::Type, "Must provide an integer file descriptor as the first argument.");
+         if (IsSafeInteger(info[0], sizeof(int)) != IntegerInvalid::None) // fd
+            throw NodeException(
+               NodeError::Type, std::string("Must provide a ") + std::to_string(sizeof(int) * 8) + "-bits integer file descriptor as the first argument.");
 
-         auto fd = info[0].As<Napi::Number>().Int32Value();
+         auto fd = (int)info[0].As<Napi::Number>().DoubleValue();
          auto *file = CreateFileFromFd(fd);
 #ifdef _WIN32
          auto state = GetFileState(GetWindowsHandle(fd));
@@ -79,10 +80,11 @@ namespace FileWrap {
       HandleException(env, [&] {
          ThrowIfClosed(info);
 
-         if (!IsSafeInteger(info[0])) // offset
-            throw NodeException(NodeError::Type, GetSafeNumberMessage(sizeof(long), "first argument"));
-         if (!IsSafeNumber(info[0], sizeof(long))) // offset
-            throw NodeException(NodeError::Range, GetSafeNumberMessage(sizeof(long), "first argument"));
+         auto inputError = IsSafeInteger(info[0], sizeof(long));
+         if (inputError == IntegerInvalid::Type) // offset
+            throw NodeException(NodeError::Type, GetSafeIntegerMessage(sizeof(long), "first argument"));
+         else if (inputError == IntegerInvalid::Range) // offset
+            throw NodeException(NodeError::Range, GetSafeIntegerMessage(sizeof(long), "first argument"));
 
          if (!info[1].IsNumber()) // origin
             throw NodeException(NodeError::Type, "Must provide a SeekOrigin value as the second argument.");
@@ -117,16 +119,18 @@ namespace FileWrap {
             throw NodeException(NodeError::Type, "Must provide a Buffer value as the first argument.");
 
          if (!IsNullOrUndefined(info[1])) {
-            if (!IsSafeInteger(info[1])) // offset
-               throw NodeException(NodeError::Type, GetSafeNumberMessage(sizeof(size_t), "second argument", true));
-            if (!IsSafeNumber(info[1], sizeof(size_t), true)) // offset
-               throw NodeException(NodeError::Range, GetSafeNumberMessage(sizeof(size_t), "second argument", true));
+            auto inputError = IsSafeInteger(info[1], sizeof(size_t), true);
+            if (inputError == IntegerInvalid::Type) // offset
+               throw NodeException(NodeError::Type, GetSafeIntegerMessage(sizeof(size_t), "second argument", true));
+            else if (inputError == IntegerInvalid::Range) // offset
+               throw NodeException(NodeError::Range, GetSafeIntegerMessage(sizeof(size_t), "second argument", true));
          }
          if (!IsNullOrUndefined(info[2])) {
-            if (!IsSafeInteger(info[2])) // count
-               throw NodeException(NodeError::Type, GetSafeNumberMessage(sizeof(size_t), "third argument", true));
-            if (!IsSafeNumber(info[2], sizeof(size_t), true)) // count
-               throw NodeException(NodeError::Range, GetSafeNumberMessage(sizeof(size_t), "third argument", true));
+            auto inputError = IsSafeInteger(info[2], sizeof(size_t), true);
+            if (inputError == IntegerInvalid::Type) // count
+               throw NodeException(NodeError::Type, GetSafeIntegerMessage(sizeof(size_t), "third argument", true));
+            if (inputError == IntegerInvalid::Range) // count
+               throw NodeException(NodeError::Range, GetSafeIntegerMessage(sizeof(size_t), "third argument", true));
          }
 
          auto bytes = info[0].As<Napi::Buffer<char>>();
@@ -152,17 +156,19 @@ namespace FileWrap {
             throw NodeException(NodeError::Type, "Must provide a Buffer value as the first argument.");
 
          if (!IsNullOrUndefined(info[1])) {
-            if (!IsSafeInteger(info[1])) // offset
-               throw NodeException(NodeError::Type, GetSafeNumberMessage(sizeof(size_t), "second argument", true));
-            if (!IsSafeNumber(info[1], sizeof(size_t), true)) // offset
-               throw NodeException(NodeError::Range, GetSafeNumberMessage(sizeof(size_t), "second argument", true));
+            auto inputError = IsSafeInteger(info[1], sizeof(size_t), true);
+            if (inputError == IntegerInvalid::Type) // offset
+               throw NodeException(NodeError::Type, GetSafeIntegerMessage(sizeof(size_t), "second argument", true));
+            else if (inputError == IntegerInvalid::Range) // offset
+               throw NodeException(NodeError::Range, GetSafeIntegerMessage(sizeof(size_t), "second argument", true));
          }
 
          if (!IsNullOrUndefined(info[2])) {
-            if (!IsSafeInteger(info[2])) // count
-               throw NodeException(NodeError::Type, GetSafeNumberMessage(sizeof(size_t), "third argument", true));
-            if (!IsSafeNumber(info[2], sizeof(size_t), true)) // count
-               throw NodeException(NodeError::Range, GetSafeNumberMessage(sizeof(size_t), "third argument", true));
+            auto inputError = IsSafeInteger(info[2], sizeof(size_t), true);
+            if (inputError == IntegerInvalid::Type) // count
+               throw NodeException(NodeError::Type, GetSafeIntegerMessage(sizeof(size_t), "third argument", true));
+            if (inputError == IntegerInvalid::Range) // count
+               throw NodeException(NodeError::Range, GetSafeIntegerMessage(sizeof(size_t), "third argument", true));
          }
 
          auto bytes = info[0].As<Napi::Buffer<char>>();
@@ -190,10 +196,11 @@ namespace FileWrap {
       HandleException(env, [&]() {
          ThrowIfClosed(info);
 
-         if (!IsSafeInteger(info[0])) // size
-            throw NodeException(NodeError::Type, GetSafeNumberMessage(sizeof(size_t), "first argument", true));
-         if (!IsSafeNumber(info[0], sizeof(size_t), true)) // size
-            throw NodeException(NodeError::Range, GetSafeNumberMessage(sizeof(size_t), "first argument", true));
+         auto inputError = IsSafeInteger(info[0], sizeof(size_t), true);
+         if (inputError == IntegerInvalid::Type) // size
+            throw NodeException(NodeError::Type, GetSafeIntegerMessage(sizeof(size_t), "first argument", true));
+         else if (inputError == IntegerInvalid::Range) // size
+            throw NodeException(NodeError::Range, GetSafeIntegerMessage(sizeof(size_t), "first argument", true));
 
          auto size = (size_t)info[0].As<Napi::Number>().DoubleValue();
          if (size != 0)

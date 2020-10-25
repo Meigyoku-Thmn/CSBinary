@@ -56,19 +56,14 @@ bool IsNullOrUndefined(Napi::Value x) {
    return x.IsNull() || x.IsUndefined();
 }
 
-bool IsSafeInteger(Napi::Value x) {
-   if (!x.IsNumber()) return false;
-   auto originalNumber = x.As<Napi::Number>().DoubleValue();
-   if (originalNumber > MAX_SAFE_INTEGER || originalNumber < MIN_SAFE_INTEGER)
-      return false;
-   return true;
-}
-
-bool IsSafeNumber(Napi::Value x, int typeSize, bool _unsigned) {
+IntegerInvalid IsSafeInteger(Napi::Value x, int typeSize, bool _unsigned) {
+   if (!x.IsNumber()) return IntegerInvalid::Type;
    auto originalNumber = x.As<Napi::Number>().DoubleValue();
    auto afterCast = (int64_t)originalNumber;
+   if ((double)afterCast != originalNumber) return IntegerInvalid::Type;
+   bool inRange;
    if (typeSize >= 8) {
-      return _unsigned ? originalNumber >= 0 : true;
+      inRange =  _unsigned ? originalNumber >= 0 : true;
    } else {
       auto min = (int64_t)pow(256, typeSize) / -2;
       auto max = (int64_t)pow(256, typeSize) - 1;
@@ -76,11 +71,14 @@ bool IsSafeNumber(Napi::Value x, int typeSize, bool _unsigned) {
          min = 0;
          max = max - min;
       }
-      return afterCast <= max && afterCast >= min;
+      inRange = afterCast <= max && afterCast >= min;
    }
+   if (inRange == false)
+      return IntegerInvalid::Range;
+   return IntegerInvalid::None;
 }
 
-const std::string GetSafeNumberMessage(int typeSize, const char *argIdx, bool _unsigned) {
+const std::string GetSafeIntegerMessage(int typeSize, const char *argIdx, bool _unsigned) {
    if (typeSize >= 8)
       return std::string("Must provide a safe ") + (_unsigned ? "unsigned" : "") + " integer as the " + argIdx + ".";
    auto min = (int64_t)pow(256, typeSize) / -2;

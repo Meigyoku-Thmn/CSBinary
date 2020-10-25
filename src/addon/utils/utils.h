@@ -70,11 +70,13 @@ FILE *CreateFileFromFd(int fd);
 
 bool IsNullOrUndefined(Napi::Value x);
 
-bool IsSafeInteger(Napi::Value x);
+enum class IntegerInvalid {
+   Type, Range, None
+};
 
-bool IsSafeNumber(Napi::Value x, int typeSize, bool _unsigned = false);
+IntegerInvalid IsSafeInteger(Napi::Value x, int typeSize, bool _unsigned = false);
 
-const std::string GetSafeNumberMessage(int typeSize, const char *argIdx, bool _unsigned = false);
+const std::string GetSafeIntegerMessage(int typeSize, const char *argIdx, bool _unsigned = false);
 
 void CloseFile(FILE *file);
 
