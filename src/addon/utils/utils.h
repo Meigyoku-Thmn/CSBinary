@@ -76,13 +76,6 @@ bool IsSafeNumber(Napi::Value x, int typeSize, bool _unsigned = false);
 
 const std::string GetSafeNumberMessage(int typeSize, const char *argIdx, bool _unsigned = false);
 
-template <class T>
-std::string ToString(T t, std::ios_base &(*f)(std::ios_base &)) {
-   std::ostringstream oss;
-   oss << f << t;
-   return oss.str();
-}
-
 void CloseFile(FILE *file);
 
 void SeekFile(FILE *file, long offset, int origin);

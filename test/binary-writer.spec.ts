@@ -68,7 +68,7 @@ describe('BinaryWriter Tests', () => {
       writer.flush();
       file.seek(0, SeekOrigin.Begin);
 
-      assert.strictEqual(reader.readString(), testString);      
+      assert.strictEqual(reader.readString(), testString);
       assert.strictEqual(reader.readRawString(_encoding.encode(testString).length + nullLen).replace(/\0*$/g, ''), testString);
       assert.strictEqual(reader.readRawString(_encoding.encode(testString).length), testString);
       writer.close();

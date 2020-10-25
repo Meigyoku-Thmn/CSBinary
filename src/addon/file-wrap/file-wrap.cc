@@ -95,18 +95,21 @@ namespace FileWrap {
       });
    }
    // tell(): number
-   void File::tell(const Napi::CallbackInfo &info) {
+   Napi::Value File::tell(const Napi::CallbackInfo &info) {
       auto env = info.Env();
+      Napi::Value rs;
       HandleException(env, [&]() {
          ThrowIfClosed(info);
          auto pos = TellFile(this->file);
          THROW_IF_NOT_SAFE_NUMBER(pos);
-         return Napi::Number::New(env, (double)pos);
+         rs = Napi::Number::New(env, (double)pos);
       });
+      return rs;
    }
    // read(bytes: NodeJS.ArrayBufferView, offset?: number, count?: number): number
-   void File::read(const Napi::CallbackInfo &info) {
+   Napi::Value File::read(const Napi::CallbackInfo &info) {
       auto env = info.Env();
+      Napi::Value rs;
       HandleException(env, [&]() {
          ThrowIfClosed(info);
 
@@ -135,8 +138,9 @@ namespace FileWrap {
          if (byteLen - offset < count)
             throw NodeException(NodeError::Range, "Your requested read range would cause buffer overflow.");
          auto nRead = ReadFile(this->file, bytes.Data() + offset, 1, count);
-         return Napi::Number::New(env, (double)nRead);
+         rs = Napi::Number::New(env, (double)nRead);
       });
+      return rs;
    }
    // write(bytes: NodeJS.ArrayBufferView, offset?: number, count?: number): void
    void File::write(const Napi::CallbackInfo &info) {

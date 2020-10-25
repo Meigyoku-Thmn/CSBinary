@@ -29,5 +29,5 @@ export function openNullDevice(): IFile {
     fd = fs.openSync('//./nul', 'w');
   else
     throw Error('I don\'t know how to open a null device on your system.');
-  return File(fd);
+  return new File(fd);
 }

@@ -41,8 +41,8 @@ namespace FileWrap {
       void ThrowIfClosed(const Napi::CallbackInfo &info);
       void close(const Napi::CallbackInfo &info);
       void seek(const Napi::CallbackInfo &info);
-      void tell(const Napi::CallbackInfo &info);
-      void read(const Napi::CallbackInfo &info);
+      Napi::Value tell(const Napi::CallbackInfo &info);
+      Napi::Value read(const Napi::CallbackInfo &info);
       void write(const Napi::CallbackInfo &info);
       void flush(const Napi::CallbackInfo &info);
       void setBufSize(const Napi::CallbackInfo &info);

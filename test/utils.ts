@@ -15,6 +15,9 @@ export function installHookToFile(fileArr: IFile[]): typeof File {
       super(fd);
       fileArr.push(this);
     }
+    read(bytes: NodeJS.ArrayBufferView, offset?: number, count?: number): number {
+      return super.read(bytes, offset, count);
+    }
   }) as never;
 }
 
