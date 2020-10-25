@@ -52,18 +52,20 @@ FILE *CreateFileFromFd(int fd) {
    return file;
 }
 
-bool IsSafeInteger(v8::Local<v8::Value> x) {
-   using namespace v8;
-   if (!x->IsNumber()) return false;
-   auto originalNumber = x.As<Number>()->Value();
+bool IsNullOrUndefined(Napi::Value x) {
+   return x.IsNull() || x.IsUndefined();
+}
+
+bool IsSafeInteger(Napi::Value x) {
+   if (!x.IsNumber()) return false;
+   auto originalNumber = x.As<Napi::Number>().DoubleValue();
    if (originalNumber > MAX_SAFE_INTEGER || originalNumber < MIN_SAFE_INTEGER)
       return false;
    return true;
 }
 
-bool IsSafeNumber(v8::Local<v8::Value> x, int typeSize, bool _unsigned) {
-   using namespace v8;
-   auto originalNumber = x.As<Number>()->Value();
+bool IsSafeNumber(Napi::Value x, int typeSize, bool _unsigned) {
+   auto originalNumber = x.As<Napi::Number>().DoubleValue();
    auto afterCast = (int64_t)originalNumber;
    if (typeSize >= 8) {
       return _unsigned ? originalNumber >= 0 : true;
@@ -79,16 +81,16 @@ bool IsSafeNumber(v8::Local<v8::Value> x, int typeSize, bool _unsigned) {
 }
 
 const std::string GetSafeNumberMessage(int typeSize, const char *argIdx, bool _unsigned) {
-   using namespace std;
    if (typeSize >= 8)
-      return string("Must provide a safe ") + (_unsigned ? "unsigned" : "") + " integer as the " + argIdx + ".";
+      return std::string("Must provide a safe ") + (_unsigned ? "unsigned" : "") + " integer as the " + argIdx + ".";
    auto min = (int64_t)pow(256, typeSize) / -2;
    auto max = (int64_t)pow(256, typeSize) - 1;
    if (_unsigned == true) {
       min = 0;
       max = max - min;
    }
-   return "Must provide an integer in range [" + to_string(min) + ":" + to_string(max) + "] as the " + argIdx + ".";
+   return "Must provide an integer in range [" + 
+      std::to_string(min) + ":" + std::to_string(max) + "] as the " + argIdx + ".";
 }
 
 #ifdef _WIN32

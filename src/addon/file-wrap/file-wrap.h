@@ -1,58 +1,51 @@
 #ifndef FILE_WRAP_H
 #define FILE_WRAP_H
 
-#include <nan.h>
+#include <napi.h>
+#include <uv.h>
 #include <cstdio>
 #include "../utils/utils.h"
 namespace FileWrap {
-   using namespace v8;
-   void Prepare(Local<Object> exports);
-   class File : public node::ObjectWrap {
+   void Prepare(Napi::Env env, Napi::Object exports);
+   class File : public Napi::ObjectWrap<File> {
    public:
-      static void Init(Local<Object> exports);
+      static void Init(Napi::Env env, Napi::Object exports);
    private:
-      File(int fd, FILE *file, IOState state) : fd(fd), file(file), state(state) {}
-      static Nan::Persistent<Function> constructor;
-      static NAN_METHOD(New);
+      File(const Napi::CallbackInfo &info);
 
       int fd;
       FILE *file;
       IOState state;
+
       bool isClose = false;
-      static NAN_GETTER(getFd) {
-         auto obj = Unwrap<File>(info.This());
-         info.GetReturnValue().Set(Nan::New(obj->fd));
+      Napi::Value getFd(const Napi::CallbackInfo &info) {
+         return Napi::Number::New(info.Env(), this->fd);
       }
-      static NAN_GETTER(getCanSeek) {
-         auto obj = Unwrap<File>(info.This());
-         info.GetReturnValue().Set(Nan::New(obj->state.canSeek));
+      Napi::Value getCanSeek(const Napi::CallbackInfo& info) {
+         return Napi::Boolean::New(info.Env(), this->state.canSeek);
       }
-      static NAN_GETTER(getCanRead) {
-         auto obj = Unwrap<File>(info.This());
-         info.GetReturnValue().Set(Nan::New(obj->state.canRead));
+      Napi::Value getCanRead(const Napi::CallbackInfo& info) {
+         return Napi::Boolean::New(info.Env(), this->state.canRead);
       }
-      static NAN_GETTER(getCanWrite) {
-         auto obj = Unwrap<File>(info.This());
-         info.GetReturnValue().Set(Nan::New(obj->state.canWrite));
+      Napi::Value getCanWrite(const Napi::CallbackInfo& info) {
+         return Napi::Boolean::New(info.Env(), this->state.canWrite);
       }
-      static NAN_GETTER(getCanAppend) {
-         auto obj = Unwrap<File>(info.This());
-         info.GetReturnValue().Set(Nan::New(obj->state.canAppend));
+      Napi::Value getCanAppend(const Napi::CallbackInfo& info) {
+         return Napi::Boolean::New(info.Env(), this->state.canAppend);
       }
-      static NAN_METHOD(ThrowIfClosed);
       ~File() {
          if (this->isClose) return;
          fclose(this->file);
          this->isClose = true;
       }
-
-      static NAN_METHOD(close);
-      static NAN_METHOD(seek);
-      static NAN_METHOD(tell);
-      static NAN_METHOD(read);
-      static NAN_METHOD(write);
-      static NAN_METHOD(flush);
-      static NAN_METHOD(setBufSize);
+      Napi::Value ThrowIfClosed(const Napi::CallbackInfo &info);
+      Napi::Value close(const Napi::CallbackInfo& info);
+      Napi::Value seek(const Napi::CallbackInfo& info);
+      Napi::Value tell(const Napi::CallbackInfo& info);
+      Napi::Value read(const Napi::CallbackInfo& info);
+      Napi::Value write(const Napi::CallbackInfo& info);
+      Napi::Value flush(const Napi::CallbackInfo& info);
+      Napi::Value setBufSize(const Napi::CallbackInfo& info);
    };
 }
 

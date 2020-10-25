@@ -1,10 +1,10 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#include <nan.h>
+#include <napi.h>
+#include <uv.h>
 namespace Constants {
-   using namespace v8;
-   void Prepare(Local<Object> exports);
+   void Prepare(Napi::Env env, Napi::Object exports);
 }
 
 #endif

@@ -65,12 +65,14 @@ FILE *CreateFileFromFd(int fd);
    if (x > MAX_SAFE_INTEGER || x < MIN_SAFE_INTEGER) \
       THROW_ERRNO_EX(EOVERFLOW, "")
 
-#define CAST_OR_DEFAULT(expression, nodeType, defaultValue) \
-   (expression->IsNullOrUndefined() ? defaultValue : expression.As<nodeType>()->Value())
+#define TRY_GET_NUMBER(expression, defaultValue) \
+   (IsNullOrUndefined(expression) ? defaultValue : expression.As<Napi::Number>().DoubleValue())
 
-bool IsSafeInteger(v8::Local<v8::Value> x);
+bool IsNullOrUndefined(Napi::Value x);
 
-bool IsSafeNumber(v8::Local<v8::Value> x, int typeSize, bool _unsigned = false);
+bool IsSafeInteger(Napi::Value x);
+
+bool IsSafeNumber(Napi::Value x, int typeSize, bool _unsigned = false);
 
 const std::string GetSafeNumberMessage(int typeSize, const char *argIdx, bool _unsigned = false);
 

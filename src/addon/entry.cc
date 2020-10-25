@@ -1,4 +1,5 @@
-#include <nan.h>
+#include <napi.h>
+#include <uv.h>
 #include "utils/utils.h"
 #include "file-wrap/file-wrap.h"
 #include "constants/constants.h"
@@ -8,13 +9,14 @@ static void invalid_parameter_function(LPCWSTR a, LPCWSTR b, LPCWSTR c, UINT d, 
 }
 #endif
 
-NAN_MODULE_INIT(Init) {
+Napi::Object Init(Napi::Env env, Napi::Object exports) {
 #ifdef _WIN32
    _set_invalid_parameter_handler(invalid_parameter_function);
    ImportNtDllFunctions();
 #endif
-   FileWrap::Prepare(target);
-   Constants::Prepare(target);
+   FileWrap::Prepare(env, exports);
+   Constants::Prepare(env, exports);
+   return exports;
 }
 
-NODE_MODULE(addon, Init)
+NODE_API_MODULE(addon, Init)

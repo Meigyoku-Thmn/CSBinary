@@ -9,8 +9,10 @@
           "ExceptionHandling": 1
         }
       },
-      'xcode_settings': {
-        'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
+      "xcode_settings": { 
+        "GCC_ENABLE_CPP_EXCEPTIONS": "YES",
+        "CLANG_CXX_LIBRARY": "libc++",
+        "MACOSX_DEPLOYMENT_TARGET": "10.7",
       },
       "sources": [ 
         "src/addon/entry.cc" ,
@@ -27,7 +29,8 @@
         "src/addon/constants/constants.cc",
       ],
       "include_dirs": [
-        "<!(node -e \"require('nan')\")"
+        "<!(node -p \"require('node-addon-api').include_dir\")",
+
       ],
       'defines': [
         '_CRT_SECURE_NO_WARNINGS',

@@ -1,7 +1,8 @@
 #ifndef EXCEPTION_HANDLER_H
 #define EXCEPTION_HANDLER_H
 
-#include <nan.h>
+#include <napi.h>
+#include <uv.h>
 #include <exception>
 
 enum class NodeError {
@@ -21,31 +22,32 @@ struct NodeException : public std::exception {
 };
 
 template<typename Func>
-void HandleException(Func f) {
+void HandleException(Napi::Env env, Func f) {
    try {
       f();
    } catch (NodeException &e) {
       switch (e.type) {
          case NodeError::Generic:
-            return Nan::ThrowError(e.what());
+            return Napi::Error::New(env, e.what()).ThrowAsJavaScriptException();
          case NodeError::Range:
-            return Nan::ThrowRangeError(e.what());
+            return Napi::RangeError::New(env, e.what()).ThrowAsJavaScriptException();
          case NodeError::Reference:
-            return Nan::ThrowReferenceError(e.what());
+            // waiting for a day that Napi would have ReferenceError
+            return Napi::Error::New(env, e.what()).ThrowAsJavaScriptException();
          case NodeError::Type:
-            return Nan::ThrowTypeError(e.what());
+            return Napi::TypeError::New(env, e.what()).ThrowAsJavaScriptException();
          case NodeError::Errno: {
-            auto func = e.func.length() == 0 ? NULL : e.func.c_str();
-            auto message = e.message.length() == 0 ? NULL : e.message.c_str();
-            auto path = e.path.length() == 0 ? NULL : e.path.c_str();
-            return Nan::ThrowError(
-               Nan::ErrnoException(errno, func, message, path));
+            auto func = e.func.Length() == 0 ? NULL : e.func.c_str();
+            auto message = e.message.Length() == 0 ? NULL : e.message.c_str();
+            auto path = e.path.Length() == 0 ? NULL : e.path.c_str();
+            // {ErrnoString}: {ErrnoMessage}, {Message}
+            return Napi::Error::New(env, Napi::ErrnoException(errno, func, message, path))
          }
          default:
             throw;
       }
    } catch (std::exception &e) {
-      return Nan::ThrowError(e.what());
+      return Napi::Error::New(env, e.what()).ThrowAsJavaScriptException();
    }
 }
 
