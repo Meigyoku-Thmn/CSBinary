@@ -24,9 +24,14 @@
         "src/addon/utils/utils.cc",
 
         "src/addon/exception-handler/exception-handler.h",
+        "src/addon/exception-handler/exception-handler.cc",
 
         "src/addon/constants/constants.h",
         "src/addon/constants/constants.cc",
+
+        # submodule
+        "src/addon/errnoname/errnoname.h",
+        "src/addon/errnoname/errnoname.c",
       ],
       "include_dirs": [
         "<!(node -p \"require('node-addon-api').include_dir\")",

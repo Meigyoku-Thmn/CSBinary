@@ -38,7 +38,8 @@ namespace FileWrap {
       env.SetInstanceData(constructor);
       exports.Set("File", func);
    }
-   File::File(const Napi::CallbackInfo &info) : Napi::ObjectWrap<File>(info) {
+   // new (fd: number) => IFile
+   File::File(const Napi::CallbackInfo &info) : Napi::ObjectWrap<File>(info), fd(-1), file(NULL) {
       auto env = info.Env();
       HandleException(env, [&]() {
          if (!info[0].IsNumber()) // fd
@@ -56,12 +57,12 @@ namespace FileWrap {
          this->state = state;
       });
    }
-   Napi::Value File::ThrowIfClosed(const Napi::CallbackInfo &info) {
+   void File::ThrowIfClosed(const Napi::CallbackInfo &info) {
       if (this->isClose)
          THROW_ERRNO_EX(EBADF, "");
    }
    // close(): void
-   Napi::Value File::close(const Napi::CallbackInfo &info) {
+   void File::close(const Napi::CallbackInfo &info) {
       auto env = info.Env();
       HandleException(env, [&]() {
          if (this->isClose) return;
@@ -73,7 +74,7 @@ namespace FileWrap {
       });
    }
    // seek(offset: number, origin: SeekOrigin): void
-   Napi::Value File::seek(const Napi::CallbackInfo &info) {
+   void File::seek(const Napi::CallbackInfo &info) {
       auto env = info.Env();
       HandleException(env, [&] {
          ThrowIfClosed(info);
@@ -94,7 +95,7 @@ namespace FileWrap {
       });
    }
    // tell(): number
-   Napi::Value File::tell(const Napi::CallbackInfo &info) {
+   void File::tell(const Napi::CallbackInfo &info) {
       auto env = info.Env();
       HandleException(env, [&]() {
          ThrowIfClosed(info);
@@ -104,7 +105,7 @@ namespace FileWrap {
       });
    }
    // read(bytes: NodeJS.ArrayBufferView, offset?: number, count?: number): number
-   Napi::Value File::read(const Napi::CallbackInfo &info) {
+   void File::read(const Napi::CallbackInfo &info) {
       auto env = info.Env();
       HandleException(env, [&]() {
          ThrowIfClosed(info);
@@ -138,7 +139,7 @@ namespace FileWrap {
       });
    }
    // write(bytes: NodeJS.ArrayBufferView, offset?: number, count?: number): void
-   Napi::Value File::write(const Napi::CallbackInfo &info) {
+   void File::write(const Napi::CallbackInfo &info) {
       auto env = info.Env();
       HandleException(env, [&]() {
          ThrowIfClosed(info);
@@ -172,7 +173,7 @@ namespace FileWrap {
       });
    }
    // flush(): void
-   Napi::Value File::flush(const Napi::CallbackInfo &info) {
+   void File::flush(const Napi::CallbackInfo &info) {
       auto env = info.Env();
       HandleException(env, [&]() {
          ThrowIfClosed(info);
@@ -180,7 +181,7 @@ namespace FileWrap {
       });
    }
    // setBufSize(size: number): void
-   Napi::Value File::setBufSize(const Napi::CallbackInfo &info) {
+   void File::setBufSize(const Napi::CallbackInfo &info) {
       auto env = info.Env();
       HandleException(env, [&]() {
          ThrowIfClosed(info);
