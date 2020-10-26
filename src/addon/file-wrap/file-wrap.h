@@ -13,7 +13,7 @@ namespace FileWrap {
       File(const Napi::CallbackInfo &info);
       ~File() {
          if (this->isClose) return;
-         fclose(this->file);
+         if (this->file != NULL) fclose(this->file);
          this->isClose = true;
       }
 
