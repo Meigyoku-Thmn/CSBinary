@@ -7,7 +7,7 @@ export const getFileState = addon.GetFileState as (fd: number) => {
   canAppend: boolean;
 };
 
-export const _File = addon.File;
+export const NativeFile = addon.File;
 
 export const constants = addon.constants as {
   SEEK_SET: number;

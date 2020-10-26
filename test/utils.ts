@@ -1,5 +1,5 @@
 import fse from 'fs-extra';
-import { IFile, File as _File } from '../src/addon/file';
+import { IFile, NativeFile as _File } from '../src/addon/file';
 import fs from 'fs';
 import { SeekOrigin } from '../src/constants/mode';
 import path from 'path';

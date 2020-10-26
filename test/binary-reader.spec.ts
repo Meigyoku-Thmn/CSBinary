@@ -17,7 +17,7 @@ import { Decoder } from '../src/encoding';
 
 describe('BinaryReader Tests', () => {
   const fileArr: IFile[] = [];
-  let File: (new (fd: number) => IFile) & ((fd: number) => IFile);
+  let File: new (fd: number) => IFile;
   before(() => {
     File = installHookToFile(fileArr);
   });

@@ -1,4 +1,4 @@
-import { _File } from '.';
+import { NativeFile as _NativeFile } from '.';
 import { SeekOrigin } from '../constants/mode';
 
 /**  */
@@ -56,4 +56,9 @@ export interface IFile {
 }
 
 /** A thin wrapper of \<cstdio\>, implementing the IFile interface. It uses binary mode only. */
-export const File = _File as (new (fd: number) => IFile) & ((fd: number) => IFile);
+export const NativeFile = _NativeFile as new (fd: number) => IFile;
+
+/** Factory function to create NativeFile instance */
+export function File(fd: number): IFile {
+  return new NativeFile(fd);
+}
