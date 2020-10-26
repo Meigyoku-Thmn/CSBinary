@@ -1,4 +1,4 @@
-# CSBinary – A port of BinaryReader and BinaryWriter from .NET Core to NodeJS
+<h1 style="line-height: initial;">CSBinary – A port of BinaryReader and BinaryWriter from .NET Core to NodeJS</h1>
 I ported BinaryReader and BinaryWriter from Dotnet Core to NodeJS because reading
 and writing binary files non-linearly in NodeJS is very tedious.
 
@@ -39,7 +39,7 @@ console.log(reader.readUInt32());
 
 reader.close();
 ```
-# Installation
+## Installation
 ```bash
 npm i --save csbinary
 ```
@@ -47,13 +47,13 @@ You need a C/C++ compiler toolchain for installing this package.
 Refer to the [node-gyp repository](https://github.com/nodejs/node-gyp) to
 know how to setup a compiler toolchain for your system. On Windows, manual installation is recommended.
 
-# API reference
+## API reference
 Please refer to the [CSBinary API Reference](https://meigyoku-thmn.github.io/CSBinary/).
 
-# Examples
+## Examples
 Please refer to the [Example page](https://github.com/Meigyoku-Thmn/CSBinary/blob/master/EXAMPLE.md).
 
-# Encoding and File
+## Encoding and File
 By default, this library uses [iconv-lite](https://github.com/ashtuchkin/iconv-lite) as the internal encoding system. You can provide your own encoding by implementing the IEncoding interface,
 then pass your encoding instance to BinaryReader and BinaryWriter's constructor.
 You don't have to implement everything in the IEncoding interface.
@@ -64,7 +64,7 @@ Similarly, you can provide your own IFile implementation.
 Please refer to the [addon/file.ts](https://github.com/Meigyoku-Thmn/CSBinary/blob/master/src/addon/file.ts) file
 to see what can be implemented.
 
-# Limitations
+## Limitations
 This libary cannot perform asynchronous i/o operation (not a popular usecase for binary files on disk anyway);
 
 Dispose Pattern and Decimal are not supported (because there is no such thing in any Javascript engine by default);
@@ -75,7 +75,7 @@ so to avoid massive memory allocation you should not write such string;
 writeChars and writeCharsEx will concat the array before writing,
 this may be slow on your system, I'm still not sure about that;
 
-# Pitfalls
+## Pitfalls
 If you are going to use the same file descriptor for BinaryReader and BinaryWriter,
 then you should use the same IFile instance for them, using different IFile instances
 will lead to unpredictable outcome of the 2 classes:

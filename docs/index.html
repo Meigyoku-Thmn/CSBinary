@@ -3,8 +3,8 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>CSBinary - v2.0.4</title>
-	<meta name="description" content="Documentation for CSBinary - v2.0.4">
+	<title>CSBinary - v2.0.5</title>
+	<meta name="description" content="Documentation for CSBinary - v2.0.5">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="assets/css/main.css">
 </head>
@@ -22,7 +22,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="index.html" class="title">CSBinary - v2.0.4</a>
+					<a href="index.html" class="title">CSBinary - v2.0.5</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -56,7 +56,7 @@
 					<a href="globals.html">Globals</a>
 				</li>
 			</ul>
-			<h1>CSBinary - v2.0.4</h1>
+			<h1>CSBinary - v2.0.5</h1>
 		</div>
 	</div>
 </header>
@@ -64,11 +64,9 @@
 	<div class="row">
 		<div class="col-8 col-content">
 			<div class="tsd-panel tsd-typography">
-				<a href="#csbinary" id="csbinary" style="color: inherit; text-decoration: none;">
-					<h1>CSBinary</h1>
-				</a>
-				<p>I ported BinaryReader and BinaryWriter from Dotnet Core to NodeJS because reading
-				and writing binary files non-linearly in NodeJS is very tedious.</p>
+				<h1 style="line-height: initial;">CSBinary – A port of BinaryReader and BinaryWriter from .NET Core to NodeJS</h1>
+				I ported BinaryReader and BinaryWriter from Dotnet Core to NodeJS because reading
+				and writing binary files non-linearly in NodeJS is very tedious.
 				<p>Non-linear data processing (that means you can jump/&quot;seek&quot; back and forth at will all across a file
 					to read its&#39; data) is not a popular thing in NodeJS world (people usually do streaming instead),
 					but when you have to, then this library will come in handy.
@@ -102,24 +100,24 @@ fs.closeSync(fd);</code></pre>
 
 reader.close();</code></pre>
 				<a href="#installation" id="installation" style="color: inherit; text-decoration: none;">
-					<h1>Installation</h1>
+					<h2>Installation</h2>
 				</a>
 				<pre><code class="language-bash">npm i --save csbinary</code></pre>
 				<p>You need a C/C++ compiler toolchain for installing this package.
 					Refer to the <a href="https://github.com/nodejs/node-gyp">node-gyp repository</a> to
-				know how to setup a compiler toolchain for your system.</p>
+				know how to setup a compiler toolchain for your system. On Windows, manual installation is recommended.</p>
 				<a href="#api-reference" id="api-reference" style="color: inherit; text-decoration: none;">
-					<h1>API reference</h1>
+					<h2>API reference</h2>
 				</a>
 				<p>Please refer to the <a href="https://meigyoku-thmn.github.io/CSBinary/">CSBinary API Reference</a>.</p>
 				<a href="#examples" id="examples" style="color: inherit; text-decoration: none;">
-					<h1>Examples</h1>
+					<h2>Examples</h2>
 				</a>
 				<p>Please refer to the <a href="https://github.com/Meigyoku-Thmn/CSBinary/blob/master/EXAMPLE.md">Example page</a>.</p>
 				<a href="#encoding-and-file" id="encoding-and-file" style="color: inherit; text-decoration: none;">
-					<h1>Encoding and File</h1>
+					<h2>Encoding and File</h2>
 				</a>
-				<p>You can provide your own encoding by implementing the IEncoding interface,
+				<p>By default, this library uses <a href="https://github.com/ashtuchkin/iconv-lite">iconv-lite</a> as the internal encoding system. You can provide your own encoding by implementing the IEncoding interface,
 					then pass your encoding instance to BinaryReader and BinaryWriter&#39;s constructor.
 					You don&#39;t have to implement everything in the IEncoding interface.
 					Please refer to the <a href="https://github.com/Meigyoku-Thmn/CSBinary/blob/master/src/encoding.ts">encoding.ts</a> file
@@ -128,7 +126,7 @@ reader.close();</code></pre>
 					Please refer to the <a href="https://github.com/Meigyoku-Thmn/CSBinary/blob/master/src/addon/file.ts">addon/file.ts</a> file
 				to see what can be implemented.</p>
 				<a href="#limitations" id="limitations" style="color: inherit; text-decoration: none;">
-					<h1>Limitations</h1>
+					<h2>Limitations</h2>
 				</a>
 				<p>This libary cannot perform asynchronous i/o operation (not a popular usecase for binary files on disk anyway);</p>
 				<p>Dispose Pattern and Decimal are not supported (because there is no such thing in any Javascript engine by default);</p>
@@ -137,7 +135,7 @@ reader.close();</code></pre>
 				<p>writeChars and writeCharsEx will concat the array before writing,
 				this may be slow on your system, I&#39;m still not sure about that;</p>
 				<a href="#pitfalls" id="pitfalls" style="color: inherit; text-decoration: none;">
-					<h1>Pitfalls</h1>
+					<h2>Pitfalls</h2>
 				</a>
 				<p>If you are going to use the same file descriptor for BinaryReader and BinaryWriter,
 					then you should use the same IFile instance for them, using different IFile instances
@@ -215,6 +213,9 @@ reader.close();</code></pre>
 						<a href="globals.html#char" class="tsd-kind-icon">char</a>
 					</li>
 					<li class=" tsd-kind-variable">
+						<a href="globals.html#nativefile" class="tsd-kind-icon">Native<wbr>File</a>
+					</li>
+					<li class=" tsd-kind-function">
 						<a href="globals.html#file" class="tsd-kind-icon">File</a>
 					</li>
 				</ul>
