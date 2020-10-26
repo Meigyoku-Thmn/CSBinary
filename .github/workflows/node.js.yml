@@ -54,10 +54,3 @@ jobs:
 
     - name: Run tests
       run: npm test
-
-    - name: Upload crash log
-      uses: actions/upload-artifact@v2
-      if: failure()
-      with:
-        name: crash-log-${{ matrix.node-version }}-${{ matrix.os }}
-        path: crash.log
