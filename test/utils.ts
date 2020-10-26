@@ -4,8 +4,8 @@ import fs from 'fs';
 import { SeekOrigin } from '../src/constants/mode';
 import path from 'path';
 
-import SegfaultHandler from 'segfault-handler';
-SegfaultHandler.registerHandler('crash.log', () => console.log('Written to crash.log'));
+// import SegfaultHandler from 'segfault-handler';
+// SegfaultHandler.registerHandler('crash.log', () => console.log('Written to crash.log'));
 
 let File = _File;
 export const TmpFilePath = path.join(__dirname, 'tmp/f.tmp');
