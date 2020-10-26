@@ -28,6 +28,7 @@ describe('File | Arguments Validation Test', () => {
     assert.throws(() => new File(99999), { code: 'EBADF' });
     assert.throws(() => new File(Number.MAX_SAFE_INTEGER), TypeError);
     assert.throws(() => new File('kdjkf' as never), TypeError);
+    assert.throws(() => new File(99.99), TypeError);
   });
 
   it('Can get back file descriptor from File', () => {
@@ -55,6 +56,8 @@ describe('File | Arguments Validation Test', () => {
     assert.throws(() => file.write(null), TypeError);
     assert.throws(() => file.write(Buffer.alloc(1), '2' as never, -1), TypeError);
     assert.throws(() => file.write(Buffer.alloc(1), 0, '2' as never), TypeError);
+    assert.throws(() => file.write(Buffer.alloc(1), 99.99, 2 as never), TypeError);
+    assert.throws(() => file.write(Buffer.alloc(1), 2, 99.99 as never), TypeError);
 
     assert.throws(() => file.write(Buffer.alloc(1), -1), RangeError);
     assert.throws(() => file.write(Buffer.alloc(1), 2), RangeError);
@@ -94,6 +97,8 @@ describe('File | Arguments Validation Test', () => {
     assert.throws(() => file.read(null), TypeError);
     assert.throws(() => file.read(Buffer.alloc(1), '2' as never, -1), TypeError);
     assert.throws(() => file.read(Buffer.alloc(1), 0, '2' as never), TypeError);
+    assert.throws(() => file.read(Buffer.alloc(1), 9.9, '2' as never), TypeError);
+    assert.throws(() => file.read(Buffer.alloc(1), 0, 9.9 as never), TypeError);
 
     assert.throws(() => file.read(Buffer.alloc(1), -1), RangeError);
     assert.throws(() => file.read(Buffer.alloc(1), 2), RangeError);
@@ -120,6 +125,7 @@ describe('File | Arguments Validation Test', () => {
     assert.throws(() => file.seek(-1, SeekOrigin.Begin), { code: 'EINVAL' });
     assert.throws(() => file.seek(-1, 'i' as never), TypeError);
     assert.throws(() => file.seek(null, SeekOrigin.Begin), TypeError);
+    assert.throws(() => file.seek(9.3, SeekOrigin.Begin), TypeError);
   });
 
   it('SetBufSize', () => {
@@ -131,6 +137,7 @@ describe('File | Arguments Validation Test', () => {
   it('SetBufSize | Negative', () => {
     const file = openToReadWithContent(Buffer.alloc(10));
     assert.throws(() => file.setBufSize(null), TypeError);
+    assert.throws(() => file.setBufSize(9.5), TypeError);
     assert.throws(() => file.setBufSize(-1), RangeError);
   });
 
