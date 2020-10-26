@@ -19,7 +19,7 @@
     "patch": "npm --no-git-tag-version --no-commit-hooks version patch",
     "gen-js": "tsc",
     "gen-doc": "typedoc",
-    "prebuildify": "prebuildify --napi",
+    "prebuildify": "prebuildify --napi --target 10.20.1 && node-gyp clean",
     "install": "node-gyp-build"
   },
   "keywords": [
@@ -51,7 +51,7 @@
   },
   "license": "MIT",
   "engines": {
-    "node": ">= 10.0.0"
+    "node": ">= 10.20.1"
   },
   "devDependencies": {
     "@types/bindings": "^1.3.0",
