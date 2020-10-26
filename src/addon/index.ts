@@ -1,5 +1,5 @@
-import bindings from 'bindings';
-const addon = bindings('addon.node');
+import node_gyp_build from 'node-gyp-build';
+const addon = node_gyp_build();
 
 export const getFileState = addon.GetFileState as (fd: number) => {
   canRead: boolean;
