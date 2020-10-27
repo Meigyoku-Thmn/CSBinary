@@ -19,7 +19,7 @@
     "patch": "npm --no-git-tag-version --no-commit-hooks version patch",
     "gen-js": "tsc",
     "gen-doc": "typedoc",
-    "prebuildify": "prebuildify --napi --target v10.20.1 --tag-uv && node-gyp clean",
+    "prebuildify": "prebuildify --napi --target v10.20.1 --tag-uv",
     "install": "node skip-build.js || node-gyp-build"
   },
   "keywords": [
