@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: [ publish ]
 
-target-os: &target-os [macos-latest, ubuntu-latest, windows-latest]
-base-node-v: &base-node-v 10.x
-
 jobs:
   prebuild:
     runs-on: ${{ matrix.os }}
@@ -19,8 +16,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: *target-os
-        node-version: *base-node-v
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        node-version: [10.x]
 
     steps:
     - name: Checkout
@@ -62,19 +59,15 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     needs: prebuild
-
-    strategy:
-      matrix:
-        node-version: *base-node-v
     
     steps:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Use Node.js ${{ matrix.node-version }}
+    - name: Use Node.js 10.x
       uses: actions/setup-node@v1
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: 10.x
 
     - name: Get npm cache directory
       id: npm-cache
