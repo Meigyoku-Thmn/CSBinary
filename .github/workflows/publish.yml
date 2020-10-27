@@ -80,6 +80,7 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 14.x
+        registry-url: 'https://registry.npmjs.org'
 
     - name: Get npm cache directory
       id: npm-cache
@@ -112,4 +113,6 @@ jobs:
       run: find prebuilds | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
 
     - name: Publish to npm
-      run: echo Not implemented!
+      run: npm publish
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

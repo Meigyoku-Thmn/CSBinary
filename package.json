@@ -36,10 +36,8 @@
     "prebuilds",
     "types",
     "binding.gyp",
-    "entry.ts",
     "EXAMPLE.md",
     "README.md",
-    "tsconfig.json",
     "LICENSE"
   ],
   "author": "Meigyoku Thmn",
