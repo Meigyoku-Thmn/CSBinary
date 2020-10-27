@@ -45,11 +45,11 @@ jobs:
           ${{ runner.os }}-node-
 
     - name: Install dependencies
-      if: runner.os != Windows
+      if: runner.os != 'Windows'
       run: SKIP_BUILD=1 npm ci
 
     - name: Install dependencies
-      if: runner.os == Windows
+      if: runner.os == 'Windows'
       run: set SKIP_BUILD=1 && npm ci
 
     - name: Prebuild using prebuildify
