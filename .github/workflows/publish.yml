@@ -52,6 +52,10 @@ jobs:
       if: runner.os == 'Windows'
       run: $env:SKIP_BUILD=1; npm ci; Remove-Item Env:\SKIP_BUILD
 
+    - name: Install cross-compiling tools
+      if: runner.os == 'Linux'
+      run: sudo apt-get install g++-multilib
+
     - name: Prebuild using prebuildify for x86-32
       run: npm run prebuildify -- --arch ia32
 
