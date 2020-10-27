@@ -44,13 +44,13 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-node-
 
-    - name: Install dependencies
+    - name: Install dependencies (Posix)
       if: runner.os != 'Windows'
       run: SKIP_BUILD=1 npm ci
 
-    - name: Install dependencies
+    - name: Install dependencies (Windows)
       if: runner.os == 'Windows'
-      run: set SKIP_BUILD=1 && npm ci
+      run: $env:SKIP_BUILD=1; npm ci; Remove-Item Env:\SKIP_BUILD
 
     - name: Prebuild using prebuildify
       run: npm run prebuildify
@@ -99,7 +99,7 @@ jobs:
         path: artifacts
 
     - name: List all prebuilts
-      run: find prebuilds | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
+      run: find artifacts | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
 
     - name: Publish to npm
       run: echo Not implemented!
