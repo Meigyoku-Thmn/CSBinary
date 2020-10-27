@@ -47,8 +47,5 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    - name: Build native modules
-      run: npm run install
-
     - name: Run tests
       run: npm test

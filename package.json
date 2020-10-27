@@ -20,7 +20,7 @@
     "gen-js": "tsc",
     "gen-doc": "typedoc",
     "prebuildify": "prebuildify --napi --target v10.20.1 --tag-uv && node-gyp clean",
-    "install": "node-gyp-build"
+    "install": "node skip-build.js || node-gyp-build"
   },
   "keywords": [
     "binaryreader",
