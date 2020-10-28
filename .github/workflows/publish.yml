@@ -31,16 +31,25 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name: Get npm cache directory
+    - name: Get npm cache directory and npm cache hash key (Posix)
+      if: runner.os != 'Windows'
       id: npm-cache
       run: |
         echo "::set-output name=dir::$(npm config get cache)"
+        echo "::set-output name=hashkey::$(shasum -a 256 package-lock.json | cut -d " " -f 1)"
+
+    - name: Get npm cache directory and npm cache hash key (Windows)
+      if: runner.os == 'Windows'
+      id: npm-cache
+      run: |
+        echo "::set-output name=dir::$(npm config get cache)"
+        echo "::set-output name=hashkey::$(Get-FileHash package-lock.json | Select-Object -ExpandProperty Hash)"
 
     - name: Try to cache
       uses: actions/cache@v2
       with:
         path: ${{ steps.npm-cache.outputs.dir }}
-        key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+        key: ${{ runner.os }}-node-${{ steps.npm-cache.outputs.hashkey }}
         restore-keys: |
           ${{ runner.os }}-node-
 
@@ -82,16 +91,25 @@ jobs:
         node-version: 14.x
         registry-url: 'https://registry.npmjs.org'
 
-    - name: Get npm cache directory
+    - name: Get npm cache directory and npm cache hash key (Posix)
+      if: runner.os != 'Windows'
       id: npm-cache
       run: |
         echo "::set-output name=dir::$(npm config get cache)"
+        echo "::set-output name=hashkey::$(shasum -a 256 package-lock.json | cut -d " " -f 1)"
+
+    - name: Get npm cache directory and npm cache hash key (Windows)
+      if: runner.os == 'Windows'
+      id: npm-cache
+      run: |
+        echo "::set-output name=dir::$(npm config get cache)"
+        echo "::set-output name=hashkey::$(Get-FileHash package-lock.json | Select-Object -ExpandProperty Hash)"
 
     - name: Try to cache
       uses: actions/cache@v2
       with:
         path: ${{ steps.npm-cache.outputs.dir }}
-        key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+        key: ${{ runner.os }}-node-${{ steps.npm-cache.outputs.hashkey }}
         restore-keys: |
           ${{ runner.os }}-node-
 
