@@ -1,6 +1,9 @@
 {
   "name": "csbinary",
-  "version": "2.0.5",
+  "version": "2.1.0",
+  "publishConfig": {
+    "tag": "dev"
+  },
   "description": "A port of BinaryReader and BinaryWriter from .NET Core to NodeJS",
   "main": "dist/entry.js",
   "types": "types/entry.d.ts",
@@ -14,9 +17,6 @@
     "rebuild": "npm run clean && node-gyp rebuild",
     "rebuild:debug": "npm run clean && node-gyp rebuild --debug",
     "clean": "node-gyp clean && rimraf dist types coverage test/tmp prebuilds",
-    "major": "npm --no-git-tag-version --no-commit-hooks version major",
-    "minor": "npm --no-git-tag-version --no-commit-hooks version minor",
-    "patch": "npm --no-git-tag-version --no-commit-hooks version patch",
     "gen-js": "tsc",
     "gen-doc": "typedoc",
     "prebuildify": "prebuildify --napi --target v10.20.1 --tag-uv",
