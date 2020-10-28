@@ -46,8 +46,8 @@ jobs:
     - name: Try to cache
       uses: actions/cache@v2
       with:
-        path: $npm_cache_dir
-        key: ${{ runner.os }}-node-$npm_cache_hash
+        path: ${{ env.npm_cache_dir }}
+        key: ${{ runner.os }}-node-${{ env.npm_cache_hash }}
 
     - name: Install dependencies (Posix)
       if: runner.os != 'Windows'
@@ -95,8 +95,8 @@ jobs:
     - name: Try to cache
       uses: actions/cache@v2
       with:
-        path: $npm_cache_dir
-        key: ${{ runner.os }}-node-$npm_cache_hash
+        path: ${{ env.npm_cache_dir }}
+        key: ${{ runner.os }}-node-${{ env.npm_cache_hash }}
 
     - name: Install dependencies
       run: SKIP_BUILD=1 npm ci
