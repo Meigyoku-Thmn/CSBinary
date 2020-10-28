@@ -39,7 +39,8 @@
     "EXAMPLE.md",
     "README.md",
     "LICENSE",
-    "skip-build.js"
+    "skip-build.js",
+    "entry.ts"
   ],
   "author": "Meigyoku Thmn",
   "homepage": "https://meigyoku-thmn.github.io/CSBinary",
