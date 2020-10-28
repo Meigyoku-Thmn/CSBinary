@@ -31,24 +31,6 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name: Get npm cache directory and npm cache hash key (Posix)
-      if: runner.os != 'Windows'
-      run: |
-        echo "npm_cache_dir=$(npm config get cache)" >> $GITHUB_ENV
-        echo "npm_cache_hash=$(shasum -a 256 package-lock.json | cut -d " " -f 1)" >> $GITHUB_ENV
-
-    - name: Get npm cache directory and npm cache hash key (Windows)
-      if: runner.os == 'Windows'
-      run: |
-        echo "npm_cache_dir=$(npm config get cache)" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
-        echo "npm_cache_hash=$(shasum -a 256 package-lock.json | cut -d " " -f 1)" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
-
-    - name: Try to cache
-      uses: actions/cache@v2
-      with:
-        path: ${{ env.npm_cache_dir }}
-        key: ${{ runner.os }}-node-${{ env.npm_cache_hash }}
-
     - name: Install dependencies (Posix)
       if: runner.os != 'Windows'
       run: SKIP_BUILD=1 npm ci
@@ -86,17 +68,6 @@ jobs:
       with:
         node-version: 14.x
         registry-url: 'https://registry.npmjs.org'
-
-    - name: Get npm cache directory and npm cache hash key (Posix)
-      run: |
-        echo "npm_cache_dir=$(npm config get cache)" >> $GITHUB_ENV
-        echo "npm_cache_hash=$(shasum -a 256 package-lock.json | cut -d " " -f 1)" >> $GITHUB_ENV
-
-    - name: Try to cache
-      uses: actions/cache@v2
-      with:
-        path: ${{ env.npm_cache_dir }}
-        key: ${{ runner.os }}-node-${{ env.npm_cache_hash }}
 
     - name: Install dependencies
       run: SKIP_BUILD=1 npm ci
