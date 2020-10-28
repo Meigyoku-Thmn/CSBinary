@@ -1,4 +1,5 @@
 <h1 style="line-height: initial;">CSBinary – A port of BinaryReader and BinaryWriter from .NET Core to NodeJS</h1>
+
 I ported BinaryReader and BinaryWriter from Dotnet Core to NodeJS because reading
 and writing binary files non-linearly in NodeJS is very tedious.
 
