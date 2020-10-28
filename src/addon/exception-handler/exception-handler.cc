@@ -44,9 +44,9 @@ void HandleException(Napi::Env env, std::function<void()> f) {
             auto code = errnoname(errno);
             std::string msg;
             if (message != NULL)
-               msg = code ? code : std::to_string(errno) + std::string(": ") + strerror(errno) + " (" + message + ")";
+               msg = (code ? code : std::to_string(errno)) + std::string(": ") + strerror(errno) + " (" + message + ")";
             else
-               msg = code ? code : std::to_string(errno) + std::string(": ") + strerror(errno);
+               msg = (code ? code : std::to_string(errno)) + std::string(": ") + strerror(errno);
             auto err = Napi::Error::New(env, msg);
             err.Set("code", code);
             err.Set("errno", (double)errno);

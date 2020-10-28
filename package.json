@@ -1,8 +1,8 @@
 {
   "name": "csbinary",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "publishConfig": {
-    "tag": "dev"
+    "tag": "latest"
   },
   "description": "A port of BinaryReader and BinaryWriter from .NET Core to NodeJS",
   "main": "dist/entry.js",
