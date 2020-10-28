@@ -43,9 +43,11 @@ reader.close();
 ```bash
 npm i --save csbinary
 ```
-You need a C/C++ compiler toolchain for installing this package.
+From version 2.1.0, this library uses prebuilt [__IA-32__](https://en.wikipedia.org/wiki/IA-32) and [__x86-64__](https://en.wikipedia.org/wiki/X86-64) native modules for [__Windows__](https://en.wikipedia.org/wiki/Microsoft_Windows), [__Linux-based OS__](https://en.wikipedia.org/wiki/Linux) and [__MacOS__](https://en.wikipedia.org/wiki/MacOS). You don't have to install any C/C++ compiler if you uses any of these systems.
+
+But if you uses a different system than the above systems, then you need a C/C++ compiler toolchain for installing this package.
 Refer to the [node-gyp repository](https://github.com/nodejs/node-gyp) to
-know how to setup a compiler toolchain for your system. On Windows, manual installation is recommended.
+know how to setup a compiler toolchain for your system.
 
 ## API reference
 Please refer to the [CSBinary API Reference](https://meigyoku-thmn.github.io/CSBinary/).
