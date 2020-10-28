@@ -33,25 +33,21 @@ jobs:
 
     - name: Get npm cache directory and npm cache hash key (Posix)
       if: runner.os != 'Windows'
-      id: npm-cache
       run: |
-        echo "::set-output name=dir::$(npm config get cache)"
-        echo "::set-output name=hashkey::$(shasum -a 256 package-lock.json | cut -d " " -f 1)"
+        echo "npm_cache_dir=$(npm config get cache)" >> $GITHUB_ENV
+        echo "npm_cache_hash=$(shasum -a 256 package-lock.json | cut -d " " -f 1)" >> $GITHUB_ENV
 
     - name: Get npm cache directory and npm cache hash key (Windows)
       if: runner.os == 'Windows'
-      id: npm-cache
       run: |
-        echo "::set-output name=dir::$(npm config get cache)"
-        echo "::set-output name=hashkey::$(Get-FileHash package-lock.json | Select-Object -ExpandProperty Hash)"
+        echo "npm_cache_dir=$(npm config get cache)" >> $GITHUB_ENV
+        echo "npm_cache_hash=$(Get-FileHash package-lock.json | Select-Object -ExpandProperty Hash)" >> $GITHUB_ENV
 
     - name: Try to cache
       uses: actions/cache@v2
       with:
-        path: ${{ steps.npm-cache.outputs.dir }}
-        key: ${{ runner.os }}-node-${{ steps.npm-cache.outputs.hashkey }}
-        restore-keys: |
-          ${{ runner.os }}-node-
+        path: $npm_cache_dir
+        key: ${{ runner.os }}-node-$npm_cache_hash
 
     - name: Install dependencies
       run: npm ci
