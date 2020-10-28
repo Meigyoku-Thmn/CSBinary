@@ -38,7 +38,8 @@
     "binding.gyp",
     "EXAMPLE.md",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "skip-build.js"
   ],
   "author": "Meigyoku Thmn",
   "homepage": "https://meigyoku-thmn.github.io/CSBinary",
