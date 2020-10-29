@@ -1,4 +1,5 @@
 # Ví dụ về cách sử dụng CSBinary
+[(Click here to read the English version)](https://github.com/Meigyoku-Thmn/CSBinary/blob/master/EXAMPLE.md).
 ## Viết dữ liệu vào file, rồi đọc lên lại
 [***(Thử trên Repl.it)***](https://repl.it/@Meigyoku_Thmn/CSBinary-Example)
 ```js
