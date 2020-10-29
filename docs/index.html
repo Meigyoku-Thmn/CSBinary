@@ -65,13 +65,8 @@
 		<div class="col-8 col-content">
 			<div class="tsd-panel tsd-typography">
 				<h1 style="line-height: initial;">CSBinary – A port of BinaryReader and BinaryWriter from .NET Core to NodeJS</h1>
-				<p>I ported BinaryReader and BinaryWriter from Dotnet Core to NodeJS because reading
-				and writing binary files non-linearly in NodeJS is very tedious.</p>
-				<p>Non-linear data processing (that means you can jump/&quot;seek&quot; back and forth at will all across a file
-					to read its&#39; data) is not a popular thing in NodeJS world (people usually do streaming instead),
-					but when you have to, then this library will come in handy.
-				Beside, you want to write code in a scripting language for simplicity and convenience.</p>
-				<p>You don&#39;t have to write code like this anymore:</p>
+				<p><a href="https://github.com/Meigyoku-Thmn/CSBinary/blob/master/README_VI.md">(Click vào đây để đọc bản Tiếng Việt)</a>.</p>
+				<p>Let&#39;s say you want to write a program that read và extract data from a binary file, such as archive file, compressed file, etc. and NodeJS seems to be a very convenient platform for quickly writing a program to do so. But sadly, the NodeJS platform, which is designed with a focus on server programming, is minimalistic, it has a meager API compared to other platforms. That does not mean NodeJS doesn&#39;t have APIs to read files, but reading and writing binary files in NodeJS is very tedious:</p>
 				<pre><code class="language-js"><span class="hljs-comment">// read one byte, two bytes and four bytes</span>
 <span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;fs&#x27;</span>);
 
@@ -86,7 +81,8 @@ fs.readSync(fd, buffer, <span class="hljs-number">0</span>, <span class="hljs-nu
 <span class="hljs-built_in">console</span>.log(buffer.readUInt32LE());
 
 fs.closeSync(fd);</code></pre>
-				<p>With this library, you can just write:</p>
+				<p>The fs module does not have any function to read specific types of data from the file, it can only read/write with the Buffer type (equivalent to array type in other languages). And not to mention the NodeJS fs module doesn&#39;t really have a separate &quot;seek&quot; function, you have to maintain a separate position variable for passing as a parameter to the read/write functions if you want to read/write at arbitrary location. Since NodeJS is server-oriented, it doesn&#39;t have a built-in file buffering mechanism. Think if you use NodeJS to read/write a binary file with a very complex and non-linear structure, how long would the code be?</p>
+				<p>This library is a port of two very convenient APIs for reading/writing binary files from .NET Core. With this library, the code becomes concise and easier to understand, please refer to the example section below for more details.</p>
 				<pre><code class="language-js"><span class="hljs-comment">// read one byte, two bytes and four bytes</span>
 <span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;fs&#x27;</span>);
 <span class="hljs-keyword">const</span> { BinaryReader, File } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;csbinary&#x27;</span>);
@@ -99,6 +95,13 @@ fs.closeSync(fd);</code></pre>
 <span class="hljs-built_in">console</span>.log(reader.readUInt32());
 
 reader.close();</code></pre>
+				<a href="#features" id="features" style="color: inherit; text-decoration: none;">
+					<h2>Features</h2>
+				</a>
+				<p>Support a &quot;seek&quot; method to move the file pointer to any position in the file, programmers do not need to maintain any location variable. Along with a &quot;tell&quot; method to know where the file pointer points to.</p>
+				<p>Has methods to quickly and concisely read/write many data types such as Integer (1 byte, 2 bytes, 4 bytes, 8 bytes), Float, Double, Char, String (null-terminated, length-prefix)</p>
+				<p>Has file buffering mechanism on by default.</p>
+				<p>Has the ability to read/write string in various encodings, powered by the built-in iconv-lite.</p>
 				<a href="#installation" id="installation" style="color: inherit; text-decoration: none;">
 					<h2>Installation</h2>
 				</a>
