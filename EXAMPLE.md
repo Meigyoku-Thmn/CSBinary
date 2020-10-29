@@ -3,7 +3,7 @@
 [***(Run in Repl.it)***](https://repl.it/@Meigyoku_Thmn/CSBinary-Example)
 ```js
 const fs = require('fs');
-const { BinaryReader, BinaryWriter, File, SeekOrigin } = require('csbinary');
+const { BinaryReader, BinaryWriter, File } = require('csbinary');
 
 const bw = new BinaryWriter(File(fs.openSync('example', 'w')));
 bw.writeInt32(123);
