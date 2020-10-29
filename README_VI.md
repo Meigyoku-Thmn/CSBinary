@@ -71,13 +71,11 @@ Xin hãy xem file [addon/file.ts](https://github.com/Meigyoku-Thmn/CSBinary/blob
 ## Hạn chế
 Thư viện này không thể thực thi thao tác nhập/xuất bất đồng bộ.
 
-Không hỗ trợ Dispose Pattern và kiểu dữ liệu Decimal, do những thứ này không tồn tại mặc định trong bất kỳ engine Javascript nào
+Không hỗ trợ Dispose Pattern và kiểu dữ liệu Decimal, do những thứ này không tồn tại mặc định trong bất kỳ engine Javascript nào.
 
-There is no memory optimization for writing overly long string in BinaryWriter,
-so to avoid massive memory allocation you should not write such string;
+Thư viện không có tối ưu hóa cho việc viết chuỗi văn bản quá dài trong BinaryWriter, cho nên để tránh chuyện cấp phát bộ nhớ quá to thì bạn đừng nên viết chuỗi dài quá.
 
-writeChars and writeCharsEx will concat the array before writing,
-this may be slow on your system, I'm still not sure about that;
+Hai phương thức writeChars với writeCharsEx đều sẽ nối các ký tự trong mảng lại trước khi ghi file, trên hệ thống của bạn có thể chậm;
 
 ## Pitfalls
 If you are going to use the same file descriptor for BinaryReader and BinaryWriter,
