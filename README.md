@@ -37,6 +37,16 @@ console.log(reader.readUInt32());
 
 reader.close();
 ```
+
+## Features
+Support a "seek" method to move the file pointer to any position in the file, programmers do not need to maintain any location variable. Along with a "tell" method to know where the file pointer points to.
+
+Has methods to quickly and concisely read/write many data types such as Integer (1 byte, 2 bytes, 4 bytes, 8 bytes), Float, Double, Char, String (null-terminated, length-prefix)
+
+Has file buffering mechanism on by default.
+
+Has the ability to read/write string in various encodings, powered by the built-in iconv-lite.
+
 ## Installation
 ```bash
 npm i --save csbinary
