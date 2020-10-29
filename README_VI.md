@@ -71,7 +71,7 @@ Xin hãy xem file [addon/file.ts](https://github.com/Meigyoku-Thmn/CSBinary/blob
 ## Hạn chế
 Thư viện này không thể thực thi thao tác nhập/xuất bất đồng bộ.
 
-Không hỗ trợ Dispose Pattern và kiểu dữ liệu Decimal, do những thứ này không tồn tại mặc định trong bất kỳ engine Javascript nào.
+Không hỗ trợ Mô thức Dispose và kiểu dữ liệu Decimal, do những thứ này không tồn tại mặc định trong bất kỳ engine Javascript nào.
 
 Thư viện không có tối ưu hóa cho việc viết chuỗi văn bản quá dài trong BinaryWriter, cho nên để tránh chuyện cấp phát bộ nhớ quá to thì bạn đừng nên viết chuỗi dài quá.
 
@@ -103,7 +103,7 @@ const writer = new BinaryWriter(file);
 reader.close();
 writer.close();
 ```
-Nếu trong khi đang sử dụng BinaryReader/BinaryWriter mà bạn điều chỉnh vị trí con trỏ file bên dưới một cách trực tiếp (bằng hàm của module fs chẳng hạn), thì sẽ dễ sinh ra lỗi không biết trước được. Thay vào đó, hãy sử dụng phương thức seek của IFile.
+Nếu trong khi đang sử dụng BinaryReader/BinaryWriter mà bạn điều chỉnh vị trí của con trỏ file bên dưới một cách trực tiếp (bằng hàm của module fs chẳng hạn), thì sẽ dễ sinh ra lỗi không biết trước được. Thay vào đó, hãy sử dụng phương thức seek của IFile.
 Nhưng nếu bạn dùng phương thức [disable file buffering](https://meigyoku-thmn.github.io/CSBinary/interfaces/ifile.html#setbufsize) thì không sao.
 ```js
 const fs = require('fs');
