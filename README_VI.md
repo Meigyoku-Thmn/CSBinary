@@ -78,26 +78,24 @@ Thư viện không có tối ưu hóa cho việc viết chuỗi văn bản quá 
 Hai phương thức writeChars với writeCharsEx đều sẽ nối các ký tự trong mảng lại trước khi ghi file, trên hệ thống của bạn có thể chậm;
 
 ## Pitfalls
-If you are going to use the same file descriptor for BinaryReader and BinaryWriter,
-then you should use the same IFile instance for them, using different IFile instances
-will lead to unpredictable outcome of the 2 classes:
+Nếu bạn tính dùng chung file descriptor cho BinaryReader và BinaryWriter, thì bạn cũng hãy nên dùng chung IFile instance cho 2 class đó. Dùng khác IFile instance thì sẽ khiến cho kết quả sinh ra không thể lường được:
 ```js
 const fs = require('fs');
 const { BinaryReader, BinaryWriter, File } = require('csbinary');
 const fd = fs.openSync(filePath, 'rw');
-// this is very wrong
+// viết thế này là sai
 const reader = new BinaryReader(File(fd), 'utf8', true);
 const writer = new BinaryWriter(File(fd));
 // ***
 reader.close();
 writer.close();
 ```
-Please use the same IFile instance for them:
+Xin hãy dùng chung IFile instance cho chúng:
 ```js
 const fs = require('fs');
 const { BinaryReader, BinaryWriter, File } = require('csbinary');
 const fd = fs.openSync(filePath, 'rw');
-// this is the right way
+// viết thế này mới là đúng
 const file = File(fd);
 const reader = new BinaryReader(file, 'utf8', true);
 const writer = new BinaryWriter(file);
@@ -105,19 +103,17 @@ const writer = new BinaryWriter(file);
 reader.close();
 writer.close();
 ```
-If you manipulate the underlying file's position directly (by fs methods) while
-using BinaryReader/BinaryWriter, unexpected error will be bound to happen.
-Use the seek method of IFile instead.
-But if you [disable file buffering](https://meigyoku-thmn.github.io/CSBinary/interfaces/ifile.html#setbufsize) then this is fine.
+Nếu trong khi đang sử dụng BinaryReader/BinaryWriter mà bạn điều chỉnh vị trí con trỏ file bên dưới một cách trực tiếp (bằng hàm của module fs chẳng hạn), thì sẽ dễ sinh ra lỗi không biết trước được. Thay vào đó, hãy sử dụng phương thức seek của IFile.
+Nhưng nếu bạn dùng phương thức [disable file buffering](https://meigyoku-thmn.github.io/CSBinary/interfaces/ifile.html#setbufsize) thì không sao.
 ```js
 const fs = require('fs');
 const { BinaryReader, BinaryWriter, File, SeekOrigin } = require('csbinary');
 const fd = fs.openSync(filePath, 'rw');
 const file = File(fd);
 const reader = new BinaryReader(file, 'utf8', true);
-// don't do this unless you have disabled the file buffering
-fs.readSync(fd, buffer, 0, 2, 4); // or any thing that can change the file's position
-// you should do this instead
+// nếu chưa tắt dùng file buffering thì đừng làm thế này
+fs.readSync(fd, buffer, 0, 2, 4); // và cũng đừng làm điều gì khác mà có thay đổi vị trí con trỏ file
+// thay vào đó thì nên ghi thế này
 reader.file.seek(4, SeekOrigin.Begin);
 reader.file.read(buffer, 0, 2);
 
