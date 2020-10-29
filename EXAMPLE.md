@@ -1,4 +1,6 @@
 # Example of using CSBinary
+[(Click vào đây để đọc bản Tiếng Việt)](https://github.com/Meigyoku-Thmn/CSBinary/blob/master/EXAMPLE_VI.md).
+
 ## Write data into a file, then read them back
 [***(Run in Repl.it)***](https://repl.it/@Meigyoku_Thmn/CSBinary-Example)
 ```js
