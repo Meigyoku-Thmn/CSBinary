@@ -4,10 +4,10 @@
 
 Giả sử bạn muốn viết chương trình đọc, trích xuất dữ liệu từ file nhị phân, chẳng hạn như archive file, file nén, v.v. và NodeJS có vẻ là nền tảng rất gọn nhẹ và tiện lợi để viết nhanh một chương trình làm như vậy. Nhưng đáng buồn thay, nền tảng NodeJS vốn được thiết kế chú trọng vào lập trình server, mang tính tối giản, có API ít ỏi so với những nền tảng khác. Không có nghĩa là NodeJS không có API để đọc file, nhưng để đọc được file nhị phân bằng NodeJS thì phải rất cực khổ bằng module fs như thế này:
 ```js
-// read one byte, two bytes and four bytes
+// đọc một byte, hai byte và bốn byte
 const fs = require('fs');
 
-const fd = fs.openSync('<put your file path here>', 'r');
+const fd = fs.openSync('<đặt đường dẫn file vào đây>', 'r');
 const buffer = Buffer.alloc(4);
 
 fs.readSync(fd, buffer, 0, 1);
@@ -23,11 +23,11 @@ Module đấy không có sẵn các hàm đọc cụ thể kiểu dữ liệu n�
 
 Thư viện này là bản port của 2 API rất tiện lợi cho việc đọc/ghi tập tin nhị phân từ .NET Core. Bằng thư viện này, code trở nên ngắn gọn và dễ hiểu hơn, bạn có thể xem thêm phần ví dụ bên dưới để biết thêm chi tiết.
 ```js
-// read one byte, two bytes and four bytes
+// đọc một byte, hai byte và bốn byte
 const fs = require('fs');
 const { BinaryReader, File } = require('csbinary');
 
-const file = File(fs.openSync('<put your file path here>', 'r'));
+const file = File(fs.openSync('<đặt đường dẫn file vào đây>', 'r'));
 const reader = new BinaryReader(file);
 
 console.log(reader.readUInt8());
