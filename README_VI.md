@@ -59,7 +59,7 @@ Tuy nhiên nếu bạn sử dụng hệ thống khác với các hệ thống k�
 Xin ghé xem [CSBinary API Reference](https://meigyoku-thmn.github.io/CSBinary/) (Tiếng Anh).
 
 ## Ví dụ
-Xin xem tại [Example page](https://github.com/Meigyoku-Thmn/CSBinary/blob/master/EXAMPLE_VI.md).
+Xin xem tại [Trang Ví dụ](https://github.com/Meigyoku-Thmn/CSBinary/blob/master/EXAMPLE_VI.md).
 
 ## Encoding và File
 Mặc định thì thư viện này sử dụng [iconv-lite](https://github.com/ashtuchkin/iconv-lite) làm hệ thống encoding nội bộ. Bạn có thể đưa encoding của chính bạn vào bằng cách "thực hiện" giao diện IEncoding, rồi đưa encoding instance của bạn vào constructor của BinaryReader và BinaryWriter.
