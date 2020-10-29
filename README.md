@@ -1,14 +1,8 @@
 <h1 style="line-height: initial;">CSBinary – A port of BinaryReader and BinaryWriter from .NET Core to NodeJS</h1>
 
-I ported BinaryReader and BinaryWriter from Dotnet Core to NodeJS because reading
-and writing binary files non-linearly in NodeJS is very tedious.
+[(Click vào đây để đọc bản Tiếng Việt)](https://github.com/Meigyoku-Thmn/CSBinary/blob/master/README_VI.md).
 
-Non-linear data processing (that means you can jump/"seek" back and forth at will all across a file
-to read its' data) is not a popular thing in NodeJS world (people usually do streaming instead),
-but when you have to, then this library will come in handy.
-Beside, you want to write code in a scripting language for simplicity and convenience.
-
-You don't have to write code like this anymore:
+Let's say you want to write a program that read và extract data from a binary file, such as archive file, compressed file, etc. and NodeJS seems to be a very convenient platform for quickly writing a program to do so. But sadly, the NodeJS platform, which is designed with a focus on server programming, is minimalistic, it has a meager API compared to other platforms. That does not mean NodeJS doesn't have APIs to read files, but reading and writing binary files in NodeJS is very tedious:
 ```js
 // read one byte, two bytes and four bytes
 const fs = require('fs');
@@ -25,7 +19,10 @@ console.log(buffer.readUInt32LE());
 
 fs.closeSync(fd);
 ```
-With this library, you can just write:
+The fs module does not have any function to read specific types of data from the file, it can only read/write with the Buffer type (equivalent to array type in other languages). And not to mention the NodeJS fs module doesn't really have a separate "seek" function, you have to maintain a separate position variable for passing as a parameter to the read/write functions if you want to read/write at arbitrary location. Since NodeJS is server-oriented, it doesn't have a built-in file buffering mechanism. Think if you use NodeJS to read/write a binary file with a very complex and non-linear structure, how long would the code be?
+
+This library is a port of two very convenient APIs for reading/writing binary files from .NET Core. With this library, the code becomes concise and easier to understand, please refer to the example section below for more details.
+
 ```js
 // read one byte, two bytes and four bytes
 const fs = require('fs');
