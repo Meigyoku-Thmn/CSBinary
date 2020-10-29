@@ -2,7 +2,7 @@
 
 [(Click vào đây để đọc bản Tiếng Việt)](https://github.com/Meigyoku-Thmn/CSBinary/blob/master/README_VI.md).
 
-Let's say you want to write a program that read và extract data from a binary file, such as archive file, compressed file, etc. and NodeJS seems to be a very convenient platform for quickly writing a program to do so. But sadly, the NodeJS platform, which is designed with a focus on server programming, is minimalistic, it has a meager API compared to other platforms. That does not mean NodeJS doesn't have APIs to read files, but reading and writing binary files in NodeJS is very tedious:
+Let's say you want to write a program that read and extract data from a binary file, such as archive file, compressed file, etc. and NodeJS seems to be a very convenient platform for quickly writing a program to do so. But sadly, the NodeJS platform, which is designed with a focus on server programming, is minimalistic, it has a meager API compared to other platforms. That does not mean NodeJS doesn't have APIs to read files, but reading and writing binary files in NodeJS is very tedious:
 ```js
 // read one byte, two bytes and four bytes
 const fs = require('fs');
