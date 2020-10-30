@@ -2,7 +2,7 @@
 
 [(Click here to read the English version)](https://github.com/Meigyoku-Thmn/CSBinary/blob/master/README.md).
 
-[(Nhảy tới mục ví dụ)](https://github.com/Meigyoku-Thmn/CSBinary/blob/master/README_VI.md#ví-dụ).
+[(Nhảy tới mục ví dụ)](#ví-dụ).
 
 Giả sử bạn muốn viết chương trình đọc, trích xuất dữ liệu từ file nhị phân, chẳng hạn như archive file, file nén, v.v. và NodeJS có vẻ là nền tảng rất gọn nhẹ và tiện lợi để viết nhanh một chương trình làm như vậy. Nhưng đáng buồn thay, nền tảng NodeJS vốn được thiết kế chú trọng vào lập trình server, mang tính tối giản, có API ít ỏi so với những nền tảng khác. Không có nghĩa là NodeJS không có API để đọc file, nhưng để đọc được file nhị phân bằng NodeJS thì phải rất cực khổ bằng module fs như thế này:
 ```js
